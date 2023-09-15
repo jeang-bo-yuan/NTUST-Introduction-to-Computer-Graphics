@@ -238,9 +238,10 @@ bool TargaImage::Quant_Uniform()
         int id = i * TGA_TRUECOLOR_32;
 
         // 取首3個bit
-        data[id] &= 0xE0;
-        data[id + 1] &= 0xE0;
-        data[id + 2] &= 0xC0;
+        data[id] &= 0xE0; // R
+        data[id + 1] &= 0xE0; // G
+        // 取首兩個bit
+        data[id + 2] &= 0xC0; // B
     }
     return true; 
 }// Quant_Uniform
