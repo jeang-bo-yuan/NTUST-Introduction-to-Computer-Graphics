@@ -79,7 +79,7 @@ TargaImage::TargaImage(int w, int h, unsigned char *d)
     data = new unsigned char[width * height * 4];
 
     for (i = 0; i < width * height * 4; i++)
-	    data[i] = d[i];
+        data[i] = d[i];
 }// TargaImage
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -124,18 +124,18 @@ unsigned char* TargaImage::To_RGB(void)
     int		    i, j;
 
     if (! data)
-	    return NULL;
+        return NULL;
 
     // Divide out the alpha
     for (i = 0 ; i < height ; i++)
     {
-	    int in_offset = i * width * 4;
-	    int out_offset = i * width * 3;
+        int in_offset = i * width * 4;
+        int out_offset = i * width * 3;
 
-	    for (j = 0 ; j < width ; j++)
+        for (j = 0 ; j < width ; j++)
         {
-	        RGBA_To_RGB(data + (in_offset + j*4), rgb + (out_offset + j*3));
-	    }
+            RGBA_To_RGB(data + (in_offset + j*4), rgb + (out_offset + j*3));
+        }
     }
 
     return rgb;
@@ -152,12 +152,12 @@ bool TargaImage::Save_Image(const char *filename)
     TargaImage	*out_image = Reverse_Rows();
 
     if (! out_image)
-	    return false;
+        return false;
 
     if (!tga_write_raw(filename, width, height, out_image->data, TGA_TRUECOLOR_32))
     {
-	    cout << "TGA Save Error: %s\n", tga_error_string(tga_get_last_error());
-	    return false;
+        cout << "TGA Save Error: %s\n", tga_error_string(tga_get_last_error());
+        return false;
     }
 
     delete out_image;
@@ -189,8 +189,8 @@ TargaImage* TargaImage::Load_Image(char *filename)
     if (!temp_data)
     {
         cout << "TGA Error: %s\n", tga_error_string(tga_get_last_error());
-	    width = height = 0;
-	    return NULL;
+        width = height = 0;
+        return NULL;
     }
     temp_image = new TargaImage(width, height, temp_data);
     free(temp_data);
@@ -289,13 +289,13 @@ bool TargaImage::Quant_Populosity()
         usage_histogram.emplace_back(Record_t{ (RGB_index_t)i, 0 });
 
     // Uniform Quantization，將RGB分別轉成5 bit，順便計算出現次數
-	for (int i = 0; i < num_of_pixels; ++i) {
-		int id = i * TGA_TRUECOLOR_32;
-		data[id] &= 0b1111'1000;
-		data[id + 1] &= 0b1111'1000;
-		data[id + 2] &= 0b1111'1000;
-		usage_histogram[to_index(data[id], data[id + 1], data[id + 2])].count++;
-	}
+    for (int i = 0; i < num_of_pixels; ++i) {
+        int id = i * TGA_TRUECOLOR_32;
+        data[id] &= 0b1111'1000;
+        data[id + 1] &= 0b1111'1000;
+        data[id + 2] &= 0b1111'1000;
+        usage_histogram[to_index(data[id], data[id + 1], data[id + 2])].count++;
+    }
 
     // 排序，次數多 -> 次數少，前256項為被選上的顏色
     std::sort(usage_histogram.begin(), usage_histogram.end(), [](const Record_t& r1, const Record_t& r2) -> bool {
@@ -303,26 +303,26 @@ bool TargaImage::Quant_Populosity()
     });
 
     // population quantization
-	for (int i = 0; i < num_of_pixels; ++i) {
-		int id = i * TGA_TRUECOLOR_32;
-		RGB_index_t rgb_id = to_index(data[id], data[id + 1], data[id + 2]);
+    for (int i = 0; i < num_of_pixels; ++i) {
+        int id = i * TGA_TRUECOLOR_32;
+        RGB_index_t rgb_id = to_index(data[id], data[id + 1], data[id + 2]);
 
-		// 對於每個被選上的顏色，比較距離 + 找最近
-		RGB_index_t closest = usage_histogram[0].index;
-		int L2_closest = L2_distance(rgb_id, closest);
-		for (int j = 1; j < 256; ++j) {
-			int L2 = L2_distance(rgb_id, usage_histogram[j].index);
+        // 對於每個被選上的顏色，比較距離 + 找最近
+        RGB_index_t closest = usage_histogram[0].index;
+        int L2_closest = L2_distance(rgb_id, closest);
+        for (int j = 1; j < 256; ++j) {
+            int L2 = L2_distance(rgb_id, usage_histogram[j].index);
 
-			if (L2 < L2_closest) {
-				closest = usage_histogram[j].index;
-				L2_closest = L2;
-			}
-		}
+            if (L2 < L2_closest) {
+                closest = usage_histogram[j].index;
+                L2_closest = L2;
+            }
+        }
 
-		data[id] = getR(closest);
-		data[id + 1] = getG(closest);
-		data[id + 2] = getB(closest);
-	}
+        data[id] = getR(closest);
+        data[id + 1] = getG(closest);
+        data[id + 2] = getB(closest);
+    }
 
     return true;
 #undef getR
@@ -358,8 +358,21 @@ bool TargaImage::Dither_Threshold()
 ///////////////////////////////////////////////////////////////////////////////
 bool TargaImage::Dither_Random()
 {
-    ClearToBlack();
-    return false;
+    int num_of_pixels = height * width;
+    int threshold = 255 / 2;
+
+    To_Grayscale();
+
+    srand(time(NULL));
+    for (int i = 0; i < num_of_pixels; ++i) {
+        int id = i * TGA_TRUECOLOR_32;
+        int gray = data[id];
+
+        gray += 255 * (((float)rand() / RAND_MAX * 0.4f) - 0.2f); // 255 * （[-0.2, 0.2]內隨機一數）
+        data[id] = data[id + 1] = data[id + 2] = (gray > threshold ? 255 : 0);
+    }
+
+    return true;
 }// Dither_Random
 
 
@@ -756,20 +769,20 @@ void TargaImage::RGBA_To_RGB(unsigned char *rgba, unsigned char *rgb)
     }
     else
     {
-	    float	alpha_scale = (float)255 / (float)alpha;
-	    int	val;
-	    int	i;
+        float	alpha_scale = (float)255 / (float)alpha;
+        int	val;
+        int	i;
 
-	    for (i = 0 ; i < 3 ; i++)
-	    {
-	        val = (int)floor(rgba[i] * alpha_scale);
-	        if (val < 0)
-		    rgb[i] = 0;
-	        else if (val > 255)
-		    rgb[i] = 255;
-	        else
-		    rgb[i] = val;
-	    }
+        for (i = 0 ; i < 3 ; i++)
+        {
+            val = (int)floor(rgba[i] * alpha_scale);
+            if (val < 0)
+            rgb[i] = 0;
+            else if (val > 255)
+            rgb[i] = 255;
+            else
+            rgb[i] = val;
+        }
     }
 }// RGA_To_RGB
 
@@ -787,19 +800,19 @@ TargaImage* TargaImage::Reverse_Rows(void)
     int 	        i, j;
 
     if (! data)
-    	return NULL;
+        return NULL;
 
     for (i = 0 ; i < height ; i++)
     {
-	    int in_offset = (height - i - 1) * width * 4;
-	    int out_offset = i * width * 4;
+        int in_offset = (height - i - 1) * width * 4;
+        int out_offset = i * width * 4;
 
-	    for (j = 0 ; j < width ; j++)
+        for (j = 0 ; j < width ; j++)
         {
-	        dest[out_offset + j * 4] = data[in_offset + j * 4];
-	        dest[out_offset + j * 4 + 1] = data[in_offset + j * 4 + 1];
-	        dest[out_offset + j * 4 + 2] = data[in_offset + j * 4 + 2];
-	        dest[out_offset + j * 4 + 3] = data[in_offset + j * 4 + 3];
+            dest[out_offset + j * 4] = data[in_offset + j * 4];
+            dest[out_offset + j * 4 + 1] = data[in_offset + j * 4 + 1];
+            dest[out_offset + j * 4 + 2] = data[in_offset + j * 4 + 2];
+            dest[out_offset + j * 4 + 3] = data[in_offset + j * 4 + 3];
         }
     }
 
