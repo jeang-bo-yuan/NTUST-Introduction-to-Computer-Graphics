@@ -256,8 +256,75 @@ bool TargaImage::Quant_Uniform()
 ///////////////////////////////////////////////////////////////////////////////
 bool TargaImage::Quant_Populosity()
 {
-    ClearToBlack();
-    return false;
+    // 將15 bit的 RGB 存成一個index
+    // Binary: (MSB -> LSB)
+    // - RRRRR GGGGG BBBBB
+    typedef uint16_t RGB_index_t;
+    // 給 RGB 轉成 RGB_index_t
+    auto to_index = [](unsigned char R, unsigned char G, unsigned char B) -> RGB_index_t {
+        RGB_index_t result = 0;
+        result |= (RGB_index_t(B & 0b1111'1000) >> 3);
+        result |= (RGB_index_t(G & 0b1111'1000) << 2);
+        result |= (RGB_index_t(R & 0b1111'1000) << 7);
+        return result;
+    };
+    auto getR = [](RGB_index_t index) -> unsigned char { return (index & 0b0'11111'00000'00000) >> 7; };
+    auto getG = [](RGB_index_t index) -> unsigned char { return (index & 0b0'00000'11111'00000) >> 2; };
+    auto getB = [](RGB_index_t index) -> unsigned char { return (index & 0b0'00000'00000'11111) << 3; };
+    // 計算歐氏距離的平方
+    auto L2_distance = [&getR, &getG, &getB](RGB_index_t id1, RGB_index_t id2) -> int {
+        int deltaR = getR(id1) - getR(id2), deltaG = getG(id1) - getG(id2), deltaB = getB(id1) - getB(id2);
+        return deltaR * deltaR + deltaG * deltaG + deltaB * deltaB; 
+    };
+    // 用來儲存某顏色出現次數。
+    typedef struct { RGB_index_t index; unsigned count; } Record_t;
+
+    int num_of_pixels = height * width;
+    constexpr int num_of_color = 32768;
+    std::vector<Record_t> usage_histogram;
+    usage_histogram.reserve(num_of_color);
+
+    // 初始化usage_histogram
+    for (int i = 0; i < num_of_color; ++i)
+        usage_histogram.emplace_back(Record_t{ (RGB_index_t)i, 0 });
+
+    // Uniform Quantization，將RGB分別轉成5 bit，順便計算出現次數
+    for (int i = 0; i < num_of_pixels; ++i) {
+        int id = i * TGA_TRUECOLOR_32;
+        data[id] &= 0b1111'1000;
+        data[id + 1] &= 0b1111'1000;
+        data[id + 2] &= 0b1111'1000;
+        usage_histogram[to_index(data[id], data[id + 1], data[id + 2])].count++;
+    }
+
+    // 排序，次數多 -> 次數少，前256項為被選上的顏色
+    std::sort(usage_histogram.begin(), usage_histogram.end(), [](const Record_t& r1, const Record_t& r2) -> bool {
+        return r1.count > r2.count;
+    });
+
+    // population quantization
+    for (int i = 0; i < num_of_pixels; ++i) {
+        int id = i * TGA_TRUECOLOR_32;
+        RGB_index_t rgb_id = to_index(data[id], data[id + 1], data[id + 2]);
+
+        // 對於每個被選上的顏色，比較距離 + 找最近
+        RGB_index_t closest = usage_histogram[0].index;
+        int L2_closest = L2_distance(rgb_id, closest);
+        for (int j = 1; j < 256; ++j) {
+            int L2 = L2_distance(rgb_id, usage_histogram[j].index);
+
+            if (L2 < L2_closest) {
+                closest = usage_histogram[j].index;
+                L2_closest = L2;
+            }
+        }
+
+        data[id] = getR(closest);
+        data[id + 1] = getG(closest);
+        data[id + 2] = getB(closest);
+    }
+
+    return true;
 }// Quant_Populosity
 
 
