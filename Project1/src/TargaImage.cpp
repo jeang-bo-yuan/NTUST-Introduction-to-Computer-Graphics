@@ -7,6 +7,7 @@
 //      Implementation of TargaImage methods.  You must implement the image
 //  modification functions.
 //
+// Reference: https://research.cs.wisc.edu/graphics/Courses/559-f2002/projects/project1/project-1-faq.html
 ///////////////////////////////////////////////////////////////////////////////
 
 #include "Globals.h"
@@ -313,8 +314,36 @@ bool TargaImage::Dither_FS()
 ///////////////////////////////////////////////////////////////////////////////
 bool TargaImage::Dither_Bright()
 {
-    ClearToBlack();
-    return false;
+    To_Grayscale();
+    int num_of_pixels = height * width;
+    unsigned sum_of_gray = 0;
+    unsigned char* gray_arr = new unsigned char[num_of_pixels];
+
+    // 求和 + 填入gray_arr
+    for (int i = 0; i < num_of_pixels; ++i) {
+        gray_arr[i] = data[i * TGA_TRUECOLOR_32];
+        sum_of_gray += gray_arr[i];
+    }
+
+    // 計算亮度：平均灰階 / 255
+    // 若亮度為 0.17，代表 dithering 後， 17% 的像素要是白的，其餘為黑的
+    float brightness = (float)sum_of_gray / num_of_pixels / 0xFF;
+    std::cout << "brightness = " << brightness << std::endl;
+
+    // 求閥值
+    std::sort(gray_arr, gray_arr + num_of_pixels);
+    unsigned char threshold = gray_arr[unsigned(num_of_pixels * (1 - brightness))];
+    std::cout << "threshold = " << (int)threshold << std::endl;
+
+    // dithering
+    for (int i = 0; i < num_of_pixels; ++i) {
+        int id = i * TGA_TRUECOLOR_32;
+
+        data[id] = data[id + 1] = data[id + 2] = (data[id] > threshold ? 255 : 0);
+    }
+
+    delete[] gray_arr;
+    return true;
 }// Dither_Bright
 
 
