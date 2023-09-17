@@ -13,6 +13,7 @@
 #include "Globals.h"
 #include "TargaImage.h"
 #include "libtarga.h"
+#include "Palette.h"
 #include <stdlib.h>
 #include <assert.h>
 #include <memory.h>
@@ -268,23 +269,18 @@ bool TargaImage::Quant_Populosity()
         result |= (RGB_index_t(R & 0b1111'1000) << 7);
         return result;
     };
-#define getR(index) ((index & 0b0'11111'00000'00000) >> 7)
-#define getG(index) ((index & 0b0'00000'11111'00000) >> 2)
-#define getB(index) ((index & 0b0'00000'00000'11111) << 3)
-    // 計算歐氏距離的平方
-    auto L2_distance = [](RGB_index_t id1, RGB_index_t id2) -> int {
-        int deltaR = getR(id1) - getR(id2), deltaG = getG(id1) - getG(id2), deltaB = getB(id1) - getB(id2);
-        return deltaR * deltaR + deltaG * deltaG + deltaB * deltaB; 
-    };
+#define getR(index) (unsigned char)((index & 0b0'11111'00000'00000) >> 7)
+#define getG(index) (unsigned char)((index & 0b0'00000'11111'00000) >> 2)
+#define getB(index) (unsigned char)((index & 0b0'00000'00000'11111) << 3)
     // 用來儲存某顏色出現次數。
     typedef struct { RGB_index_t index; unsigned count; } Record_t;
 
     int num_of_pixels = height * width;
-    constexpr int num_of_color = 32768;
-    std::vector<Record_t> usage_histogram;
-    usage_histogram.reserve(num_of_color);
+    constexpr int num_of_color = 32768; // 32 * 32 * 32
+    std::vector<Record_t> usage_histogram; // 32768種顏色，各顏色的使用量
 
     // 初始化usage_histogram
+    usage_histogram.reserve(num_of_color);
     for (int i = 0; i < num_of_color; ++i)
         usage_histogram.emplace_back(Record_t{ (RGB_index_t)i, 0 });
 
@@ -302,26 +298,28 @@ bool TargaImage::Quant_Populosity()
         return r1.count > r2.count;
     });
 
-    // population quantization
+    // 建立 Palette，內含 usage_histogram 中最常出現的 256 色
+    Color::Palette_t palette(256);
+    for (int i = 0; i < 256; ++i) {
+        if (usage_histogram[i].count > 0) {
+            RGB_index_t index = usage_histogram[i].index;
+            palette[i] = Color::RGB_t(getR(index), getG(index), getB(index));
+        }
+        else {
+            // 其實原圖沒有256種顏色
+            palette.resize(i);
+            break;
+        }
+    }
+
+    // 對每個像素替換
     for (int i = 0; i < num_of_pixels; ++i) {
         int id = i * TGA_TRUECOLOR_32;
-        RGB_index_t rgb_id = to_index(data[id], data[id + 1], data[id + 2]);
-
-        // 對於每個被選上的顏色，比較距離 + 找最近
-        RGB_index_t closest = usage_histogram[0].index;
-        int L2_closest = L2_distance(rgb_id, closest);
-        for (int j = 1; j < 256; ++j) {
-            int L2 = L2_distance(rgb_id, usage_histogram[j].index);
-
-            if (L2 < L2_closest) {
-                closest = usage_histogram[j].index;
-                L2_closest = L2;
-            }
-        }
-
-        data[id] = getR(closest);
-        data[id + 1] = getG(closest);
-        data[id + 2] = getB(closest);
+        Color::RGB_t closest = palette.find_closest_to(Color::RGB_t(data + id));
+        // 換成palette中最近的
+        data[id] = closest.R;
+        data[id + 1] = closest.G;
+        data[id + 2] = closest.B;
     }
 
     return true;
