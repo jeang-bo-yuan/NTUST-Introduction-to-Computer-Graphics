@@ -382,8 +382,49 @@ bool TargaImage::Dither_Random()
 ///////////////////////////////////////////////////////////////////////////////
 bool TargaImage::Dither_FS()
 {
-    ClearToBlack();
-    return false;
+    // 讓gray加上error，並處理溢位的問題
+    auto add_error = [](unsigned char& gray, int error) {
+        int result = gray + error;
+        gray = (result < 0 ? 0 : (result > 0xFF ? 0xFF : result));
+    };
+
+    To_Grayscale();
+    int threshold = 255 / 2;
+
+    for (int r = 0; r < height; ++r) {
+        for (int c = 0; c < width; ++c) {
+            int id = (r * width + c) * TGA_TRUECOLOR_32;
+            int error = data[id];
+
+            if (data[id] > threshold) {
+                data[id] = data[id + 1] = data[id + 2] = 255;
+                error -= 255;
+            }
+            else {
+                data[id] = data[id + 1] = data[id + 2] = 0;
+            }
+
+            // Right, Left Down, Down, Right Down
+            constexpr int R = 0, LD = 1, D = 2, RD = 3;
+            // 右、左下、下、右下 要乘上的係數
+            constexpr float proportion[] = { 7 / 16.f, 3 / 16.f, 5 / 16.f, 1 / 16.f };
+            // id加上這些delta後所得的new_id，分別對應到 右、左下、下、右下
+            int delta[] = { TGA_TRUECOLOR_32, (width - 1) * TGA_TRUECOLOR_32, width * TGA_TRUECOLOR_32, (width + 1) * TGA_TRUECOLOR_32 };
+            // propagate error
+            if (c != width - 1) { // 右邊有像素
+                add_error(data[id + delta[R]], error * proportion[R]);
+            }
+            if (r != height - 1) { // 下面有像素
+                add_error(data[id + delta[D]], error * proportion[D]);
+                // 左下有像素
+                if (c != 0) add_error(data[id + delta[LD]], error * proportion[LD]);
+                // 右下有像素
+                if (c != width - 1) add_error(data[id + delta[RD]], error * proportion[RD]);
+            }
+        }
+    }
+
+    return true;
 }// Dither_FS
 
 
