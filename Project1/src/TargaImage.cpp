@@ -384,8 +384,6 @@ bool TargaImage::General_Dither_FS(const Color::Palette_t& palette) {
         }
     };
 
-    To_Grayscale();
-
     // from top to down, left to right
     for (int r = 0; r < height; ++r) {
         for (int c = 0; c < width; ++c) {
@@ -432,6 +430,7 @@ bool TargaImage::General_Dither_FS(const Color::Palette_t& palette) {
 ///////////////////////////////////////////////////////////////////////////////
 bool TargaImage::Dither_FS()
 {
+    To_Grayscale();
     return General_Dither_FS(Color::Palette_t{ Color::Black, Color::White });
 }// Dither_FS
 
@@ -518,8 +517,21 @@ bool TargaImage::Dither_Cluster()
 ///////////////////////////////////////////////////////////////////////////////
 bool TargaImage::Dither_Color()
 {
-    ClearToBlack();
-    return false;
+    constexpr uint8_t R_channel[] = { 0, 36, 73, 109, 146, 182, 219, 255 };
+    constexpr uint8_t G_channel[] = { 0, 36, 73, 109, 146, 182, 219, 255 };
+    constexpr uint8_t B_channel[] = { 0, 85, 170, 255 };
+    Color::Palette_t palette;
+    palette.reserve(8ULL * 8 * 4);
+
+    for (uint8_t r : R_channel) {
+        for (uint8_t g : G_channel) {
+            for (uint8_t b : B_channel) {
+                palette.emplace_back(r, g, b);
+            }
+        }
+    }
+
+    return General_Dither_FS(palette);
 }// Dither_Color
 
 
