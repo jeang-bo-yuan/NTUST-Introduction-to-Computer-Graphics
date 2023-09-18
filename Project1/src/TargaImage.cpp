@@ -220,7 +220,7 @@ bool TargaImage::To_Grayscale()
         int id = i * TGA_TRUECOLOR_32;
 
         int Y = 0.3 * data[id] + 0.59 * data[id + 1] + 0.11 * data[id + 2];
-        data[id] = data[id + 1] = data[id + 2] = Y;
+        Color::memset(data + id, Color::RGB_t(Y, Y, Y));
     }
     return true;
 }// To_Grayscale
@@ -317,9 +317,7 @@ bool TargaImage::Quant_Populosity()
         int id = i * TGA_TRUECOLOR_32;
         Color::RGB_t closest = palette.find_closest_to(Color::RGB_t(data + id));
         // 換成palette中最近的
-        data[id] = closest.R;
-        data[id + 1] = closest.G;
-        data[id + 2] = closest.B;
+        Color::memset(data + id, closest);
     }
 
     return true;
@@ -343,7 +341,7 @@ bool TargaImage::Dither_Threshold()
     for (int i = 0; i < num_of_pixels; ++i) { // for each pixel
         int id = i * TGA_TRUECOLOR_32;
 
-        data[id] = data[id + 1] = data[id + 2] = (data[id] > threshold ? 255 : 0);
+        Color::memset(data + id, (data[id] > threshold ? Color::White : Color::Black));
     }
     return true;
 }// Dither_Threshold
@@ -367,7 +365,7 @@ bool TargaImage::Dither_Random()
         int gray = data[id];
 
         gray += 255 * (((float)rand() / RAND_MAX * 0.4f) - 0.2f); // 255 * （[-0.2, 0.2]內隨機一數）
-        data[id] = data[id + 1] = data[id + 2] = (gray > threshold ? 255 : 0);
+        Color::memset(data + id, (gray > threshold ? Color::White : Color::Black));
     }
 
     return true;
@@ -397,11 +395,11 @@ bool TargaImage::Dither_FS()
             int error = data[id];
 
             if (data[id] > threshold) {
-                data[id] = data[id + 1] = data[id + 2] = 255;
+                Color::memset(data + id, Color::White);
                 error -= 255;
             }
             else {
-                data[id] = data[id + 1] = data[id + 2] = 0;
+                Color::memset(data + id, Color::Black);
             }
 
             // Right, Left Down, Down, Right Down
@@ -461,7 +459,7 @@ bool TargaImage::Dither_Bright()
     for (int i = 0; i < num_of_pixels; ++i) {
         int id = i * TGA_TRUECOLOR_32;
 
-        data[id] = data[id + 1] = data[id + 2] = (data[id] > threshold ? 255 : 0);
+        Color::memset(data + id, (data[id] > threshold ? Color::White : Color::Black));
     }
 
     delete[] gray_arr;
@@ -490,10 +488,10 @@ bool TargaImage::Dither_Cluster()
         for (int c = 0; c < width; ++c) {
             int id = (r * width + c) * TGA_TRUECOLOR_32;
             if (data[id] >= mask[r % 4][c % 4]) {
-                data[id] = data[id + 1] = data[id + 2] = 255;
+                Color::memset(data + id, Color::White);
             }
             else {
-                data[id] = data[id + 1] = data[id + 2] = 0;
+                Color::memset(data + id, Color::Black);
             }
         }
     }

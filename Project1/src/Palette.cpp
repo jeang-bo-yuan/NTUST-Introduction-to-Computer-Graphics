@@ -1,6 +1,6 @@
 #include "Palette.h"
 
-const Color::RGB_t& Color::Palette_t::find_closest_to(const RGB_t& color) const {
+Color::RGB_t Color::Palette_t::find_closest_to(RGB_t color) const {
     if (this->empty()) return color;
 
     // assume `this->at(0)` is closest to `color`
