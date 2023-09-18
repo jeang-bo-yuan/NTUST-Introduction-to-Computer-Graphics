@@ -790,8 +790,36 @@ bool TargaImage::NPR_Paint()
 ///////////////////////////////////////////////////////////////////////////////
 bool TargaImage::Half_Size()
 {
-    ClearToBlack();
-    return false;
+    const Filter::ImageInfo_t old_image = { height, width, data };
+    const Filter::Filter_t<3>  bartlett_filter = {
+        { 1 / 16.f, 1 / 8.f, 1 / 16.f },
+        { 1 / 8.f,  1 / 4.f, 1 / 8.f },
+        { 1 / 16.f, 1 / 8.f, 1 / 16.f}
+    };
+
+    int new_height = height / 2;
+    int new_width = width / 2;
+    unsigned char* new_data = new unsigned char[new_height * new_width * TGA_TRUECOLOR_32];
+
+    // use backward mapping
+    for (int r = 0; r < new_height; ++r) {
+        for (int c = 0; c < new_width; ++c) {
+            int new_id = (r * new_width + c) * TGA_TRUECOLOR_32; // new_data中的r列c欄
+            int id = ((r + r) * width + c + c) * TGA_TRUECOLOR_32; // 對應到data中的2r列2c欄
+
+            // set RGB
+            Color::memset(new_data + new_id, bartlett_filter.calculate(r + r, c + c, old_image));
+            // Alpha channel
+            new_data[new_id + 3] = data[id + 3];
+        }
+    }
+
+    height = new_height;
+    width = new_width;
+    delete[] data; // delete old image
+    data = new_data;
+
+    return true;
 }// Half_Size
 
 
