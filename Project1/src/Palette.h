@@ -4,6 +4,7 @@
  * \date 2023/9/17
  * \brief 用Palette物件儲存可用的顏色
  *********************************************************************/
+#pragma once
 #include <vector>
 #include <stdint.h>
 

@@ -14,6 +14,7 @@
 #include "TargaImage.h"
 #include "libtarga.h"
 #include "Palette.h"
+#include "Filter.h"
 #include <stdlib.h>
 #include <assert.h>
 #include <memory.h>
@@ -672,8 +673,32 @@ bool TargaImage::Difference(TargaImage* pImage)
 ///////////////////////////////////////////////////////////////////////////////
 bool TargaImage::Filter_Box()
 {
-    ClearToBlack();
-    return false;
+    const Filter::ImageInfo_t old_image{ height, width, data };
+    const Filter::Filter_t<5> box_filter{
+        {0.04, 0.04, 0.04, 0.04, 0.04},
+        {0.04, 0.04, 0.04, 0.04, 0.04},
+        {0.04, 0.04, 0.04, 0.04, 0.04},
+        {0.04, 0.04, 0.04, 0.04, 0.04},
+        {0.04, 0.04, 0.04, 0.04, 0.04} };
+
+    unsigned char* new_data = new unsigned char[(size_t)height * width * TGA_TRUECOLOR_32];
+
+    for (int r = 0; r < height; ++r) {
+        for (int c = 0; c < width; ++c) {
+            int id = (r * width + c) * TGA_TRUECOLOR_32;
+
+            // set R G B based on calculation
+            Color::memset(new_data + id, box_filter.calculate(r, c, old_image));
+            // set Alpha
+            new_data[id + 3] = data[id + 3];
+        }
+    }
+
+    // move new_data back to data
+    memmove(data, new_data, (size_t)height * width * TGA_TRUECOLOR_32);
+
+    delete[] new_data;
+    return true;
 }// Filter_Box
 
 
