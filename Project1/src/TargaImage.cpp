@@ -372,35 +372,34 @@ bool TargaImage::Dither_Random()
 }// Dither_Random
 
 
-///////////////////////////////////////////////////////////////////////////////
-//
-//      Perform Floyd-Steinberg dithering on the image.  Return success of 
-//  operation.
-//
-///////////////////////////////////////////////////////////////////////////////
-bool TargaImage::Dither_FS()
-{
-    // 讓gray加上error，並處理溢位的問題
-    auto add_error = [](unsigned char& gray, int error) {
-        int result = gray + error;
-        gray = (result < 0 ? 0 : (result > 0xFF ? 0xFF : result));
+bool TargaImage::General_Dither_FS(const Color::Palette_t& palette) {
+    if (palette.empty()) return false;
+
+    // 讓arr和error的0、1、2項分別相加並存回arr，並處理溢位的問題
+    // proportion 為 error 要乘上的係數
+    auto add_error = [](unsigned char* arr, int* error, float proportion) {
+        for (int i = 0; i < 3; ++i) {
+            int result = arr[i] + error[i] * proportion;
+            arr[i] = (result < 0 ? 0 : (result > 0xFF ? 0xFF : result));
+        }
     };
 
     To_Grayscale();
-    int threshold = 255 / 2;
 
+    // from top to down, left to right
     for (int r = 0; r < height; ++r) {
         for (int c = 0; c < width; ++c) {
             int id = (r * width + c) * TGA_TRUECOLOR_32;
-            int error = data[id];
+            // error in R, G, B channel respectively
+            int error[3] = { data[id], data[id + 1], data[id + 2] };
 
-            if (data[id] > threshold) {
-                Color::memset(data + id, Color::White);
-                error -= 255;
-            }
-            else {
-                Color::memset(data + id, Color::Black);
-            }
+            Color::RGB_t closest = palette.find_closest_to(Color::RGB_t(data + id));
+            Color::memset(data + id, closest);
+
+            // calculate error: OLD - NEW
+            error[0] -= closest.R;
+            error[1] -= closest.G;
+            error[2] -= closest.B;
 
             // Right, Left Down, Down, Right Down
             constexpr int R = 0, LD = 1, D = 2, RD = 3;
@@ -410,19 +409,30 @@ bool TargaImage::Dither_FS()
             int delta[] = { TGA_TRUECOLOR_32, (width - 1) * TGA_TRUECOLOR_32, width * TGA_TRUECOLOR_32, (width + 1) * TGA_TRUECOLOR_32 };
             // propagate error
             if (c != width - 1) { // 右邊有像素
-                add_error(data[id + delta[R]], error * proportion[R]);
+                add_error(data + id + delta[R], error, proportion[R]);
             }
             if (r != height - 1) { // 下面有像素
-                add_error(data[id + delta[D]], error * proportion[D]);
+                add_error(data + id + delta[D], error, proportion[D]);
                 // 左下有像素
-                if (c != 0) add_error(data[id + delta[LD]], error * proportion[LD]);
+                if (c != 0) add_error(data + id + delta[LD], error, proportion[LD]);
                 // 右下有像素
-                if (c != width - 1) add_error(data[id + delta[RD]], error * proportion[RD]);
+                if (c != width - 1) add_error(data + id + delta[RD], error, proportion[RD]);
             }
         }
     }
 
     return true;
+}
+
+///////////////////////////////////////////////////////////////////////////////
+//
+//      Perform Floyd-Steinberg dithering on the image.  Return success of 
+//  operation.
+//
+///////////////////////////////////////////////////////////////////////////////
+bool TargaImage::Dither_FS()
+{
+    return General_Dither_FS(Color::Palette_t{ Color::Black, Color::White });
 }// Dither_FS
 
 

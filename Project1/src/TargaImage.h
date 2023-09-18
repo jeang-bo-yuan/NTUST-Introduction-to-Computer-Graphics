@@ -19,6 +19,10 @@
 class Stroke;
 class DistanceImage;
 
+namespace Color {
+    class Palette_t;
+}
+
 class TargaImage
 {
     // methods
@@ -80,6 +84,14 @@ class TargaImage
 
 	// Draws a filled circle according to the stroke data
         void Paint_Stroke(const Stroke& s);
+
+    /**
+     * @brief 泛用版的Floyd-Steinberg Dithering
+     * @param palette - 內含可用顏色
+     * @return 成功與否。若palette為空，回傳false，否則完成Dithering並回傳true。
+     * @author 蔣博元
+     */
+    bool General_Dither_FS(const Color::Palette_t& palette);
 
     // members
     public:

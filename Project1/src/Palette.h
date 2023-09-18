@@ -51,6 +51,12 @@ namespace Color {
         explicit Palette_t(size_t count, RGB_t val = RGB_t()) : std::vector<RGB_t>(count, val) {}
 
         /**
+         * \brief 用initializer_list初始化
+         * \param list - 以 {} 包住的一連串 Color::RGB_t
+         */
+        Palette_t(std::initializer_list<RGB_t> list) : std::vector<RGB_t>(list) {}
+
+        /**
          * \brief 找到 Palette 中「歐氏距離」離 color 最近的顏色。若 Palette 為空則直接回傳 color
          * \param color - 某個顏色
          */
