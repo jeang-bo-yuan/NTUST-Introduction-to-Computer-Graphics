@@ -2,7 +2,7 @@
  * \file Palette.h
  * \author 蔣博元
  * \date 2023/9/17
- * \brief 用Palette物件儲存可用的顏色
+ * \brief 用Palette_t物件儲存可用的顏色
  *********************************************************************/
 #pragma once
 #include <vector>

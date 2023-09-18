@@ -1,5 +1,10 @@
+/*****************************************************************//**
+ * \file Filter.h
+ * \author 蔣博元
+ * \date 2023/9/18
+ * \brief 用Filter_t物件來儲存一組filter用的mask
+ *********************************************************************/
 #pragma once
-#include <array>
 #include <initializer_list>
 #include "Palette.h"
 
@@ -11,15 +16,16 @@ namespace Filter {
 		const unsigned char* data;
 	};
 
-	//! a Row * Col filter
+	//! a Size * Size filter
 	template <size_t Size>
 	class Filter_t {
-		static_assert((Size & 1), "Size must be both odd");
+		static_assert((Size & 1), "Size must be odd");
 
-		std::array<std::array<float, Size>, Size> mask; //!< Size列 Size欄
+		float mask[Size][Size]; //!< Size列 Size欄
 
 	public:
-		//! @brief construct from a list, ex: { {1, 2}, {3, 4} }
+		//! @brief construct from a list, ex: { {1, 2, 3}, {4, 5, 6}, {7, 8, 9} }
+		//! @param _list - a list contains lists of float. It's undefined, if `_list`'s size is bigger than Size * Size
 		Filter_t(std::initializer_list<std::initializer_list<float>> _list) : mask{0} {
 			int r = 0;
 			for (const auto& row : _list) {
@@ -59,7 +65,7 @@ namespace Filter {
 				}
 			}
 
-			return Color::RGB_t(result[0], result[1], result[2]);
+			return Color::RGB_t((uint8_t)result[0], (uint8_t)result[1], (uint8_t)result[2]);
 		}
 	};
 }
