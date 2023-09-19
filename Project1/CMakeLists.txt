@@ -1,9 +1,10 @@
-cmake_minimum_required(VERSION 2.8)
+cmake_minimum_required(VERSION 3.1)
 
 project(ImageEditing)
 set(SRC_DIR ${PROJECT_SOURCE_DIR}/src/)
 set(INCLUDE_DIR ${PROJECT_SOURCE_DIR}/include/)
 set(LIB_DIR ${PROJECT_SOURCE_DIR}/lib/)
+set(CMAKE_CXX_STANDARD 14)
 
 include_directories(${INCLUDE_DIR})
 include_directories(${LIB_DIR})
