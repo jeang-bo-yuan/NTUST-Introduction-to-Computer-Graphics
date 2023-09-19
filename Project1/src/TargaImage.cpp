@@ -674,12 +674,13 @@ bool TargaImage::Difference(TargaImage* pImage)
 bool TargaImage::Filter_Box()
 {
     const Filter::ImageInfo_t old_image{ height, width, data };
-    const Filter::Filter_t<5, 5> box_filter{
+    const Filter::Filter_t box_filter(5, 5, {
         {0.04, 0.04, 0.04, 0.04, 0.04},
         {0.04, 0.04, 0.04, 0.04, 0.04},
         {0.04, 0.04, 0.04, 0.04, 0.04},
         {0.04, 0.04, 0.04, 0.04, 0.04},
-        {0.04, 0.04, 0.04, 0.04, 0.04} };
+        {0.04, 0.04, 0.04, 0.04, 0.04}
+     });
 
     unsigned char* new_data = new unsigned char[(size_t)height * width * TGA_TRUECOLOR_32];
 
@@ -711,13 +712,13 @@ bool TargaImage::Filter_Box()
 bool TargaImage::Filter_Bartlett()
 {
     const Filter::ImageInfo_t old_image = { height, width, data };
-    const Filter::Filter_t<5, 5> bartlett_filter = {
+    const Filter::Filter_t bartlett_filter(5, 5, {
         {1 / 81.f, 2 / 81.f, 3 / 81.f, 2 / 81.f, 1 / 81.f},
         {2 / 81.f, 4 / 81.f, 6 / 81.f, 4 / 81.f, 2 / 81.f},
         {3 / 81.f, 6 / 81.f, 9 / 81.f, 6 / 81.f, 3 / 81.f},
         {2 / 81.f, 4 / 81.f, 6 / 81.f, 4 / 81.f, 2 / 81.f},
         {1 / 81.f, 2 / 81.f, 3 / 81.f, 2 / 81.f, 1 / 81.f},
-    };
+    });
 
     unsigned char* new_data = new unsigned char[(size_t)height * width * TGA_TRUECOLOR_32];
 
@@ -815,11 +816,11 @@ bool TargaImage::NPR_Paint()
 bool TargaImage::Half_Size()
 {
     const Filter::ImageInfo_t old_image = { height, width, data };
-    const Filter::Filter_t<3, 3>  bartlett_filter = {
+    const Filter::Filter_t bartlett_filter(3, 3, {
         { 1 / 16.f, 1 / 8.f, 1 / 16.f },
         { 1 / 8.f,  1 / 4.f, 1 / 8.f },
         { 1 / 16.f, 1 / 8.f, 1 / 16.f}
-    };
+    });
 
     int new_height = height / 2;
     int new_width = width / 2;
