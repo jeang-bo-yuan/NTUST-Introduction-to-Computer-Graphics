@@ -674,7 +674,7 @@ bool TargaImage::Difference(TargaImage* pImage)
 bool TargaImage::Filter_Box()
 {
     const Filter::ImageInfo_t old_image{ height, width, data };
-    const Filter::Filter_t<5> box_filter{
+    const Filter::Filter_t<5, 5> box_filter{
         {0.04, 0.04, 0.04, 0.04, 0.04},
         {0.04, 0.04, 0.04, 0.04, 0.04},
         {0.04, 0.04, 0.04, 0.04, 0.04},
@@ -688,7 +688,7 @@ bool TargaImage::Filter_Box()
             int id = (r * width + c) * TGA_TRUECOLOR_32;
 
             // set R G B based on calculation
-            Color::memset(new_data + id, box_filter.calculate(r, c, old_image));
+            Color::memset(new_data + id, box_filter.calculate(r - 2, c - 2, r + 2, c + 2, old_image));
             // set Alpha
             new_data[id + 3] = data[id + 3];
         }
@@ -791,7 +791,7 @@ bool TargaImage::NPR_Paint()
 bool TargaImage::Half_Size()
 {
     const Filter::ImageInfo_t old_image = { height, width, data };
-    const Filter::Filter_t<3>  bartlett_filter = {
+    const Filter::Filter_t<3, 3>  bartlett_filter = {
         { 1 / 16.f, 1 / 8.f, 1 / 16.f },
         { 1 / 8.f,  1 / 4.f, 1 / 8.f },
         { 1 / 16.f, 1 / 8.f, 1 / 16.f}
@@ -808,7 +808,8 @@ bool TargaImage::Half_Size()
             int id = ((r + r) * width + c + c) * TGA_TRUECOLOR_32; // 對應到data中的2r列2c欄
 
             // set RGB
-            Color::memset(new_data + new_id, bartlett_filter.calculate(r + r, c + c, old_image));
+            Color::memset(new_data + new_id,
+                bartlett_filter.calculate(r + r - 1, c + c - 1, r + r + 1, c + c + 1, old_image));
             // Alpha channel
             new_data[new_id + 3] = data[id + 3];
         }
