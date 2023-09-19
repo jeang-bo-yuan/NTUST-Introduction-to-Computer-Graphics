@@ -748,8 +748,30 @@ bool TargaImage::Filter_Bartlett()
 ///////////////////////////////////////////////////////////////////////////////
 bool TargaImage::Filter_Gaussian()
 {
-    ClearToBlack();
-    return false;
+    const Filter::ImageInfo_t old_image = { height, width, data };
+    const Filter::Filter_t gussian_filter(5, 5, {
+        { 1 / 256.f, 4 / 256.f,  6 / 256.f,  4 / 256.f,  1 / 256.f },
+        { 4 / 256.f, 16 / 256.f, 24 / 256.f, 16 / 256.f, 4 / 256.f },
+        { 6 / 256.f, 24 / 256.f, 36 / 256.f, 24 / 256.f, 6 / 256.f },
+        { 4 / 256.f, 16 / 256.f, 24 / 256.f, 16 / 256.f, 4 / 256.f },
+        { 1 / 256.f, 4 / 256.f,  6 / 256.f,  4 / 256.f,  1 / 256.f }
+    });
+
+    unsigned char* new_data = new unsigned char[height * width * TGA_TRUECOLOR_32];
+
+    for (int r = 0; r < height; ++r) {
+        for (int c = 0; c < width; ++c) {
+            int id = (r * width + c) * TGA_TRUECOLOR_32;
+
+            Color::memset(new_data + id, gussian_filter.calculate(r - 2, c - 2, r + 2, c + 2, old_image));
+            new_data[id + 3] = data[id + 3];
+        }
+    }
+
+    delete[] data;
+    data = new_data;
+
+    return true;
 }// Filter_Gaussian
 
 ///////////////////////////////////////////////////////////////////////////////
