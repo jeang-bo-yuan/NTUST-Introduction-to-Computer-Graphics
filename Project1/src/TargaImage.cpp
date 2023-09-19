@@ -852,13 +852,12 @@ bool TargaImage::Half_Size()
     for (int r = 0; r < new_height; ++r) {
         for (int c = 0; c < new_width; ++c) {
             int new_id = (r * new_width + c) * TGA_TRUECOLOR_32; // new_data中的r列c欄
-            int id = ((r + r) * width + c + c) * TGA_TRUECOLOR_32; // 對應到data中的2r列2c欄
 
             // set RGB
             Color::memset(new_data + new_id,
                 bartlett_filter.calculate(r + r - 1, c + c - 1, r + r + 1, c + c + 1, old_image));
             // Alpha channel
-            new_data[new_id + 3] = data[id + 3];
+            new_data[new_id + 3] = 255;
         }
     }
 
@@ -878,8 +877,67 @@ bool TargaImage::Half_Size()
 ///////////////////////////////////////////////////////////////////////////////
 bool TargaImage::Double_Size()
 {
-    ClearToBlack();
-    return false;
+    const Filter::ImageInfo_t old_image = { height, width, data };
+    const Filter::Filter_t even_even(3, 3, {
+        { 1 / 16.f, 1 / 8.f, 1 / 16.f },
+        { 1 / 8.f,  1 / 4.f, 1 / 8.f },
+        { 1 / 16.f, 1 / 8.f, 1 / 16.f}
+    });
+    const Filter::Filter_t odd_odd(4, 4, {
+        { 1 / 64.f, 3 / 64.f, 3 / 64.f, 1 / 64.f },
+        { 3 / 64.f, 9 / 64.f, 9 / 64.f, 3 / 64.f },
+        { 3 / 64.f, 9 / 64.f, 9 / 64.f, 3 / 64.f },
+        { 1 / 64.f, 3 / 64.f, 3 / 64.f, 1 / 64.f }
+    });
+    const Filter::Filter_t odd_even(4, 3, {
+        { 1 / 32.f, 2 / 32.f, 1 / 32.f },
+        { 3 / 32.f, 6 / 32.f, 3 / 32.f },
+        { 3 / 32.f, 6 / 32.f, 3 / 32.f },
+        { 1 / 32.f, 2 / 32.f, 1 / 32.f }
+    });
+    const Filter::Filter_t even_odd(3, 4, {
+        { 1 / 32.f, 3 / 32.f, 3 / 32.f, 1 / 32.f },
+        { 2 / 32.f, 6 / 32.f, 6 / 32.f, 2 / 32.f },
+        { 1 / 32.f, 3 / 32.f, 3 / 32.f, 1 / 32.f },
+    });
+
+    int new_height = height * 2;
+    int new_width = width * 2;
+    unsigned char* new_data = new unsigned char[new_height * new_width * TGA_TRUECOLOR_32];
+
+    // use backward mapping
+    for (int r = 0; r < new_height; ++r) {
+        for (int c = 0; c < new_width; ++c) {
+            int new_id = (r * new_width + c) * TGA_TRUECOLOR_32;
+            int half_r = r / 2, half_c = c / 2;
+
+            if (!(r & 1) && !(c & 1)) { // even even
+                Color::memset(new_data + new_id,
+                    even_even.calculate(half_r - 1, half_c - 1, half_r + 1, half_c + 1, old_image));
+            }
+            else if ((r & 1) && (c & 1)) { // odd odd
+                Color::memset(new_data + new_id,
+                    odd_odd.calculate(half_r - 1, half_c - 1, half_r + 2, half_c + 2, old_image));
+            }
+            else if ((r & 1) && !(c & 1)) { // odd even
+                Color::memset(new_data + new_id,
+                    odd_even.calculate(half_r - 1, half_c - 1, half_r + 2, half_c + 1, old_image));
+            }
+            else { // even odd
+                Color::memset(new_data + new_id,
+                    even_odd.calculate(half_r - 1, half_c - 1, half_r + 1, half_c + 2, old_image));
+            }
+
+            new_data[new_id + 3] = 255;
+        }
+    }
+
+    height = new_height;
+    width = new_width;
+    delete[] data;
+    data = new_data;
+
+    return true;
 }// Double_Size
 
 
