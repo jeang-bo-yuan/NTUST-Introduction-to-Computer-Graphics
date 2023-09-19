@@ -710,8 +710,32 @@ bool TargaImage::Filter_Box()
 ///////////////////////////////////////////////////////////////////////////////
 bool TargaImage::Filter_Bartlett()
 {
-    ClearToBlack();
-    return false;
+    const Filter::ImageInfo_t old_image = { height, width, data };
+    const Filter::Filter_t<5, 5> bartlett_filter = {
+        {1 / 81.f, 2 / 81.f, 3 / 81.f, 2 / 81.f, 1 / 81.f},
+        {2 / 81.f, 4 / 81.f, 6 / 81.f, 4 / 81.f, 2 / 81.f},
+        {3 / 81.f, 6 / 81.f, 9 / 81.f, 6 / 81.f, 3 / 81.f},
+        {2 / 81.f, 4 / 81.f, 6 / 81.f, 4 / 81.f, 2 / 81.f},
+        {1 / 81.f, 2 / 81.f, 3 / 81.f, 2 / 81.f, 1 / 81.f},
+    };
+
+    unsigned char* new_data = new unsigned char[(size_t)height * width * TGA_TRUECOLOR_32];
+
+    for (int r = 0; r < height; ++r) {
+        for (int c = 0; c < width; ++c) {
+            int id = (r * width + c) * TGA_TRUECOLOR_32;
+
+            // set R G B
+            Color::memset(new_data + id, bartlett_filter.calculate(r - 2, c - 2, r + 2, c + 2, old_image));
+            // Alpha channel
+            new_data[id + 3] = data[id + 3];
+        }
+    }
+
+    delete[] data;
+    data = new_data;
+
+    return true;
 }// Filter_Bartlett
 
 
