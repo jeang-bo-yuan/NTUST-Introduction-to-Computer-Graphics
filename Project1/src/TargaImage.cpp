@@ -949,8 +949,35 @@ bool TargaImage::Double_Size()
 ///////////////////////////////////////////////////////////////////////////////
 bool TargaImage::Resize(float scale)
 {
-    ClearToBlack();
-    return false;
+    const Filter::ImageInfo_t old_image = { height, width, data };
+    const Filter::Filter_t bartlett_filter(4, 4, {
+        { 1 / 64.f, 3 / 64.f, 3 / 64.f, 1 / 64.f },
+        { 3 / 64.f, 9 / 64.f, 9 / 64.f, 3 / 64.f },
+        { 3 / 64.f, 9 / 64.f, 9 / 64.f, 3 / 64.f },
+        { 1 / 64.f, 3 / 64.f, 3 / 64.f, 1 / 64.f }
+    });
+
+    int new_height = height * scale;
+    int new_width = width * scale;
+    unsigned char* new_data = new unsigned char[new_height * new_width * TGA_TRUECOLOR_32];
+
+    for (int r = 0; r < new_height; ++r) {
+        for (int c = 0; c < new_width; ++c) {
+            int new_id = (r * new_width + c) * TGA_TRUECOLOR_32;
+            int old_r = r / scale, old_c = c / scale;
+
+            Color::memset(new_data + new_id,
+                bartlett_filter.calculate(old_r - 1, old_c - 1, old_r + 2, old_c + 2, old_image));
+            new_data[new_id + 3] = 255;
+        }
+    }
+
+    height = new_height;
+    width = new_width;
+    delete[] data;
+    data = new_data;
+
+    return true;
 }// Resize
 
 
