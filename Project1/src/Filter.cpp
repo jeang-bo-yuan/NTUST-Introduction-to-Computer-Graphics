@@ -37,5 +37,7 @@ Color::RGB_t Filter::Filter_t::calculate(int r1, int c1, int r2, int c2, const I
 		}
 	}
 
-	return Color::RGB_t((uint8_t)result[0], (uint8_t)result[1], (uint8_t)result[2]);
+#define clip(val) (uint8_t)(val < 0 ? 0 : val > 0xFF ? 0xFF : val)
+	return Color::RGB_t(clip(result[0]), clip(result[1]), clip(result[2]));
+#undef clip
 }

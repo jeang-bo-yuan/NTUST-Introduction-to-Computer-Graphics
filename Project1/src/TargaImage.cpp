@@ -796,8 +796,31 @@ bool TargaImage::Filter_Gaussian_N( unsigned int N )
 ///////////////////////////////////////////////////////////////////////////////
 bool TargaImage::Filter_Edge()
 {
-    ClearToBlack();
-    return false;
+    const Filter::ImageInfo_t old_image = { height, width, data };
+    const Filter::Filter_t edge_detecter(5, 5, {
+        { -1 / 256.f, -4 / 256.f,  -6 / 256.f,  -4 / 256.f,  -1 / 256.f },
+        { -4 / 256.f, -16 / 256.f, -24 / 256.f, -16 / 256.f, -4 / 256.f },
+        { -6 / 256.f, -24 / 256.f, 220 / 256.f, -24 / 256.f, -6 / 256.f },
+        { -4 / 256.f, -16 / 256.f, -24 / 256.f, -16 / 256.f, -4 / 256.f },
+        { -1 / 256.f, -4 / 256.f,  -6 / 256.f,  -4 / 256.f,  -1 / 256.f },
+    });
+
+    unsigned char* new_data = new unsigned char[(size_t)height * width * TGA_TRUECOLOR_32];
+
+    for (int r = 0; r < height; ++r) {
+        for (int c = 0; c < width; ++c) {
+            int id = (r * width + c) * TGA_TRUECOLOR_32;
+
+            Color::memset(new_data + id,
+                edge_detecter.calculate(r - 2, c - 2, r + 2, c + 2, old_image));
+            new_data[id + 3] = 255;
+        }
+    }
+
+    delete[] data;
+    data = new_data;
+
+    return true;
 }// Filter_Edge
 
 
