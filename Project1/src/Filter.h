@@ -23,6 +23,7 @@ namespace Filter {
 		int Row;
 		int Col;
 		std::unique_ptr<float[]> mask; //!< Row列 Col欄
+		std::unique_ptr<Color::RGB_t[]> calculate_buffer; //!< 在calculate前會先將範圍內的顏色填入，超出圖片範圍的以對稱的方式去補上
 
 	public:
 		//! @brief Construct from a list, ex: { {1, 2, 3}, {4, 5, 6}, {7, 8, 9} }.
@@ -33,7 +34,7 @@ namespace Filter {
 		Filter_t(int Row, int Col, std::initializer_list<std::initializer_list<float>> _list = {});
 
 		//! @brief Put mask on image's pixel(r1, c1) ~ pixel(r2, c2), and return result.
-		//! 如果(r1, c1)和(r2, c2)圍出的空間不是Row列Col欄，則丟出std::invalid_argument
+		//! 如果(r1, c1)和(r2, c2)圍出的空間不是Row列Col欄，則丟出std::invalid_argument。
 		//! @param r1 - start row
 		//! @param c1 - start column
 		//! @param r2 - end row
@@ -59,5 +60,24 @@ namespace Filter {
 		int getRow(void) const { return Row; }
 		//! Get Col
 		int getCol(void) const { return Col; }
+
+	private:
+		enum class Fill_Mode_t {
+			LT_RD, // 左上->右下
+			RD_LT, // 右下->左上
+			RT_LD, // 右上->左下
+			LD_RT  // 左下->右上
+		};
+
+		/**
+		 * @brief This is the helper function for Filter_t::calculate
+		 * @param rs - start row
+		 * @param cs - start column
+		 * @param re - end row
+		 * @param ce - end column
+		 * @param image - information of the image
+		 * @param mode
+		 */
+		void fill_calculate_buffer(int rs, int cs, int re, int ce, const ImageInfo_t& image, Fill_Mode_t mode) const;
 	}; // class Filter_t
 }

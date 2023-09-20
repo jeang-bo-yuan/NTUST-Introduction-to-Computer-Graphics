@@ -23,7 +23,7 @@ namespace Color {
 
         //! construct from an byte array
         //! @param arr - 取第0, 1, 2項做R, G, B。長度必須>=3（不做檢查）
-        constexpr explicit RGB_t(uint8_t* arr) : R(arr[0]), G(arr[1]), B(arr[2]) {}
+        constexpr explicit RGB_t(const uint8_t* arr) : R(arr[0]), G(arr[1]), B(arr[2]) {}
 
         //! copy constructor
         constexpr RGB_t(const RGB_t&) = default;
