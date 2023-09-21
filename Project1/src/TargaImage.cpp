@@ -23,6 +23,7 @@
 #include <sstream>
 #include <vector>
 #include <algorithm>
+#include <list>
 
 using namespace std;
 
@@ -928,10 +929,82 @@ bool TargaImage::Filter_Enhance()
 ///////////////////////////////////////////////////////////////////////////////
 bool TargaImage::NPR_Paint()
 {
-    ClearToBlack();
-    return false;
+    unsigned int stroke_radius[] = { 10, 6, 4, 2 };
+    // 白色的畫布
+    TargaImage canvas(width, height);
+    memset(canvas.data, 0xFF, (size_t)height * width * TGA_TRUECOLOR_32);
+
+    for (unsigned radius : stroke_radius) {
+        TargaImage reference_image(*this); // copy (*this)
+        reference_image.Filter_Gaussian_N(radius * 2);
+        canvas.Paint_Layer(reference_image, radius);
+    }
+
+    std::swap(canvas.data, this->data);
+
+    return true;
 }
 
+
+void TargaImage::Paint_Layer(const TargaImage& reference, unsigned radius) {
+    constexpr int factorG = 1; // 值越大，筆刷間隔越大
+    constexpr int parameterT = 20; // 值越大，越模糊
+
+    std::list<Stroke> S;
+    int* D = new int[height * width];
+
+    // calculate difference between "this" and "reference"
+    for (int r = 0; r < height; ++r) {
+        for (int c = 0; c < width; ++c) {
+            int id = (r * width + c) * TGA_TRUECOLOR_32;
+            D[r * width + c] = Color::euclidean_distance_square(Color::RGB_t(data + id), Color::RGB_t(reference.data + id));
+        }
+    }
+
+    srand(time(NULL));
+
+    int grid = factorG * radius;
+    for (int r = 0; r < height; r += grid) {
+        for (int c = 0; c < width; c += grid) {
+            int areaError = 0;
+            int maxError = 0, rMax = 0, cMax = 0;
+
+            // add up areaError and find the largest error point
+            for (int i = r - grid / 2; i <= r + grid / 2; ++i) {
+                for (int j = c - grid / 2; j <= c + grid / 2; ++j) {
+                    // (i列, j欄)在圖外
+                    if (i < 0 || j < 0 || i >= height || j >= width) {
+                        continue;
+                    }
+                    else {
+                        int error = D[i * width + j];
+                        areaError += error;
+                        if (error > maxError) {
+                            maxError = error;
+                            rMax = i;
+                            cMax = j;
+                        }
+                    }
+                }
+            }
+
+            areaError /= (grid * grid);
+            if (areaError > parameterT) {
+                int id = (rMax * width + cMax) * TGA_TRUECOLOR_32;
+                unsigned R = reference.data[id], G = reference.data[id + 1];
+                unsigned B = reference.data[id + 2], A = reference.data[id + 3];
+                if (rand() & 1)
+                    S.emplace_back(radius, cMax, rMax, R, G, B, A);
+                else
+                    S.emplace_front(radius, cMax, rMax, R, G, B, A);
+            }
+        }
+    }
+
+    for (const auto& stroke : S) {
+        this->Paint_Stroke(stroke);
+    }
+}
 
 
 ///////////////////////////////////////////////////////////////////////////////

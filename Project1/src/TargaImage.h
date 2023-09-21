@@ -27,11 +27,11 @@ class TargaImage
 {
     // methods
     public:
-	    TargaImage(void);
+        TargaImage(void);
             TargaImage(int w, int h);
-	    TargaImage(int w, int h, unsigned char *d);
+        TargaImage(int w, int h, unsigned char *d);
             TargaImage(const TargaImage& image);
-	    ~TargaImage(void);
+        ~TargaImage(void);
 
         unsigned char*	To_RGB(void);	            // Convert the image to RGB format,
         bool Save_Image(const char*);               // save the image to a file
@@ -73,25 +73,33 @@ class TargaImage
         bool Rotate(float angleDegrees);
 
     private:
-	// helper function for format conversion
+        // helper function for format conversion
         void RGBA_To_RGB(unsigned char *rgba, unsigned char *rgb);
 
         // reverse the rows of the image, some targas are stored bottom to top
-	TargaImage* Reverse_Rows(void);
+        TargaImage* Reverse_Rows(void);
 
-	// clear image to all black
+        // clear image to all black
         void ClearToBlack();
 
-	// Draws a filled circle according to the stroke data
+        // Draws a filled circle according to the stroke data
         void Paint_Stroke(const Stroke& s);
 
-    /**
-     * @brief 泛用版的Floyd-Steinberg Dithering
-     * @param palette - 內含可用顏色
-     * @return 成功與否。若palette為空，回傳false，否則完成Dithering並回傳true。
-     * @author 蔣博元
-     */
-    bool General_Dither_FS(const Color::Palette_t& palette);
+        /**
+         * @brief 參考reference，以半徑為radius的筆刷繪畫
+         * @param reference - 經高斯濾波後的參考圖
+         * @param radius - 筆刷的半徑
+         * @author 蔣博元
+         */
+        void Paint_Layer(const TargaImage& reference, unsigned radius);
+
+        /**
+         * @brief 泛用版的Floyd-Steinberg Dithering
+         * @param palette - 內含可用顏色
+         * @return 成功與否。若palette為空，回傳false，否則完成Dithering並回傳true。
+         * @author 蔣博元
+         */
+        bool General_Dither_FS(const Color::Palette_t& palette);
 
     // members
     public:
