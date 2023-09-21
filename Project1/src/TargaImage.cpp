@@ -1167,8 +1167,76 @@ bool TargaImage::Resize(float scale)
 ///////////////////////////////////////////////////////////////////////////////
 bool TargaImage::Rotate(float angleDegrees)
 {
-    ClearToBlack();
-    return false;
+    float theta = DegreesToRadians(angleDegrees);
+    auto forward_mapping = [theta](int& x, int& y) {
+        int _x = cosf(theta) * x - sinf(theta) * y;
+        int _y = sinf(theta) * x + cosf(theta) * y;
+        x = _x; y = _y;
+    };
+    auto backward_mapping = [theta](int& x, int& y) {
+        int _x = cosf(theta) * x + sinf(theta) * y;
+        int _y = -sinf(theta) * x + cosf(theta) * y;
+        x = _x; y = _y;
+    };
+
+    const Filter::ImageInfo_t old_image = { height, width, data };
+    const Filter::Filter_t bartlett_filter(5, 5, {
+        {1 / 81.f, 2 / 81.f, 3 / 81.f, 2 / 81.f, 1 / 81.f},
+        {2 / 81.f, 4 / 81.f, 6 / 81.f, 4 / 81.f, 2 / 81.f},
+        {3 / 81.f, 6 / 81.f, 9 / 81.f, 6 / 81.f, 3 / 81.f},
+        {2 / 81.f, 4 / 81.f, 6 / 81.f, 4 / 81.f, 2 / 81.f},
+        {1 / 81.f, 2 / 81.f, 3 / 81.f, 2 / 81.f, 1 / 81.f},
+    });
+
+    // old image:
+    // x1y1 --- x2y2
+    //  |        |
+    // x4y4 --- x3y3
+    int x1 = 0, y1 = 0, x2 = width, y2 = 0;
+    int x3 = width, y3 = height, x4 = 0, y4 = height;
+    // forward map to new image
+    forward_mapping(x1, y1);
+    forward_mapping(x2, y2);
+    forward_mapping(x3, y3);
+    forward_mapping(x4, y4);
+    // boundary of new image
+    int up_bound = std::max({ y1, y2, y3, y4 });
+    int low_bound = std::min({ y1, y2, y3, y4 });
+    int left_bound = std::min({ x1, x2, x3,x4 });
+    int right_bound = std::max({ x1, x2, x3, x4 });
+    // new image
+    int new_height = up_bound - low_bound;
+    int new_width = right_bound - left_bound;
+    unsigned char* new_data = new unsigned char[new_height * new_width * TGA_TRUECOLOR_32];
+
+    // backward_mapping
+    for (int r = 0; r < new_height; ++r) {
+        for (int c = 0; c < new_width; ++c) {
+            // 我現在在處理新圖的第new_id個像素
+            int new_id = (r * new_width + c) * TGA_TRUECOLOR_32;
+            // 求新圖的xy並backward map到舊圖
+            int x = left_bound + c, y = low_bound + r;
+            backward_mapping(x, y);
+
+            // 若舊圖沒有xy這點
+            if (x < 0 || y < 0 || x >= width || y >= height) {
+                memset(new_data + new_id, 0, 4);
+            }
+            else {
+                Color::memset(new_data + new_id,
+                    bartlett_filter.calculate(y - 2, x - 2, y + 2, x + 2, old_image));
+                new_data[new_id + 3] = 255;
+            }
+        }
+    }
+
+    // replace old image with new one
+    height = new_height;
+    width = new_width;
+    delete[] data;
+    data = new_data;
+
+    return true;
 }// Rotate
 
 
