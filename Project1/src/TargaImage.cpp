@@ -1127,11 +1127,12 @@ bool TargaImage::Double_Size()
 bool TargaImage::Resize(float scale)
 {
     const Filter::ImageInfo_t old_image = { height, width, data };
-    const Filter::Filter_t bartlett_filter(4, 4, {
-        { 1 / 64.f, 3 / 64.f, 3 / 64.f, 1 / 64.f },
-        { 3 / 64.f, 9 / 64.f, 9 / 64.f, 3 / 64.f },
-        { 3 / 64.f, 9 / 64.f, 9 / 64.f, 3 / 64.f },
-        { 1 / 64.f, 3 / 64.f, 3 / 64.f, 1 / 64.f }
+    const Filter::Filter_t bartlett_filter(5, 5, {
+        {1 / 81.f, 2 / 81.f, 3 / 81.f, 2 / 81.f, 1 / 81.f},
+        {2 / 81.f, 4 / 81.f, 6 / 81.f, 4 / 81.f, 2 / 81.f},
+        {3 / 81.f, 6 / 81.f, 9 / 81.f, 6 / 81.f, 3 / 81.f},
+        {2 / 81.f, 4 / 81.f, 6 / 81.f, 4 / 81.f, 2 / 81.f},
+        {1 / 81.f, 2 / 81.f, 3 / 81.f, 2 / 81.f, 1 / 81.f},
     });
 
     int new_height = height * scale;
@@ -1144,7 +1145,7 @@ bool TargaImage::Resize(float scale)
             int old_r = r / scale, old_c = c / scale;
 
             Color::memset(new_data + new_id,
-                bartlett_filter.calculate(old_r - 1, old_c - 1, old_r + 2, old_c + 2, old_image));
+                bartlett_filter.calculate(old_r - 2, old_c - 2, old_r + 2, old_c + 2, old_image));
             new_data[new_id + 3] = 255;
         }
     }
