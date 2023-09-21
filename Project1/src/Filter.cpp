@@ -28,16 +28,16 @@ Color::RGB_t Filter::Filter_t::calculate(int r1, int c1, int r2, int c2, const I
 	// fill
 	if (!outside_image(r2, c2))
 		// 右下往左上填
-		fill_calculate_buffer(r2, c2, r1, c1, image, Fill_Mode_t::RD_LT);
+		fill_calculate_buffer(r2, c2, r1, c1, image);
 	else if (!outside_image(r1, c1))
 		// 左上向右下填
-		fill_calculate_buffer(r1, c1, r2, c2, image, Fill_Mode_t::LT_RD);
+		fill_calculate_buffer(r1, c1, r2, c2, image);
 	else if (!outside_image(r1, c2))
 		// 右上向左下填
-		fill_calculate_buffer(r1, c2, r2, c1, image, Fill_Mode_t::RT_LD);
+		fill_calculate_buffer(r1, c2, r2, c1, image);
 	else
 		// 左下向右上填
-		fill_calculate_buffer(r2, c1, r1, c2, image, Fill_Mode_t::LD_RT);
+		fill_calculate_buffer(r2, c1, r1, c2, image);
 
 	for (int r = r1; r <= r2; ++r) {
 		for (int c = c1; c <= c2; ++c) {
@@ -55,16 +55,16 @@ Color::RGB_t Filter::Filter_t::calculate(int r1, int c1, int r2, int c2, const I
 #undef clip
 }
 
-void Filter::Filter_t::fill_calculate_buffer(int rs, int cs, int re, int ce, const ImageInfo_t& image, Fill_Mode_t mode) const {
+void Filter::Filter_t::fill_calculate_buffer(int rs, int cs, int re, int ce, const ImageInfo_t& image) const {
 	memset(calculate_buffer.get(), 0, sizeof(Color::RGB_t) * Row * Col);
 
-	int deltaR = (mode == Fill_Mode_t:: LT_RD || mode == Fill_Mode_t::RT_LD ? 1 : -1); // 上往下則1否則-1
-	int deltaC = (mode == Fill_Mode_t::LT_RD || mode == Fill_Mode_t::LD_RT ? 1 : -1); // 左往右則1否則-1
+	int deltaR = (rs <= re ? 1 : -1); // 上往下則1否則-1
+	int deltaC = (cs <= ce ? 1 : -1); // 左往右則1否則-1
 	int r = rs;
 	// 最上方那列
-	int upR = (mode == Fill_Mode_t::LT_RD || mode == Fill_Mode_t::RT_LD ? rs : re);
+	int upR = std::min(rs, re);
 	// 最左方那欄
-	int leftC = (mode == Fill_Mode_t::LT_RD || mode == Fill_Mode_t::LD_RT ? cs : ce);
+	int leftC = std::min(cs, ce);
 
 	// 從rs填到re
 	while (true) {

@@ -62,13 +62,6 @@ namespace Filter {
 		int getCol(void) const { return Col; }
 
 	private:
-		enum class Fill_Mode_t {
-			LT_RD, // 左上->右下
-			RD_LT, // 右下->左上
-			RT_LD, // 右上->左下
-			LD_RT  // 左下->右上
-		};
-
 		/**
 		 * @brief This is the helper function for Filter_t::calculate
 		 * @param rs - start row
@@ -76,8 +69,7 @@ namespace Filter {
 		 * @param re - end row
 		 * @param ce - end column
 		 * @param image - information of the image
-		 * @param mode
 		 */
-		void fill_calculate_buffer(int rs, int cs, int re, int ce, const ImageInfo_t& image, Fill_Mode_t mode) const;
+		void fill_calculate_buffer(int rs, int cs, int re, int ce, const ImageInfo_t& image) const;
 	}; // class Filter_t
 }
