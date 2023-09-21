@@ -783,14 +783,8 @@ bool TargaImage::Filter_Gaussian()
 
 bool TargaImage::Filter_Gaussian_N( unsigned int N )
 {
-    // 弘絋紇臫N程13
-    if (N > 13) {
-        std::cerr << "N must be less or equal to 13\n";
-        return false;
-    }
-
-    auto factorial = [](unsigned N) -> unsigned {
-        unsigned result = 1;
+    auto factorial = [](unsigned N) -> float {
+        float result = 1;
         while (N) {
             result *= N;
             --N;
@@ -801,25 +795,25 @@ bool TargaImage::Filter_Gaussian_N( unsigned int N )
     const Filter::ImageInfo_t old_image = { height, width, data };
     Filter::Filter_t gaussian_N(N, N); // N * N
 
-    unsigned sum = 0;
-    const unsigned fact_N_m1 = factorial(N - 1); // factorial of N minus 1
+    float sum = 0;
+    const float fact_N_m1 = factorial(N - 1); // factorial of N minus 1
     // calculate first row of gaussian_N
     // it will be: C(N-1,0), C(N-1,1), C(N-1,2), ..., C(N-1,N-1)
     for (int c = 0; c < N; ++c) {
-        unsigned elem = fact_N_m1 / factorial(c) / factorial(N - 1 - c);
+        float elem = fact_N_m1 / factorial(c) / factorial(N - 1 - c);
         gaussian_N.at(0, c) = elem;
         sum += elem;
     }
     // copy first row to first column, skip (0,0)
     for (int r = 1; r < N; ++r) {
-        unsigned elem = gaussian_N.at(0, r);
+        float elem = gaussian_N.at(0, r);
         gaussian_N.at(r, 0) = elem;
         sum += elem;
     }
     // calculate remaining elements
     for (int r = 1; r < N; ++r) {
         for (int c = 1; c < N; ++c) {
-            unsigned elem = gaussian_N.at(r, 0) * gaussian_N.at(0, c);
+            float elem = gaussian_N.at(r, 0) * gaussian_N.at(0, c);
             gaussian_N.at(r, c) = elem;
             sum += elem;
         }
@@ -827,7 +821,7 @@ bool TargaImage::Filter_Gaussian_N( unsigned int N )
     // Let each element divided by `sum`
     for (int r = 0; r < N; ++r) {
         for (int c = 0; c < N; ++c) {
-            gaussian_N.at(r, c) /= (float)sum;
+            gaussian_N.at(r, c) /= sum;
         }
     }
 
@@ -837,8 +831,10 @@ bool TargaImage::Filter_Gaussian_N( unsigned int N )
         for (int c = 0; c < width; ++c) {
             int id = (r * width + c) * TGA_TRUECOLOR_32;
 
-            Color::memset(new_data + id,
-                gaussian_N.calculate(r - half_N, c - half_N, r + half_N, c + half_N, old_image));
+            if (N & 1) // N 琌计
+                Color::memset(new_data + id, gaussian_N.calculate(r - half_N, c - half_N, r + half_N, c + half_N, old_image));
+            else // N 琌案计
+                Color::memset(new_data + id, gaussian_N.calculate(r - half_N, c - half_N, r + half_N - 1, c + half_N - 1, old_image));
             new_data[id + 3] = 0xFF; // Alpha channel
         }
     }
