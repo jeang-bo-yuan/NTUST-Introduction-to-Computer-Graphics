@@ -929,12 +929,13 @@ bool TargaImage::Filter_Enhance()
 ///////////////////////////////////////////////////////////////////////////////
 bool TargaImage::NPR_Paint()
 {
-    unsigned int stroke_radius[] = { 10, 6, 4, 2 };
+    unsigned int stroke_radius[] = { 15, 10, 3 };
     // 白色的畫布
     TargaImage canvas(width, height);
     memset(canvas.data, 0xFF, (size_t)height * width * TGA_TRUECOLOR_32);
 
     for (unsigned radius : stroke_radius) {
+        std::cout << "Painting layer with radius = " << radius << std::endl;
         TargaImage reference_image(*this); // copy (*this)
         reference_image.Filter_Gaussian_N(radius * 2);
         canvas.Paint_Layer(reference_image, radius);
@@ -947,7 +948,7 @@ bool TargaImage::NPR_Paint()
 
 
 void TargaImage::Paint_Layer(const TargaImage& reference, unsigned radius) {
-    constexpr int factorG = 1; // 值越大，筆刷間隔越大
+    constexpr float factorG = 1; // 值越大，筆刷間隔越大
     constexpr int parameterT = 20; // 值越大，越模糊
 
     std::list<Stroke> S;
@@ -991,12 +992,17 @@ void TargaImage::Paint_Layer(const TargaImage& reference, unsigned radius) {
             areaError /= (grid * grid);
             if (areaError > parameterT) {
                 int id = (rMax * width + cMax) * TGA_TRUECOLOR_32;
-                unsigned R = reference.data[id], G = reference.data[id + 1];
-                unsigned B = reference.data[id + 2], A = reference.data[id + 3];
+                float rand_rate = radius <= 3 ? (float)rand() / RAND_MAX / 10.f + 0.95f : 1;
+#define clip(val) (val < 0 ? 0 : (val > 255 ? 255 : val))
+                unsigned R = clip(reference.data[id] * rand_rate);
+                unsigned G = clip(reference.data[id + 1] * rand_rate);
+                unsigned B = clip(reference.data[id + 2] * rand_rate);
+                unsigned A = reference.data[id + 3];
+#undef clip
                 if (rand() & 1)
-                    S.emplace_back(radius, cMax, rMax, R, G, B, A);
+                    S.emplace_back(radius * rand_rate, cMax, rMax, R, G, B, A);
                 else
-                    S.emplace_front(radius, cMax, rMax, R, G, B, A);
+                    S.emplace_front(radius * rand_rate, cMax, rMax, R, G, B, A);
             }
         }
     }
