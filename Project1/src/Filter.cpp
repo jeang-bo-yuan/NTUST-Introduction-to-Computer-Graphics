@@ -1,7 +1,7 @@
 #include "Filter.h"
 
 Filter::Filter_t::Filter_t(int _Row, int _Col, std::initializer_list<std::initializer_list<float>> _list)
-	: Row(_Row), Col(_Col), mask(new float[_Row * _Col]), calculate_buffer(new Color::RGB_t[_Row * _Col])
+	: Row(_Row), Col(_Col), _filter(new float[_Row * _Col]), calculate_buffer(new Color::RGB_t[_Row * _Col])
 {
 	int r = 0;
 	for (const auto& row : _list) {
