@@ -1,7 +1,7 @@
 #include "Filter.h"
 
 Filter::Filter_t::Filter_t(int _Row, int _Col, std::initializer_list<std::initializer_list<float>> _list)
-	: Row(_Row), Col(_Col), _filter(new float[_Row * _Col]), calculate_buffer(new Color::RGB_t[_Row * _Col])
+	: Row(_Row), Col(_Col), _filter(new float[_Row * _Col])
 {
 	int r = 0;
 	for (const auto& row : _list) {
@@ -18,8 +18,6 @@ Color::RGB_t Filter::Filter_t::calculate(int r1, int c1, int r2, int c2, const I
 	if ((r2 - r1 + 1 != Row) || (c2 - c1 + 1 != Col))
 		throw std::invalid_argument("Filter_t::calculate() : the area bounded by (r1, c1) ~ (r2, c2) must be Row * Col");
 
-	float result[3] = { 0, 0, 0 };
-
 	// return true if (r, c) is outside image 
 	auto outside_image = [&image](int r, int c) -> bool {
 		return r < 0 || c < 0 || r >= image.height || c >= image.width;
@@ -27,67 +25,65 @@ Color::RGB_t Filter::Filter_t::calculate(int r1, int c1, int r2, int c2, const I
 
 	// fill
 	if (!outside_image(r2, c2))
-		// 右下往左上填
-		fill_calculate_buffer(r2, c2, r1, c1, image);
+		// 右下往左上
+		return do_the_calculate(r2, c2, r1, c1, image);
 	else if (!outside_image(r1, c1))
-		// 左上向右下填
-		fill_calculate_buffer(r1, c1, r2, c2, image);
+		// 左上向右下
+		return do_the_calculate(r1, c1, r2, c2, image);
 	else if (!outside_image(r1, c2))
-		// 右上向左下填
-		fill_calculate_buffer(r1, c2, r2, c1, image);
+		// 右上向左下
+		return do_the_calculate(r1, c2, r2, c1, image);
 	else
-		// 左下向右上填
-		fill_calculate_buffer(r2, c1, r1, c2, image);
-
-	for (int r = r1; r <= r2; ++r) {
-		for (int c = c1; c <= c2; ++c) {
-			Color::RGB_t color = calculate_buffer[(r - r1) * Col + (c - c1)];
-			float rate = this->at(r - r1, c - c1);
-
-			result[0] += color.R * rate;
-			result[1] += color.G * rate;
-			result[2] += color.B * rate;
-		}
-	}
-
-#define clip(val) (uint8_t)(val < 0 ? 0 : val > 0xFF ? 0xFF : val)
-	return Color::RGB_t(clip(result[0]), clip(result[1]), clip(result[2]));
-#undef clip
+		// 左下向右上
+		return do_the_calculate(r2, c1, r1, c2, image);
 }
 
-void Filter::Filter_t::fill_calculate_buffer(int rs, int cs, int re, int ce, const ImageInfo_t& image) const {
-	memset(calculate_buffer.get(), 0, sizeof(Color::RGB_t) * Row * Col);
+Color::RGB_t Filter::Filter_t::do_the_calculate(int rs, int cs, int re, int ce, const ImageInfo_t& image) const {
+	float result[3] = { 0.f, 0.f, 0.f };
 
-	int deltaR = (rs <= re ? 1 : -1); // 上往下則1否則-1
-	int deltaC = (cs <= ce ? 1 : -1); // 左往右則1否則-1
-	int r = rs;
-	// 最上方那列
-	int upR = std::min(rs, re);
-	// 最左方那欄
-	int leftC = std::min(cs, ce);
+	const int deltaR = (rs <= re ? 1 : -1); // 上往下則1否則-1
+	const int deltaC = (cs <= ce ? 1 : -1); // 左往右則1否則-1
+	const int upR = std::min(rs, re); // 最上方那列
+	const int leftC = std::min(cs, ce); // 最左方那欄
 
 	// 從rs填到re
-	while (true) {
+	for (int r = rs; ; r += deltaR) {
 		for (int c = cs; ; c += deltaC) {
-			// 現在要填入calculate_buffer中的bufferR列bufferC欄
-			int bufferR = r - upR;
-			int bufferC = c - leftC;
-			int index_of_buffer = bufferR * Col + bufferC;
+			// 現在處理的像素的RGB
+			Color::RGB_t color_of_pixel;
 
-			if (0 <= r && r < image.height && 0 <= c && c < image.width) { // 若image有第r列第c欄，則直接從image複製
-				calculate_buffer[index_of_buffer] = Color::RGB_t(image.data + (r * image.width + c) * 4);
+			// 現在處理的像素要乘上__filter中(filterR列, filterC欄)的值
+			int filterR = r - upR;
+			int filterC = c - leftC;
+
+			if (r < 0 || r >= image.height) { // r超出邊界，則鉛直對稱去取像素
+				int new_R = Row - filterR - 1 + upR, new_C = c;
+				// 如果c也超出邊界，則c也水平對稱
+				if (new_C < 0 || new_C >= image.width)
+					new_C = Col - filterC - 1 + leftC;
+				color_of_pixel = Color::RGB_t(image.data + (new_R * image.width + new_C) * 4);
 			}
-			else if (r < 0 || r >= image.height) { // r超出邊界，則鉛直對稱去複製calculate_buffer中的內容
-				calculate_buffer[index_of_buffer] = calculate_buffer[(Row - bufferR - 1) * Col + bufferC];
+			else if (0 <= c && c < image.width) { // 若image有第r列第c欄，則直接從image取
+				color_of_pixel = Color::RGB_t(image.data + (r * image.width + c) * 4);
 			}
-			else { // 水平對稱去複製calculate_buffer中的內容
-				calculate_buffer[index_of_buffer] = calculate_buffer[bufferR * Col + (Col - bufferC - 1)];
+			else { // 水平對稱去取
+				int new_C = Col - filterC - 1 + leftC;
+				color_of_pixel = Color::RGB_t(image.data + (r * image.width + new_C) * 4);
 			}
+
+			// 乘上rate並加入result
+			float rate = this->at(filterR, filterC);
+			result[0] += color_of_pixel.R * rate;
+			result[1] += color_of_pixel.G * rate;
+			result[2] += color_of_pixel.B * rate;
 
 			if (c == ce) break;
 		}
 
 		if (r == re) break;
-		r += deltaR;
 	}
+
+#define clip(val) (uint8_t)(val < 0 ? 0 : val > 0xFF ? 0xFF : val)
+	return Color::RGB_t(clip(result[0]), clip(result[1]), clip(result[2]));
+#undef clip
 }

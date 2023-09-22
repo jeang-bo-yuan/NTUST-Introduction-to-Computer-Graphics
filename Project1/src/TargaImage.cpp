@@ -784,12 +784,13 @@ bool TargaImage::Filter_Gaussian()
 
 bool TargaImage::Filter_Gaussian_N( unsigned int N )
 {
-    auto factorial = [](unsigned N) -> float {
+    // Calculate C(N, M)
+    auto combination = [](unsigned N, unsigned M) -> float {
+        unsigned K = N - M;
+        // result = N! / M! / K! = (M+1) * (M+2) * ... * N / K!
         float result = 1;
-        while (N) {
-            result *= N;
-            --N;
-        }
+        while ((++M) <= N) result *= M;
+        while (K) result /= (K--);
         return result;
     };
 
@@ -797,11 +798,10 @@ bool TargaImage::Filter_Gaussian_N( unsigned int N )
     Filter::Filter_t gaussian_N(N, N); // N * N
 
     float sum = 0;
-    const float fact_N_m1 = factorial(N - 1); // factorial of N minus 1
     // calculate first row of gaussian_N
     // it will be: C(N-1,0), C(N-1,1), C(N-1,2), ..., C(N-1,N-1)
     for (int c = 0; c < N; ++c) {
-        float elem = fact_N_m1 / factorial(c) / factorial(N - 1 - c);
+        float elem = combination(N - 1, c);
         gaussian_N.at(0, c) = elem;
         sum += elem;
     }

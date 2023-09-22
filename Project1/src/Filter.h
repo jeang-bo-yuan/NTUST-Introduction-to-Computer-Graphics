@@ -23,7 +23,6 @@ namespace Filter {
 		int Row;
 		int Col;
 		std::unique_ptr<float[]> _filter; //!< Row列 Col欄
-		std::unique_ptr<Color::RGB_t[]> calculate_buffer; //!< 在calculate前會先將範圍內的顏色填入，超出圖片範圍的以對稱的方式去補上
 
 	public:
 		//! @brief Construct from a list, ex: { {1, 2, 3}, {4, 5, 6}, {7, 8, 9} }.
@@ -70,6 +69,6 @@ namespace Filter {
 		 * @param ce - end column
 		 * @param image - information of the image
 		 */
-		void fill_calculate_buffer(int rs, int cs, int re, int ce, const ImageInfo_t& image) const;
+		Color::RGB_t do_the_calculate(int rs, int cs, int re, int ce, const ImageInfo_t& image) const;
 	}; // class Filter_t
 }
