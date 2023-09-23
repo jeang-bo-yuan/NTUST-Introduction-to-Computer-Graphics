@@ -18,10 +18,21 @@ Color::RGB_t Filter::Filter_t::calculate(int r1, int c1, int r2, int c2, const I
 	if ((r2 - r1 + 1 != Row) || (c2 - c1 + 1 != Col))
 		throw std::invalid_argument("Filter_t::calculate() : the area bounded by (r1, c1) ~ (r2, c2) must be Row * Col");
 
-	// return true if (r, c) is outside image 
-	auto outside_image = [&image](int r, int c) -> bool {
-		return r < 0 || c < 0 || r >= image.height || c >= image.width;
+	auto row_outside = [&image](int r) -> bool {
+		return r < 0 || r >= image.height;
 	};
+	auto col_outside = [&image](int c) -> bool {
+		return c < 0 || c >= image.width;
+	};
+
+	// return true if (r, c) is outside image 
+	auto outside_image = [&image, &row_outside, &col_outside](int r, int c) -> bool {
+		return row_outside(r) || col_outside(c);
+	};
+
+	// 若Filter整個作用在圖外，則回傳黑色
+	if (row_outside(r1) && row_outside(r2) && col_outside(c1) && col_outside(c2))
+		return Color::Black;
 
 	// fill
 	if (!outside_image(r2, c2))
@@ -86,4 +97,38 @@ Color::RGB_t Filter::Filter_t::do_the_calculate(int rs, int cs, int re, int ce, 
 #define clip(val) (uint8_t)(val < 0 ? 0 : val > 0xFF ? 0xFF : val)
 	return Color::RGB_t(clip(result[0]), clip(result[1]), clip(result[2]));
 #undef clip
+}
+
+Filter::Filter_t Filter::Filter_t::bartlett4_4(float r, float c) {
+	// domain: [0, 6]
+	const auto kernel = [](float x) -> float {
+		return 1 / 6.f - x / 36.f;
+	};
+
+	Filter::Filter_t result(4, 4);
+
+	// 結果的Filter會以(centerR, centerC)為中心
+	int centerR = floorf(r), centerC = floorf(c);
+
+	float sum = 0;
+
+	// 依序處理Filter中的(filterR列, filterC欄)
+	for (int filterR = 0; filterR < 4; ++filterR) {
+		for (int filterC = 0; filterC < 4; ++filterC) {
+			float nowR = centerR + filterR - 1;
+			float nowC = centerC + filterC - 1;
+
+			float weight = kernel(hypotf(nowR - r, nowC - c));
+			result.at(filterR, filterC) = weight;
+			sum += weight;
+		}
+	}
+
+	for (int filterR = 0; filterR < 4; ++filterR) {
+		for (int filterC = 0; filterC < 4; ++filterC) {
+			result.at(filterR, filterC) /= sum;
+		}
+	}
+
+	return result;
 }

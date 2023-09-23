@@ -60,6 +60,14 @@ namespace Filter {
 		//! Get Col
 		int getCol(void) const { return Col; }
 
+		/**
+		 * @brief 在（r列，c欄）附近產出一個4 * 4的bartlett filter。
+		 * 該filter的at(1, 1)元素應該對應到圖片(floor(r)列, floor(c)欄)。
+		 * @param r - 列
+		 * @param c - 欄
+		 */
+		static Filter_t bartlett4_4(float r, float c);
+
 	private:
 		/**
 		 * @brief This is the helper function for Filter_t::calculate

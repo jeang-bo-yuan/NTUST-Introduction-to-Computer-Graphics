@@ -1145,13 +1145,6 @@ bool TargaImage::Double_Size()
 bool TargaImage::Resize(float scale)
 {
     const Filter::ImageInfo_t old_image = { height, width, data };
-    const Filter::Filter_t bartlett_filter(5, 5, {
-        {1 / 81.f, 2 / 81.f, 3 / 81.f, 2 / 81.f, 1 / 81.f},
-        {2 / 81.f, 4 / 81.f, 6 / 81.f, 4 / 81.f, 2 / 81.f},
-        {3 / 81.f, 6 / 81.f, 9 / 81.f, 6 / 81.f, 3 / 81.f},
-        {2 / 81.f, 4 / 81.f, 6 / 81.f, 4 / 81.f, 2 / 81.f},
-        {1 / 81.f, 2 / 81.f, 3 / 81.f, 2 / 81.f, 1 / 81.f},
-    });
 
     int new_height = height * scale;
     int new_width = width * scale;
@@ -1160,10 +1153,13 @@ bool TargaImage::Resize(float scale)
     for (int r = 0; r < new_height; ++r) {
         for (int c = 0; c < new_width; ++c) {
             int new_id = (r * new_width + c) * TGA_TRUECOLOR_32;
-            int old_r = r / scale, old_c = c / scale;
+            float old_r = r / scale, old_c = c / scale;
+            const Filter::Filter_t bartlett_filter = Filter::Filter_t::bartlett4_4(old_r, old_c);
 
+            old_r = floorf(old_r);
+            old_c = floorf(old_c);
             Color::memset(new_data + new_id,
-                bartlett_filter.calculate(old_r - 2, old_c - 2, old_r + 2, old_c + 2, old_image));
+                bartlett_filter.calculate(old_r - 1, old_c - 1, old_r + 2, old_c + 2, old_image));
             new_data[new_id + 3] = 255;
         }
     }
@@ -1191,20 +1187,13 @@ bool TargaImage::Rotate(float angleDegrees)
         int _y = sinf(theta) * x + cosf(theta) * y;
         x = _x; y = _y;
     };
-    auto backward_mapping = [theta](int& x, int& y) {
-        int _x = cosf(theta) * x + sinf(theta) * y;
-        int _y = -sinf(theta) * x + cosf(theta) * y;
+    auto backward_mapping = [theta](float& x, float& y) {
+        float _x = cosf(theta) * x + sinf(theta) * y;
+        float _y = -sinf(theta) * x + cosf(theta) * y;
         x = _x; y = _y;
     };
 
     const Filter::ImageInfo_t old_image = { height, width, data };
-    const Filter::Filter_t bartlett_filter(5, 5, {
-        {1 / 81.f, 2 / 81.f, 3 / 81.f, 2 / 81.f, 1 / 81.f},
-        {2 / 81.f, 4 / 81.f, 6 / 81.f, 4 / 81.f, 2 / 81.f},
-        {3 / 81.f, 6 / 81.f, 9 / 81.f, 6 / 81.f, 3 / 81.f},
-        {2 / 81.f, 4 / 81.f, 6 / 81.f, 4 / 81.f, 2 / 81.f},
-        {1 / 81.f, 2 / 81.f, 3 / 81.f, 2 / 81.f, 1 / 81.f},
-    });
 
     // old image:
     // x1y1 --- x2y2
@@ -1233,7 +1222,7 @@ bool TargaImage::Rotate(float angleDegrees)
             // 我現在在處理新圖的第new_id個像素
             int new_id = (r * new_width + c) * TGA_TRUECOLOR_32;
             // 求新圖的xy並backward map到舊圖
-            int x = left_bound + c, y = low_bound + r;
+            float x = left_bound + c, y = low_bound + r;
             backward_mapping(x, y);
 
             // 若舊圖沒有xy這點
@@ -1241,8 +1230,11 @@ bool TargaImage::Rotate(float angleDegrees)
                 memset(new_data + new_id, 0, 4);
             }
             else {
+                const Filter::Filter_t bartlett_filter = Filter::Filter_t::bartlett4_4(y, x);
+                x = floorf(x);
+                y = floorf(y);
                 Color::memset(new_data + new_id,
-                    bartlett_filter.calculate(y - 2, x - 2, y + 2, x + 2, old_image));
+                    bartlett_filter.calculate(y - 1, x - 1, y + 2, x + 2, old_image));
                 new_data[new_id + 3] = 255;
             }
         }
