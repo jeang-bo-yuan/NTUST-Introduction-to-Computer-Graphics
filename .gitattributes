@@ -1,5 +1,7 @@
 */上課教材 export-ignore
 */CMakeSettings.json export-ignore
+*/Document.pdf export-ignore
+
 .gitignore export-ignore
 .gitattributes export-ignore
 評分與繳交規則.pdf export-ignore
