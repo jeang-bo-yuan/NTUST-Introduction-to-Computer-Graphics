@@ -17,6 +17,8 @@
 *************************************************************************/
 
 #include "Maze.h"
+#include "GL/GL.h"
+#include "GL//GLU.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
@@ -618,6 +620,9 @@ Draw_Map(int min_x, int min_y, int max_x, int max_y)
 					  min_x + (int)floor((x2 - min_xp) * scale),
 					  min_y + height - (int)floor((y2 - min_yp) * scale));
 		}
+
+
+
 }
 
 
@@ -636,6 +641,40 @@ Draw_View(const float focal_dist)
 	// TODO
 	// The rest is up to you!
 	//###################################################################
+	// GL Method
+	glClear(GL_DEPTH_BUFFER_BIT);
+
+	glEnable(GL_DEPTH_TEST);
+	for (int i = 0; i < (int)this->num_edges; i++) {
+		float edge_start[2] = {
+			this->edges[i]->endpoints[Edge::START]->posn[Vertex::X],
+			this->edges[i]->endpoints[Edge::START]->posn[Vertex::Y]
+		};
+		float edge_end[2] = {
+			this->edges[i]->endpoints[Edge::END]->posn[Vertex::X],
+			this->edges[i]->endpoints[Edge::END]->posn[Vertex::Y]
+		};
+
+		float color[3] = { this->edges[i]->color[0], this->edges[i]->color[1], this->edges[i]->color[2] };
+		if (this->edges[i]->opaque) {
+			Draw_Wall(edge_start, edge_end, color);
+		}
+	}
+}
+
+void Maze::
+Draw_Wall(const float* start, const float* end, const float* color)
+{
+	float edge0[3] = { start[Y], 0.0f, start[X] };
+	float edge1[3] = { end[Y], 0.0f, end[X] };
+
+	glBegin(GL_POLYGON);
+	glColor3fv(color);
+	glVertex3f(edge0[X], 1.0f, edge0[Z]);
+	glVertex3f(edge1[X], 1.0f, edge1[Z]);
+	glVertex3f(edge1[X], -1.0f, edge1[Z]);
+	glVertex3f(edge0[X], -1.0f, edge0[Z]);
+	glEnd();
 }
 
 
