@@ -929,10 +929,15 @@ bool TargaImage::Filter_Enhance()
 ///////////////////////////////////////////////////////////////////////////////
 bool TargaImage::NPR_Paint()
 {
-    unsigned int stroke_radius[] = { 15, 10, 3 };
-    // 白色的畫布
-    TargaImage canvas(width, height);
-    memset(canvas.data, 0xFF, (size_t)height * width * TGA_TRUECOLOR_32);
+    unsigned int stroke_radius[] = { 15, 10, 4, 2 };
+    // 畫布
+    TargaImage canvas(*this);
+    // 讓畫布和原圖的差距儘可能大
+    for (int id = canvas.height * canvas.width * TGA_TRUECOLOR_32 - 1; id >= 0; --id) {
+        // 忽略alpha channel
+        if ((id & 0b11) == 3) continue;
+        canvas.data[id] = (canvas.data[id] > 127 ? 0 : 255);
+    }
 
     for (unsigned radius : stroke_radius) {
         std::cout << "Painting layer with radius = " << radius << std::endl;
@@ -949,7 +954,7 @@ bool TargaImage::NPR_Paint()
 
 void TargaImage::Paint_Layer(const TargaImage& reference, unsigned radius) {
     constexpr float factorG = 1; // 值越大，筆刷間隔越大
-    constexpr int parameterT = 20; // 值越大，越模糊
+    constexpr int parameterT = 30; // 值越大，越模糊 0 ~ 441
 
     std::list<Stroke> S;
     int* D = new int[height * width];
@@ -958,7 +963,7 @@ void TargaImage::Paint_Layer(const TargaImage& reference, unsigned radius) {
     for (int r = 0; r < height; ++r) {
         for (int c = 0; c < width; ++c) {
             int id = (r * width + c) * TGA_TRUECOLOR_32;
-            D[r * width + c] = Color::euclidean_distance_square(Color::RGB_t(data + id), Color::RGB_t(reference.data + id));
+            D[r * width + c] = sqrt(Color::euclidean_distance_square(Color::RGB_t(data + id), Color::RGB_t(reference.data + id)));
         }
     }
 
@@ -992,17 +997,14 @@ void TargaImage::Paint_Layer(const TargaImage& reference, unsigned radius) {
             areaError /= (grid * grid);
             if (areaError > parameterT) {
                 int id = (rMax * width + cMax) * TGA_TRUECOLOR_32;
-                float rand_rate = radius <= 3 ? (float)rand() / RAND_MAX / 10.f + 0.95f : 1;
-#define clip(val) (val < 0 ? 0 : (val > 255 ? 255 : val))
-                unsigned R = clip(reference.data[id] * rand_rate);
-                unsigned G = clip(reference.data[id + 1] * rand_rate);
-                unsigned B = clip(reference.data[id + 2] * rand_rate);
+                unsigned R = reference.data[id];
+                unsigned G = reference.data[id + 1];
+                unsigned B = reference.data[id + 2];
                 unsigned A = reference.data[id + 3];
-#undef clip
                 if (rand() & 1)
-                    S.emplace_back(radius * rand_rate, cMax, rMax, R, G, B, A);
+                    S.emplace_back(radius, cMax, rMax, R, G, B, A);
                 else
-                    S.emplace_front(radius * rand_rate, cMax, rMax, R, G, B, A);
+                    S.emplace_front(radius, cMax, rMax, R, G, B, A);
             }
         }
     }
