@@ -44,6 +44,7 @@ void MakeNames()
 {
     // ************ ADD YOUR NAME HERE ****************************************
     //vsStudentNames.push_back("Your name here!");
+    vsStudentNames.push_back("Bo Yuan, Jeang");
 }// MakeNames
 
 

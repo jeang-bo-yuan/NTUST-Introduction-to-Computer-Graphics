@@ -386,9 +386,16 @@ bool TargaImage::General_Dither_FS(const Color::Palette_t& palette) {
         }
     };
 
-    // from top to down, left to right
+    // Zig-Zag
     for (int r = 0; r < height; ++r) {
-        for (int c = 0; c < width; ++c) {
+        int startC = 0, deltaC = 1;
+        // 若在奇數列，則從右到左
+        if (r % 2) {
+            startC = width - 1;
+            deltaC = -1;
+        }
+
+        for (int c = startC; 0 <= c && c < width; c += deltaC) {
             int id = (r * width + c) * TGA_TRUECOLOR_32;
             // error in R, G, B channel respectively
             int error[3] = { data[id], data[id + 1], data[id + 2] };
@@ -401,22 +408,25 @@ bool TargaImage::General_Dither_FS(const Color::Palette_t& palette) {
             error[1] -= closest.G;
             error[2] -= closest.B;
 
-            // Right, Left Down, Down, Right Down
-            constexpr int R = 0, LD = 1, D = 2, RD = 3;
-            // 右、左下、下、右下 要乘上的係數
+            // 定義「前方」為「c加上deltaC後變化的方向」
+            constexpr int Forward = 0, Back_Down = 1, Down = 2, Forward_Down = 3;
+            // 前方、後下、下、前下 要乘上的係數
             constexpr float proportion[] = { 7 / 16.f, 3 / 16.f, 5 / 16.f, 1 / 16.f };
-            // id加上這些delta後所得的new_id，分別對應到 右、左下、下、右下
+            // id加上這些delta後所得的new_id，分別對應到 前、後下、下、前下
             int delta[] = { TGA_TRUECOLOR_32, (width - 1) * TGA_TRUECOLOR_32, width * TGA_TRUECOLOR_32, (width + 1) * TGA_TRUECOLOR_32 };
+
             // propagate error
-            if (c != width - 1) { // 右邊有像素
-                add_error(data + id + delta[R], error, proportion[R]);
+            if (0 <= c + deltaC && c + deltaC < width) { // 前方有像素
+                add_error(data + id + delta[Forward], error, proportion[Forward]);
             }
             if (r != height - 1) { // 下面有像素
-                add_error(data + id + delta[D], error, proportion[D]);
-                // 左下有像素
-                if (c != 0) add_error(data + id + delta[LD], error, proportion[LD]);
-                // 右下有像素
-                if (c != width - 1) add_error(data + id + delta[RD], error, proportion[RD]);
+                add_error(data + id + delta[Down], error, proportion[Down]);
+                // 後下有像素
+                if (0 <= c - deltaC && c - deltaC < width)
+                    add_error(data + id + delta[Back_Down], error, proportion[Back_Down]);
+                // 前下有像素
+                if (0 <= c + deltaC && c + deltaC < width)
+                    add_error(data + id + delta[Forward_Down], error, proportion[Forward_Down]);
             }
         }
     }
