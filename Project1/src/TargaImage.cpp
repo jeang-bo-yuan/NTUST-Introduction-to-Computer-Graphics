@@ -1159,7 +1159,7 @@ bool TargaImage::Resize(float scale)
             old_r = floorf(old_r);
             old_c = floorf(old_c);
             Color::memset(new_data + new_id,
-                bartlett_filter.calculate(old_r - 1, old_c - 1, old_r + 2, old_c + 2, old_image));
+                bartlett_filter.calculate(old_r - 2, old_c - 2, old_r + 1, old_c + 1, old_image));
             new_data[new_id + 3] = 255;
         }
     }
@@ -1234,7 +1234,7 @@ bool TargaImage::Rotate(float angleDegrees)
                 x = floorf(x);
                 y = floorf(y);
                 Color::memset(new_data + new_id,
-                    bartlett_filter.calculate(y - 1, x - 1, y + 2, x + 2, old_image));
+                    bartlett_filter.calculate(y - 2, x - 2, y + 1, x + 1, old_image));
                 new_data[new_id + 3] = 255;
             }
         }

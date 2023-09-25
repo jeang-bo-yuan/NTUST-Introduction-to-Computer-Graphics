@@ -1,4 +1,5 @@
 #include "Filter.h"
+#include <cmath>
 
 Filter::Filter_t::Filter_t(int _Row, int _Col, std::initializer_list<std::initializer_list<float>> _list)
 	: Row(_Row), Col(_Col), _filter(new float[_Row * _Col])
@@ -100,33 +101,34 @@ Color::RGB_t Filter::Filter_t::do_the_calculate(int rs, int cs, int re, int ce, 
 }
 
 Filter::Filter_t Filter::Filter_t::bartlett4_4(float r, float c) {
-	// domain: [0, 6]
+	// domain: [-2, 2]
 	const auto kernel = [](float x) -> float {
-		return 1 / 6.f - x / 36.f;
+		return 1 / 2.f - fabs(x) / 4.f;
 	};
 
 	Filter::Filter_t result(4, 4);
+	float one_dim_horizontal[4] = { 0.f };
+	float one_dim_vertical[4] = { 0.f };
 
 	// 結果的Filter會以(centerR, centerC)為中心
 	int centerR = floorf(r), centerC = floorf(c);
 
+	for (int id = 0; id < 4; ++id) {
+		one_dim_horizontal[id] = kernel(centerC - 2 + id - c);
+		one_dim_vertical[id] = kernel(centerR - 2 + id - r);
+	}
+
 	float sum = 0;
-
-	// 依序處理Filter中的(filterR列, filterC欄)
-	for (int filterR = 0; filterR < 4; ++filterR) {
-		for (int filterC = 0; filterC < 4; ++filterC) {
-			float nowR = centerR + filterR - 1;
-			float nowC = centerC + filterC - 1;
-
-			float weight = kernel(hypotf(nowR - r, nowC - c));
-			result.at(filterR, filterC) = weight;
-			sum += weight;
+	for (int _r = 0; _r < 4; ++_r) {
+		for (int _c = 0; _c < 4; ++_c) {
+			result.at(_r, _c) = one_dim_horizontal[_c] * one_dim_vertical[_r];
+			sum += result.at(_r, _c);
 		}
 	}
 
-	for (int filterR = 0; filterR < 4; ++filterR) {
-		for (int filterC = 0; filterC < 4; ++filterC) {
-			result.at(filterR, filterC) /= sum;
+	for (int _r = 0; _r < 4; ++_r) {
+		for (int _c = 0; _c < 4; ++_c) {
+			result.at(_r, _c) /= sum;
 		}
 	}
 
