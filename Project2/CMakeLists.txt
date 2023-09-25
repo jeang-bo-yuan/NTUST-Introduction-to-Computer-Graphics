@@ -11,6 +11,10 @@ include_directories(${LIB_DIR})
 add_Definitions("-D_XKEYCHECK_H")
 add_definitions(-DPROJECT_DIR="${PROJECT_SOURCE_DIR}")
 
+if(CMAKE_BUILD_TYPE STREQUAL "Debug")
+    add_definitions(-DCMAKE_DEBUG)
+endif()
+
 add_executable(MazeVisibility
     ${SRC_DIR}MapWidget.h
     ${SRC_DIR}MapWidget.cpp
