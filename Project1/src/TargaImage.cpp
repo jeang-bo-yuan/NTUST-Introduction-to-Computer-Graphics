@@ -1156,8 +1156,8 @@ bool TargaImage::Resize(float scale)
             float old_r = r / scale, old_c = c / scale;
             const Filter::Filter_t bartlett_filter = Filter::Filter_t::bartlett4_4(old_r, old_c);
 
-            old_r = floorf(old_r);
-            old_c = floorf(old_c);
+            old_r = roundf(old_r);
+            old_c = roundf(old_c);
             Color::memset(new_data + new_id,
                 bartlett_filter.calculate(old_r - 2, old_c - 2, old_r + 1, old_c + 1, old_image));
             new_data[new_id + 3] = 255;
@@ -1181,6 +1181,8 @@ bool TargaImage::Resize(float scale)
 ///////////////////////////////////////////////////////////////////////////////
 bool TargaImage::Rotate(float angleDegrees)
 {
+    if ((int)round(angleDegrees) % 360 == 0) return true;
+
     float theta = DegreesToRadians(angleDegrees);
     auto forward_mapping = [theta](int& x, int& y) {
         int _x = cosf(theta) * x - sinf(theta) * y;
@@ -1231,8 +1233,8 @@ bool TargaImage::Rotate(float angleDegrees)
             }
             else {
                 const Filter::Filter_t bartlett_filter = Filter::Filter_t::bartlett4_4(y, x);
-                x = floorf(x);
-                y = floorf(y);
+                x = roundf(x);
+                y = roundf(y);
                 Color::memset(new_data + new_id,
                     bartlett_filter.calculate(y - 2, x - 2, y + 1, x + 1, old_image));
                 new_data[new_id + 3] = 255;

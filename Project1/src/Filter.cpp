@@ -101,23 +101,35 @@ Color::RGB_t Filter::Filter_t::do_the_calculate(int rs, int cs, int re, int ce, 
 }
 
 Filter::Filter_t Filter::Filter_t::bartlett4_4(float r, float c) {
-	// domain: [-2, 2]
+	// domain: [-3, 3]
 	const auto kernel = [](float x) -> float {
-		return 1 / 2.f - fabs(x) / 4.f;
+		return 1 / 3.f - fabs(x) / 9.f;
 	};
+
+	// 結果的Filter會以(centerR, centerC)為中心
+	int centerR = roundf(r), centerC = roundf(c);
+
+	// 若r, c都很接近整數，則使用kernel = 1/2 - x/4產出的3 * 3 filter
+	if (fabs(r - centerR) < 0.001 && fabs(c - centerC) < 0.001) {
+		return Filter::Filter_t(4, 4, {
+			{ 0,        0,        0,        0 },
+			{ 0, 1 / 16.f, 2 / 16.f, 1 / 16.f },
+			{ 0, 2 / 16.f, 4 / 16.f, 2 / 16.f },
+			{ 0, 1 / 16.f, 2 / 16.f, 1 / 16.f },
+		});
+	}
 
 	Filter::Filter_t result(4, 4);
 	float one_dim_horizontal[4] = { 0.f };
 	float one_dim_vertical[4] = { 0.f };
 
-	// 結果的Filter會以(centerR, centerC)為中心
-	int centerR = floorf(r), centerC = floorf(c);
-
+	// 先求一維filter
 	for (int id = 0; id < 4; ++id) {
 		one_dim_horizontal[id] = kernel(centerC - 2 + id - c);
 		one_dim_vertical[id] = kernel(centerR - 2 + id - r);
 	}
 
+	// 以一維filter兩兩相乘求二維filter
 	float sum = 0;
 	for (int _r = 0; _r < 4; ++_r) {
 		for (int _c = 0; _c < 4; ++_c) {
@@ -126,6 +138,7 @@ Filter::Filter_t Filter::Filter_t::bartlett4_4(float r, float c) {
 		}
 	}
 
+	// 讓filter各元素總和為1
 	for (int _r = 0; _r < 4; ++_r) {
 		for (int _c = 0; _c < 4; ++_c) {
 			result.at(_r, _c) /= sum;

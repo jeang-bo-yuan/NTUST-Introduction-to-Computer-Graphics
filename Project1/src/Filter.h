@@ -62,7 +62,7 @@ namespace Filter {
 
 		/**
 		 * @brief 在（r列，c欄）附近產出一個4 * 4的bartlett filter。
-		 * 該filter的at(2, 2)元素應該對應到圖片(floor(r)列, floor(c)欄)。
+		 * 該filter的at(2, 2)元素應該對應到圖片(round(r)列, round(c)欄)。
 		 * @param r - 列
 		 * @param c - 欄
 		 */
