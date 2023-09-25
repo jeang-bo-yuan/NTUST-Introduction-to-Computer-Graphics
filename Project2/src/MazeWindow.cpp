@@ -18,6 +18,7 @@
 *************************************************************************/
 
 #include "MazeWindow.h"
+#include "My_GLU.h"
 #include <Fl/math.h>
 #include <Fl/gl.h>
 #include <GL/glu.h>
@@ -133,13 +134,13 @@ draw(void)
         glLoadIdentity();
 
         float aspect = (float)w() / h();
-        gluPerspective(maze->viewer_fov, aspect, 0.01, 200);
+        My::perspective(maze->viewer_fov, aspect, 0.01, 200);
 
         glMatrixMode(GL_MODELVIEW);
         glLoadIdentity();
 
         float viewer_pos[3] = { maze->viewer_posn[Maze::Y], 0.0f, maze->viewer_posn[Maze::X] };
-        gluLookAt(viewer_pos[Maze::X], viewer_pos[Maze::Y], viewer_pos[Maze::Z],
+        My::lookAt(viewer_pos[Maze::X], viewer_pos[Maze::Y], viewer_pos[Maze::Z],
             viewer_pos[Maze::X] + sin(Maze::To_Radians(maze->viewer_dir)),
             viewer_pos[Maze::Y],
             viewer_pos[Maze::Z] + cos(Maze::To_Radians(maze->viewer_dir)),

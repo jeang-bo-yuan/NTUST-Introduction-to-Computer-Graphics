@@ -18,7 +18,8 @@ add_executable(MazeVisibility
     ${SRC_DIR}Maze.cpp
     ${SRC_DIR}MazeWindow.h
     ${SRC_DIR}MazeWindow.cpp
-    ${SRC_DIR}RunMaze.cpp)
+    ${SRC_DIR}RunMaze.cpp
+    ${SRC_DIR}My_GLU.cpp)
 
 add_library(MazeLib 
     ${SRC_DIR}Cell.h
