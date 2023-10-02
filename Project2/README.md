@@ -9,7 +9,7 @@
 |自己寫gluPerspective和gluLookAt | ***完成*** |寫在My_GLU.h|
 |Clipping for one cell| ***完成*** |Frustum.h </br> `Maze::Draw_Cell` </br> `Maze::Draw_Wall_With_Clipping`|
 |Clipping Recursively|||
-|用2D畫3D|||
+|手動轉NDC座標並繪製| ***完成*** ||
 
 # Note
 

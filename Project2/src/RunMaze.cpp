@@ -87,9 +87,9 @@ static void Load_Callback(Fl_Widget *widget, void *data)
 	Maze	*new_maze;
 
 #ifdef CMAKE_DEBUG
-	filename = fl_input("Enter the filename:", PROJECT_DIR "/Sources/maze-1x1");
+	filename = fl_input("Enter the filename:", PROJECT_DIR "/Sources/maze-1x1-45");
 #else
-	filename = fl_input("Enter the filename:", "./Sources/maze-1x1");
+	filename = fl_input("Enter the filename:", "./Sources/maze-1x1-45");
 #endif
 
 	if ( ! filename )

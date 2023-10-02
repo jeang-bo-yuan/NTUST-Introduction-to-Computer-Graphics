@@ -643,7 +643,16 @@ Draw_View(const float focal_dist)
 	// TODO
 	// The rest is up to you!
 	//###################################################################
-	// GL Method
+	GLfloat projection[16] = { 0 };
+	GLfloat modelview[16] = { 0 };
+	glGetFloatv(GL_PROJECTION_MATRIX, projection);
+	glGetFloatv(GL_MODELVIEW_MATRIX, modelview);
+	this->Projection_ModelView = glm::make_mat4(projection) * glm::make_mat4(modelview);
+
+	glMatrixMode(GL_PROJECTION);
+	glLoadIdentity();
+	glMatrixMode(GL_MODELVIEW);
+	glLoadIdentity();
 
 	My::Frustum_2D frustum(viewer_posn, viewer_dir, viewer_fov, 0.01, 200);
 	Draw_Cell(frustum, view_cell);
@@ -665,13 +674,25 @@ void Maze::Draw_Wall_With_Clipping(My::Frustum_2D& frustum, const Edge* wall)
 	glm::vec2 start = glm::make_vec2(wall->endpoints[Edge::START]->posn);
 	glm::vec2 end = glm::make_vec2(wall->endpoints[Edge::END]->posn);
 
+	// 在world座標下clip
 	if (frustum.clip(start, end)) {
+		glm::vec4 NDC_start(start.y, 1, start.x, 1);
+		glm::vec4 NDC_end(end.y, 1, end.x, 1);
+
+		// 轉到clip coordinate
+		NDC_start = Projection_ModelView * NDC_start;
+		NDC_end = Projection_ModelView * NDC_end;
+
+		// 變NDC
+		NDC_start /= NDC_start.w;
+		NDC_end /= NDC_end.w;
+
 		glBegin(GL_POLYGON);
 		glColor3fv(wall->color);
-		glVertex3f(start.y, 1, start.x);
-		glVertex3f(end.y, 1, end.x);
-		glVertex3f(end.y, -1, end.x);
-		glVertex3f(start.y, -1, start.x);
+		glVertex2f(NDC_start.x, NDC_start.y);
+		glVertex2f(NDC_end.x, NDC_end.y);
+		glVertex2f(NDC_end.x, -NDC_end.y);
+		glVertex2f(NDC_start.x, -NDC_start.y);
 		glEnd();
 	}
 }
