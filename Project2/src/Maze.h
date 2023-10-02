@@ -118,8 +118,15 @@ class Maze {
 
 		/**
 		* @brief Draw the wall
+		* @param wall - the wall
 		*/
-		void Draw_Wall(const float* start, const float* end, const float* color);
+		void Draw_Wall_With_Clipping(const Edge* wall);
+
+		/**
+		* @brief Draw the cell recursively
+		* 
+		*/
+		void Draw_Cell(Cell* the_cell);
 
 	private:
 		Cell				*view_cell;// The cell that currently contains the view

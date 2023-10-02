@@ -642,10 +642,9 @@ Draw_View(const float focal_dist)
 	// The rest is up to you!
 	//###################################################################
 	// GL Method
-	glClear(GL_DEPTH_BUFFER_BIT);
 
-	glEnable(GL_DEPTH_TEST);
-	for (int i = 0; i < (int)this->num_edges; i++) {
+	Draw_Cell(view_cell);
+	/*for (int i = 0; i < (int)this->num_edges; i++) {
 		float edge_start[2] = {
 			this->edges[i]->endpoints[Edge::START]->posn[Vertex::X],
 			this->edges[i]->endpoints[Edge::START]->posn[Vertex::Y]
@@ -658,6 +657,19 @@ Draw_View(const float focal_dist)
 		float color[3] = { this->edges[i]->color[0], this->edges[i]->color[1], this->edges[i]->color[2] };
 		if (this->edges[i]->opaque) {
 			Draw_Wall(edge_start, edge_end, color);
+		}
+	}*/
+}
+
+void Maze::Draw_Cell(Cell* the_cell) {
+	for (int i = 0; i < 4; ++i) {
+		if (the_cell->edges[i]->opaque) {
+			Draw_Wall(the_cell->edges[i]->endpoints[Edge::START]->posn,
+				the_cell->edges[i]->endpoints[Edge::END]->posn,
+				the_cell->edges[i]->color);
+		}
+		else {
+			
 		}
 	}
 }

@@ -23,7 +23,7 @@ add_executable(MazeVisibility
     ${SRC_DIR}MazeWindow.h
     ${SRC_DIR}MazeWindow.cpp
     ${SRC_DIR}RunMaze.cpp
-    ${SRC_DIR}My_GLU.cpp)
+    ${SRC_DIR}My_GLU.cpp "src/Frustum.h" "src/Frustum.cpp")
 
 add_library(MazeLib 
     ${SRC_DIR}Cell.h
