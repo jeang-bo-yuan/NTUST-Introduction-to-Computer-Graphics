@@ -19,6 +19,7 @@
 #define _LINESEG_H_
 
 #include "Edge.h"
+#include <glm/vec2.hpp>
 
 class LineSeg {
 
@@ -37,6 +38,16 @@ class LineSeg {
 		// DOES NOT tell you whether the edge is "entering" or "leaving".
 		// But you can use tests like Edge::Point_Side() to figure that out.
 		float   Cross_Param(LineSeg);
+
+		/**
+		 * @brief 檢查(x,y)是否在「線上」或在「線的右側」
+		 */
+		bool is_on_or_right(float x, float y);
+
+		/**
+		 * @brief 找交點
+		 */
+		glm::vec2 intersection(LineSeg);
 
 	public:
 		float   start[2];	// Starting point, x and y.

@@ -16,6 +16,7 @@
 *************************************************************************/
 
 #include "LineSeg.h"
+#include <glm/gtc/type_ptr.hpp>
 
 //**********************************************************************
 //
@@ -77,4 +78,19 @@ Cross_Param(LineSeg e)
 	s = ( e.start[0] - start[0] ) * dy1 - ( e.start[1] - start[1] ) * dx1;
 
 	return s / denom;
+}
+
+bool LineSeg::is_on_or_right(float x, float y)
+{
+	Vertex vs(-1, start[0], start[1]);
+	Vertex ve(-1, end[0], end[1]);
+	Edge tmp_edge(-1, &vs, &ve, 0, 0, 0);
+	return tmp_edge.Point_Side(x, y) != Edge::LEFT;
+}
+
+glm::vec2 LineSeg::intersection(LineSeg seg)
+{
+	float param = this->Cross_Param(seg);
+	glm::vec2 dir(end[0] - start[0], end[1] - start[1]);
+	return glm::make_vec2(start) + param * dir;
 }

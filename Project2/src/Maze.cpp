@@ -19,6 +19,7 @@
 #include "Maze.h"
 #include "GL/GL.h"
 #include "GL//GLU.h"
+#include <glm/gtc/type_ptr.hpp>
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
@@ -636,6 +637,7 @@ Draw_View(const float focal_dist)
 //======================================================================
 {
 	frame_num++;
+	printf("Frame: %d\n", frame_num);
 
 	//###################################################################
 	// TODO
@@ -643,30 +645,14 @@ Draw_View(const float focal_dist)
 	//###################################################################
 	// GL Method
 
-	Draw_Cell(view_cell);
-	/*for (int i = 0; i < (int)this->num_edges; i++) {
-		float edge_start[2] = {
-			this->edges[i]->endpoints[Edge::START]->posn[Vertex::X],
-			this->edges[i]->endpoints[Edge::START]->posn[Vertex::Y]
-		};
-		float edge_end[2] = {
-			this->edges[i]->endpoints[Edge::END]->posn[Vertex::X],
-			this->edges[i]->endpoints[Edge::END]->posn[Vertex::Y]
-		};
-
-		float color[3] = { this->edges[i]->color[0], this->edges[i]->color[1], this->edges[i]->color[2] };
-		if (this->edges[i]->opaque) {
-			Draw_Wall(edge_start, edge_end, color);
-		}
-	}*/
+	My::Frustum_2D frustum(viewer_posn, viewer_dir, viewer_fov, 0.01, 200);
+	Draw_Cell(frustum, view_cell);
 }
 
-void Maze::Draw_Cell(Cell* the_cell) {
+void Maze::Draw_Cell(My::Frustum_2D& frustum, Cell* the_cell) {
 	for (int i = 0; i < 4; ++i) {
 		if (the_cell->edges[i]->opaque) {
-			Draw_Wall(the_cell->edges[i]->endpoints[Edge::START]->posn,
-				the_cell->edges[i]->endpoints[Edge::END]->posn,
-				the_cell->edges[i]->color);
+			Draw_Wall_With_Clipping(frustum, the_cell->edges[i]);
 		}
 		else {
 			
@@ -674,19 +660,20 @@ void Maze::Draw_Cell(Cell* the_cell) {
 	}
 }
 
-void Maze::
-Draw_Wall(const float* start, const float* end, const float* color)
+void Maze::Draw_Wall_With_Clipping(My::Frustum_2D& frustum, const Edge* wall)
 {
-	float edge0[3] = { start[Y], 0.0f, start[X] };
-	float edge1[3] = { end[Y], 0.0f, end[X] };
+	glm::vec2 start = glm::make_vec2(wall->endpoints[Edge::START]->posn);
+	glm::vec2 end = glm::make_vec2(wall->endpoints[Edge::END]->posn);
 
-	glBegin(GL_POLYGON);
-	glColor3fv(color);
-	glVertex3f(edge0[X], 1.0f, edge0[Z]);
-	glVertex3f(edge1[X], 1.0f, edge1[Z]);
-	glVertex3f(edge1[X], -1.0f, edge1[Z]);
-	glVertex3f(edge0[X], -1.0f, edge0[Z]);
-	glEnd();
+	if (frustum.clip(start, end)) {
+		glBegin(GL_POLYGON);
+		glColor3fv(wall->color);
+		glVertex3f(start.y, 1, start.x);
+		glVertex3f(end.y, 1, end.x);
+		glVertex3f(end.y, -1, end.x);
+		glVertex3f(start.y, -1, start.x);
+		glEnd();
+	}
 }
 
 

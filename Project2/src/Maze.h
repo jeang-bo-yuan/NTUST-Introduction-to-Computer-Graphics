@@ -21,6 +21,7 @@
 
 #include <FL/math.h> // Use FLTK's math header because it defines M_PI
 #include "Cell.h"
+#include "Frustum.h"
 
 //************************************************************************
 //
@@ -120,13 +121,13 @@ class Maze {
 		* @brief Draw the wall
 		* @param wall - the wall
 		*/
-		void Draw_Wall_With_Clipping(const Edge* wall);
+		void Draw_Wall_With_Clipping(My::Frustum_2D& frustum, const Edge* wall);
 
 		/**
 		* @brief Draw the cell recursively
 		* 
 		*/
-		void Draw_Cell(Cell* the_cell);
+		void Draw_Cell(My::Frustum_2D& frustum, Cell* the_cell);
 
 	private:
 		Cell				*view_cell;// The cell that currently contains the view
