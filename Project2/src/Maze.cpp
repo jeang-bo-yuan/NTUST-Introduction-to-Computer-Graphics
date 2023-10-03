@@ -27,6 +27,7 @@
 #include <time.h>
 #include <FL/Fl.h>
 #include <FL/fl_draw.h>
+#include <stdexcept>
 
 const char Maze::X = 0;
 const char Maze::Y = 1;
@@ -655,17 +656,13 @@ Draw_View(const float focal_dist)
 	glMatrixMode(GL_MODELVIEW);
 	glLoadIdentity();
 
-	for (int i = 0; i < this->num_cells; ++i) {
-		cells[i]->have_drawn = false;
-	}
-
-	My::Frustum_2D frustum(viewer_posn, viewer_dir, viewer_fov, 0.01, 200);
+	My::Frustum_2D frustum(viewer_posn, viewer_dir, viewer_fov, 200);
 	Draw_Cell(frustum, view_cell);
 }
 
 void Maze::Draw_Cell(My::Frustum_2D& frustum, Cell* the_cell) {
 	printf("\tCell %d\n", the_cell->index);
-	the_cell->have_drawn = true;
+	the_cell->counter = frame_num;
 
 	for (int i = 0; i < 4; ++i) {
 		if (the_cell->edges[i]->opaque) {
@@ -679,21 +676,18 @@ void Maze::Draw_Cell(My::Frustum_2D& frustum, Cell* the_cell) {
 			glm::vec2 end = glm::make_vec2(the_cell->edges[i]->endpoints[Edge::END]->posn);
 
 			if (frustum.clip(start, end)) {
-				// gap 是透明牆開口（start ~ end線段）的長度
-				double gap = glm::length(glm::make_vec2(start) - glm::make_vec2(end));
-				// gap 太小就不處理
-				// 會加這行是因為在clip和frustum用了很多浮點數運算，數值沒很準
-				// 所以在某些特別的角度下，隔壁cell的透明牆明明就看不到，但clip完會顯示有很小一段是看的到的，最後導致多畫了很多東西
-				// 而且Frustum_2D::restrict在start和end很近時，fov可能會算出nan
-				if (fabs(gap) < 0.05) continue;
-
 				Cell* neighbor = the_cell->edges[i]->Neighbor(the_cell);
-				if (neighbor->have_drawn) continue;
+				if (neighbor->counter == frame_num) continue;
 
 				printf("\tCell %d: [New Frustum for wall (%f, %f) ~ (%f, %f)] then go to cell %d\n", the_cell->index, start.x, start.y, end.x, end.y, neighbor->index);
-				My::Frustum_2D new_frustum = My::Frustum_2D::restrict(viewer_posn, start, end, 0.01, 200);
-
-				Draw_Cell(new_frustum, neighbor);
+				try {
+					My::Frustum_2D new_frustum = My::Frustum_2D::restrict(viewer_posn, start, end, 200);
+					Draw_Cell(new_frustum, neighbor);
+				}
+				catch (std::runtime_error& err) {
+					printf("\t%s", err.what());
+					printf("\tDon't Draw Neighbor\n");
+				}
 			}
 		}
 	}

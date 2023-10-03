@@ -8,12 +8,11 @@ namespace My {
 	class Frustum_2D {
 		enum BOUND {
 			RIGHT_ = 0,
-			NEAR_,
 			LEFT_,
 			FAR_
 		};
 		//! 四個邊界，其index可用BOUND::...表示
-		LineSeg bounds[4];
+		LineSeg bounds[3];
 
 	public:
 		/**
@@ -21,11 +20,10 @@ namespace My {
 		* @param viewer_posn - 觀察者的位置
 		* @param view_dir - 視線方向的方位角（以度表示）
 		* @param view_fov - 水平的視角，也就是視野最左邊和最右邊所夾的角度（以度表示）
-		* @param zNear - 最近視野距離
 		* @param zFar - 最遠視野距離
-		* @pre 0 < zNear < zFar
+		* @pre 0 < zFar
 		*/
-		Frustum_2D(const float* viewer_posn, float view_dir, float view_fov, float zNear, float zFar);
+		Frustum_2D(const float* viewer_posn, float view_dir, float view_fov, float zFar);
 
 		/**
 		 * @brief 建立一個frustum使其左、右兩邊界分別通過S、E。
@@ -33,11 +31,10 @@ namespace My {
 		 * @param viewer_posn - 觀察者的位置
 		 * @param S
 		 * @param E
-		 * @param zNear - 最近視野距離
 		 * @param zFar - 最遠視野距離
-		 * @pre viewer_posn, S, E不能共線
+		 * @post 若fov算出來為NaN，則丟出std::runtime_error
 		 */
-		static Frustum_2D restrict(const float* viewer_posn, glm::vec2 S, glm::vec2 E, float zNear, float zFar);
+		static Frustum_2D restrict(const float* viewer_posn, glm::vec2 S, glm::vec2 E, float zFar);
 
 		/**
 		 * @brief clip line
