@@ -637,7 +637,7 @@ Draw_View(const float focal_dist)
 //======================================================================
 {
 	frame_num++;
-	printf("Frame: %d\n", frame_num);
+	printf("Frame: %d (dir = %f, fov = %f) (%f, %f)\n", frame_num, viewer_dir, viewer_fov, viewer_posn[0], viewer_posn[1]);
 
 	//###################################################################
 	// TODO
@@ -649,22 +649,52 @@ Draw_View(const float focal_dist)
 	glGetFloatv(GL_MODELVIEW_MATRIX, modelview);
 	this->Projection_ModelView = glm::make_mat4(projection) * glm::make_mat4(modelview);
 
+	// 因為要自己手動算ModelView和Projection的轉換，所以要將它清空
 	glMatrixMode(GL_PROJECTION);
 	glLoadIdentity();
 	glMatrixMode(GL_MODELVIEW);
 	glLoadIdentity();
+
+	for (int i = 0; i < this->num_cells; ++i) {
+		cells[i]->have_drawn = false;
+	}
 
 	My::Frustum_2D frustum(viewer_posn, viewer_dir, viewer_fov, 0.01, 200);
 	Draw_Cell(frustum, view_cell);
 }
 
 void Maze::Draw_Cell(My::Frustum_2D& frustum, Cell* the_cell) {
+	printf("\tCell %d\n", the_cell->index);
+	the_cell->have_drawn = true;
+
 	for (int i = 0; i < 4; ++i) {
 		if (the_cell->edges[i]->opaque) {
 			Draw_Wall_With_Clipping(frustum, the_cell->edges[i]);
 		}
-		else {
-			
+	}
+
+	for (int i = 0; i < 4; ++i) {
+		if (!the_cell->edges[i]->opaque) {
+			glm::vec2 start = glm::make_vec2(the_cell->edges[i]->endpoints[Edge::START]->posn);
+			glm::vec2 end = glm::make_vec2(the_cell->edges[i]->endpoints[Edge::END]->posn);
+
+			if (frustum.clip(start, end)) {
+				// gap 是透明牆開口（start ~ end線段）的長度
+				double gap = glm::length(glm::make_vec2(start) - glm::make_vec2(end));
+				// gap 太小就不處理
+				// 會加這行是因為在clip和frustum用了很多浮點數運算，數值沒很準
+				// 所以在某些特別的角度下，隔壁cell的透明牆明明就看不到，但clip完會顯示有很小一段是看的到的，最後導致多畫了很多東西
+				// 而且Frustum_2D::restrict在start和end很近時，fov可能會算出nan
+				if (fabs(gap) < 0.05) continue;
+
+				Cell* neighbor = the_cell->edges[i]->Neighbor(the_cell);
+				if (neighbor->have_drawn) continue;
+
+				printf("\tCell %d: [New Frustum for wall (%f, %f) ~ (%f, %f)] then go to cell %d\n", the_cell->index, start.x, start.y, end.x, end.y, neighbor->index);
+				My::Frustum_2D new_frustum = My::Frustum_2D::restrict(viewer_posn, start, end, 0.01, 200);
+
+				Draw_Cell(new_frustum, neighbor);
+			}
 		}
 	}
 }
@@ -674,8 +704,9 @@ void Maze::Draw_Wall_With_Clipping(My::Frustum_2D& frustum, const Edge* wall)
 	glm::vec2 start = glm::make_vec2(wall->endpoints[Edge::START]->posn);
 	glm::vec2 end = glm::make_vec2(wall->endpoints[Edge::END]->posn);
 
-	// 在world座標下clip
+	// 在2維的迷宮座標（Model座標?）下clip
 	if (frustum.clip(start, end)) {
+		printf("\t\tWall %d (%f,%f) ~ (%f,%f)\n", wall->index, start.x, start.y, end.x, end.y);
 		glm::vec4 NDC_start(start.y, 1, start.x, 1);
 		glm::vec4 NDC_end(end.y, 1, end.x, 1);
 

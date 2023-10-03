@@ -166,7 +166,7 @@ class Maze {
 											// axis, in the usual way.
 		float		viewer_fov;			// The horizontal field of view, in degrees.
 
-		glm::mat4x4 Projection_ModelView;
+		glm::mat4x4 Projection_ModelView; // 儲存Projection * ModelView 的結果
 };
 
 

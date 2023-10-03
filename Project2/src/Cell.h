@@ -58,6 +58,8 @@ class Cell {
 										// set it equal to the frame number each time
 										// you draw a cell. You then use it to prvent
 										// drawing cells twice when you recurse.
+
+	bool have_drawn; // 記錄該Cell有沒有被畫過（自己加的）
 };
 
 #endif

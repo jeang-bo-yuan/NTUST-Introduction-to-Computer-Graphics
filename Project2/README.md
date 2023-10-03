@@ -8,7 +8,7 @@
 |---|---|---|
 |自己寫gluPerspective和gluLookAt | ***完成*** |寫在My_GLU.h|
 |Clipping for one cell| ***完成*** |Frustum.h </br> `Maze::Draw_Cell` </br> `Maze::Draw_Wall_With_Clipping`|
-|Clipping Recursively|||
+|Clipping Recursively| ***似乎完成了***| `Frustum_2D::restrict`可用來限制視錐的範圍 </br> 偶爾會有神奇的顯示bug |
 |手動轉NDC座標並繪製| ***完成*** ||
 
 # Note
