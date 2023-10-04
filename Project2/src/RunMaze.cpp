@@ -83,17 +83,20 @@ static void Timeout_Callback(void *data)
 static void Load_Callback(Fl_Widget *widget, void *data)
 //=============================================================================
 {
+#ifdef CMAKE_DEBUG
+	static const char* default_filename = PROJECT_DIR "/Sources/maze-1x1-45";
+#else
+	static const char* default_filename = "./Sources/maze-1x1-45";
+#endif
 	const char	*filename;
 	Maze	*new_maze;
 
-#ifdef CMAKE_DEBUG
-	filename = fl_input("Enter the filename:", PROJECT_DIR "/Sources/maze-1x1-45");
-#else
-	filename = fl_input("Enter the filename:", "./Sources/maze-1x1-45");
-#endif
+	filename = fl_input("Enter the filename:", default_filename);
 
 	if ( ! filename )
 		return;
+
+	default_filename = filename;
 
 	// We use C++ exception handling here because there is no other sensible
 	// way to return an error message from the constructor.
