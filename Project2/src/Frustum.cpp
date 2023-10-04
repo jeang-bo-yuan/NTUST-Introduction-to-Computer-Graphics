@@ -9,8 +9,8 @@
 
 #define NULL_SEG LineSeg(0, 0, 0, 0)
 
-My::Frustum_2D::Frustum_2D(const float* viewer_posn, float view_dir, float view_fov, float zFar)
-	: bounds { NULL_SEG, NULL_SEG, NULL_SEG }
+My::Frustum_2D::Frustum_2D(const float* viewer_posn, float view_dir, float view_fov)
+	: bounds { NULL_SEG, NULL_SEG }
 {
 	view_dir = Maze::To_Radians(view_dir);
 	// 先除以2，方便後面計算
@@ -20,33 +20,28 @@ My::Frustum_2D::Frustum_2D(const float* viewer_posn, float view_dir, float view_
 	const glm::vec2 right_unit(cosf(view_dir - view_fov), sinf(view_dir - view_fov));
 	const glm::vec2 left_unit(cosf(view_dir + view_fov), sinf(view_dir + view_fov));
 
-	const float far_len = zFar / cosf(view_fov);
+	const glm::vec2 right = viewer + right_unit;
+	const glm::vec2 left = viewer + left_unit;
 
-	const glm::vec2 far_right = viewer + far_len * right_unit;
-	const glm::vec2 far_left = viewer + far_len * left_unit;
-
-	bounds[RIGHT_] = LineSeg(far_right.x, far_right.y, viewer.x, viewer.y);
-	bounds[LEFT_] = LineSeg(viewer.x, viewer.y, far_left.x, far_left.y);
-	bounds[FAR_] = LineSeg(far_left.x, far_left.y, far_right.x, far_right.y);
+	bounds[RIGHT_] = LineSeg(right.x, right.y, viewer.x, viewer.y);
+	bounds[LEFT_] = LineSeg(viewer.x, viewer.y, left.x, left.y);
 }
 
-My::Frustum_2D My::Frustum_2D::restrict(const float* viewer_posn, glm::vec2 S, glm::vec2 E, float zFar) {
-	glm::vec2 V = glm::make_vec2(viewer_posn);
+My::Frustum_2D My::Frustum_2D::restrict(const float* viewer_posn, glm::vec2 S, glm::vec2 E) {
+	My::Frustum_2D result;
 
-	// calculate fov
-	float a = glm::length(S - V), b = glm::length(E - V), c = glm::length(E - S);
-	float fov = Maze::To_Degrees(acos((a * a + b * b - c * c) / (2 * a * b)));
-	if (isnan(fov)) {
-		throw std::runtime_error("Frustum_2D::restrict : fov is nan");
+	LineSeg VS(viewer_posn[0], viewer_posn[1], S.x, S.y);
+
+	if (VS.is_on_or_right(E.x, E.y)) {
+		result.bounds[LEFT_] = VS;
+		result.bounds[RIGHT_] = LineSeg(E.x, E.y, viewer_posn[0], viewer_posn[1]);
+	}
+	else {
+		result.bounds[LEFT_] = LineSeg(viewer_posn[0], viewer_posn[1], E.x, E.y);
+		result.bounds[RIGHT_] = LineSeg(S.x, S.y, viewer_posn[0], viewer_posn[1]);
 	}
 
-	// calculate dir
-	glm::vec2 X = (a * E + b * S) / (a + b);
-	glm::vec2 VX = X - V;
-	float dir = Maze::To_Degrees(atan2f(VX.y, VX.x));
-
-	printf("\tdir = %f, fov = %f\n", dir, fov);
-	return Frustum_2D(viewer_posn, dir, fov, zFar);
+	return result;
 }
 
 bool My::Frustum_2D::clip(glm::vec2& start, glm::vec2& end) {

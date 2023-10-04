@@ -656,12 +656,14 @@ Draw_View(const float focal_dist)
 	glMatrixMode(GL_MODELVIEW);
 	glLoadIdentity();
 
-	My::Frustum_2D frustum(viewer_posn, viewer_dir, viewer_fov, 200);
+	My::Frustum_2D frustum(viewer_posn, viewer_dir, viewer_fov);
 	Draw_Cell(frustum, view_cell);
 }
 
 void Maze::Draw_Cell(My::Frustum_2D& frustum, Cell* the_cell) {
+#ifdef CMAKE_DEBUG
 	printf("\tCell %d\n", the_cell->index);
+#endif
 	the_cell->counter = frame_num;
 
 	for (int i = 0; i < 4; ++i) {
@@ -679,15 +681,11 @@ void Maze::Draw_Cell(My::Frustum_2D& frustum, Cell* the_cell) {
 				Cell* neighbor = the_cell->edges[i]->Neighbor(the_cell);
 				if (neighbor->counter == frame_num) continue;
 
+#ifdef CMAKE_DEBUG
 				printf("\tCell %d: [New Frustum for wall (%f, %f) ~ (%f, %f)] then go to cell %d\n", the_cell->index, start.x, start.y, end.x, end.y, neighbor->index);
-				try {
-					My::Frustum_2D new_frustum = My::Frustum_2D::restrict(viewer_posn, start, end, 200);
-					Draw_Cell(new_frustum, neighbor);
-				}
-				catch (std::runtime_error& err) {
-					printf("\t%s", err.what());
-					printf("\tDon't Draw Neighbor\n");
-				}
+#endif
+				My::Frustum_2D new_frustum = My::Frustum_2D::restrict(viewer_posn, start, end);
+				Draw_Cell(new_frustum, neighbor);
 			}
 		}
 	}
@@ -700,7 +698,9 @@ void Maze::Draw_Wall_With_Clipping(My::Frustum_2D& frustum, const Edge* wall)
 
 	// 在2維的迷宮座標（Model座標?）下clip
 	if (frustum.clip(start, end)) {
+#ifdef CMAKE_DEBUG
 		printf("\t\tWall %d (%f,%f) ~ (%f,%f)\n", wall->index, start.x, start.y, end.x, end.y);
+#endif
 		glm::vec4 NDC_start(start.y, 1, start.x, 1);
 		glm::vec4 NDC_end(end.y, 1, end.x, 1);
 
