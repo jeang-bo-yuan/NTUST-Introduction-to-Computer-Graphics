@@ -658,6 +658,7 @@ Draw_View(const float focal_dist)
 
 	My::Frustum_2D frustum(viewer_posn, viewer_dir, viewer_fov);
 	Draw_Cell(frustum, view_cell);
+	glFinish();
 }
 
 void Maze::Draw_Cell(My::Frustum_2D& frustum, Cell* the_cell) {
