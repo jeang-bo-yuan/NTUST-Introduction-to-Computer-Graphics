@@ -92,6 +92,11 @@ static void Build_Callback(Fl_Widget *widget, void *data)
 static void Save_Callback(Fl_Widget *widget, void *data)
 //============================================================================
 {
+#ifdef CMAKE_DEBUG
+#define DEFAULT_DIR PROJECT_DIR "/Sources/"
+#else
+#define DEFAULT_DIR "./Sources/"
+#endif
 	const char	*filename;
 
 	if ( ! maze )  {
@@ -99,7 +104,7 @@ static void Save_Callback(Fl_Widget *widget, void *data)
 		return;
 	}
 
-	filename = fl_input("Enter the filename:", "maze-1x1");
+	filename = fl_input("Enter the filename:", DEFAULT_DIR "maze-1x1");
 
 	if ( ! filename )
 		return;

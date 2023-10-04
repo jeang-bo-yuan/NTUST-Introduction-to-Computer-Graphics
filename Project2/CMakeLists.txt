@@ -15,6 +15,8 @@ if(CMAKE_BUILD_TYPE STREQUAL "Debug")
     add_definitions(-DCMAKE_DEBUG)
 endif()
 
+## Executables & Library #############################
+
 add_executable(MazeVisibility
     ${SRC_DIR}MapWidget.h
     ${SRC_DIR}MapWidget.cpp
@@ -24,6 +26,13 @@ add_executable(MazeVisibility
     ${SRC_DIR}MazeWindow.cpp
     ${SRC_DIR}RunMaze.cpp
     ${SRC_DIR}My_GLU.cpp "src/Frustum.h" "src/Frustum.cpp")
+
+add_executable(BuildMaze
+    ${SRC_DIR}BuildMaze.cpp
+    ${SRC_DIR}Maze.cpp
+    ${SRC_DIR}MapWidget.cpp
+    ${SRC_DIR}Frustum.cpp
+)
 
 add_library(MazeLib 
     ${SRC_DIR}Cell.h
@@ -36,7 +45,17 @@ add_library(MazeLib
     ${SRC_DIR}Vertex.cpp
     ${SRC_DIR}Vertex.h)
 
+## Link ##############################################
+
 target_link_libraries(MazeVisibility 
+    debug ${LIB_DIR}Debug/fltk_formsd.lib      optimized ${LIB_DIR}Release/fltk_forms.lib
+    debug ${LIB_DIR}Debug/fltk_gld.lib         optimized ${LIB_DIR}Release/fltk_gl.lib
+    debug ${LIB_DIR}Debug/fltk_imagesd.lib     optimized ${LIB_DIR}Release/fltk_images.lib
+    debug ${LIB_DIR}Debug/fltk_jpegd.lib       optimized ${LIB_DIR}Release/fltk_jpeg.lib
+    debug ${LIB_DIR}Debug/fltk_pngd.lib        optimized ${LIB_DIR}Release/fltk_png.lib
+    debug ${LIB_DIR}Debug/fltk_zd.lib          optimized ${LIB_DIR}Release/fltk_z.lib
+    debug ${LIB_DIR}Debug/fltkd.lib            optimized ${LIB_DIR}Release/fltk.lib)
+target_link_libraries(BuildMaze
     debug ${LIB_DIR}Debug/fltk_formsd.lib      optimized ${LIB_DIR}Release/fltk_forms.lib
     debug ${LIB_DIR}Debug/fltk_gld.lib         optimized ${LIB_DIR}Release/fltk_gl.lib
     debug ${LIB_DIR}Debug/fltk_imagesd.lib     optimized ${LIB_DIR}Release/fltk_images.lib
@@ -48,6 +67,10 @@ target_link_libraries(MazeVisibility
 target_link_libraries(MazeVisibility 
     ${LIB_DIR}OpenGL32.lib
     ${LIB_DIR}glu32.lib)
+target_link_libraries(BuildMaze
+    ${LIB_DIR}OpenGL32.lib
+    ${LIB_DIR}glu32.lib)
 
 target_link_libraries(MazeVisibility MazeLib)
+target_link_libraries(BuildMaze MazeLib)
     
