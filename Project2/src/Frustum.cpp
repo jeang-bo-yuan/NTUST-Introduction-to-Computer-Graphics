@@ -66,4 +66,6 @@ bool My::Frustum_2D::clip(glm::vec2& start, glm::vec2& end) {
 			return false;
 		}
 	}
+
+	return true;
 }
