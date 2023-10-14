@@ -25,7 +25,7 @@ add_executable(RollerCoasters
     ${SRC_DIR}TrainView.cpp
     ${SRC_DIR}TrainWindow.h
     ${SRC_DIR}TrainWindow.cpp
-    ${INCLUDE_DIR}glad4.6/src/glad.c)
+    ${INCLUDE_DIR}glad4.6/src/glad.c "src/Enum.H" "src/Draw.H" "src/Draw.cpp")
 
 add_library(Utilities 
     ${SRC_DIR}Utilities/3DUtils.h

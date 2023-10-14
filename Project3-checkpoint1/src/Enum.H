@@ -17,3 +17,6 @@ enum class SplineType {
 
 /// 各Spline Type顯示的字串
 constexpr const char* SplineTypeStr[] = { "Linear", "Cardinal Cubic", "Cubic B-Spline" };
+
+/// 畫軌道算內插時，t的變化量
+constexpr float Param_Interval = 0.05f;

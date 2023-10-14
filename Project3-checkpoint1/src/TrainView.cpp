@@ -37,6 +37,7 @@
 #include "TrainView.H"
 #include "TrainWindow.H"
 #include "Utilities/3DUtils.H"
+#include "Draw.H"
 
 
 #ifdef EXAMPLE_SOLUTION
@@ -368,6 +369,7 @@ void TrainView::drawStuff(bool doingShadows)
 #ifdef EXAMPLE_SOLUTION
 	drawTrack(this, doingShadows);
 #endif
+	Draw::draw_track(*m_pTrack, (SplineType)tw->splineBrowser->value(), doingShadows);
 
 	// draw the train
 	//####################################################################

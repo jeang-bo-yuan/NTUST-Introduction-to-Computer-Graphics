@@ -63,6 +63,8 @@ class Pnt3f {
 		Pnt3f operator * (const float)	const;  /* scale by scalar */
 		/// addition
 		Pnt3f operator + (const Pnt3f&) const;	/* create a temp */
+		/// minus
+		Pnt3f operator- (const Pnt3f& p) const { return Pnt3f(x - p.x, y - p.y, z - p.z); }
 		/// @}
 
 		/// make sure that we're unit length - vertical in the error case (0 length)
