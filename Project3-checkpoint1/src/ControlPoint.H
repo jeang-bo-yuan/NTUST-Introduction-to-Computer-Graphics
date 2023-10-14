@@ -27,22 +27,30 @@
 
 #include "Utilities/Pnt3f.H"
 
+/**
+ * @brief 控制點
+ */
 class ControlPoint {
 	public:
-		// constructors
-		// need a default constructor for making arrays
+		/// @name constructors
+		/// @{
+		
+		/// need a default constructor for making arrays
 		ControlPoint();					
 		
-		// create in a position
+		/// create in a position
 		ControlPoint(const Pnt3f& pos);	
 
-		// Create in a position and orientation
+		/// Create in a position and orientation
 		ControlPoint(const Pnt3f& pos, const Pnt3f& orient);
+		/// @}
 
-		// draw the control point - assumes the color is correct
+		/// draw the control point - assumes the color is correct
 		void draw();
 
 	public:
+		/// @brief 位置
 		Pnt3f pos;         // Position of this control point
+		/// @brief 法向量？
 		Pnt3f orient;		 // Orientation of this control point
 };

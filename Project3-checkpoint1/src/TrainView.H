@@ -51,6 +51,9 @@ class CTrack;
 // this uses the old ArcBall Code
 #include "Utilities/ArcBallCam.H"
 
+/**
+ * @brief 顯示火車的畫面
+ */
 class TrainView : public Fl_Gl_Window
 {
 	public:

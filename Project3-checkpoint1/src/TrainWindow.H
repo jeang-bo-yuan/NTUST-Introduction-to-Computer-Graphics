@@ -48,6 +48,9 @@ class TrainView;
 #include "TrainExample/TrainExample.H"
 #endif
 
+/**
+ * @brief ¥D­nªºWindow
+ */
 class TrainWindow : public Fl_Double_Window {
 	public:
 		TrainWindow(const int x=50, const int y=50);

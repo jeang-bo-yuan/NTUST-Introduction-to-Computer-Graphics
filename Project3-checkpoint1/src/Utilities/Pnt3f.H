@@ -31,33 +31,44 @@
 *************************************************************************/
 #pragma once
 
-
+/**
+ * @brief 表示三維的座標
+ */
 class Pnt3f {
 	public:
 
-		// Constructor
-		// if we have 1, we need the default 
+		/// @name Constructor
+		/// @{
+		
+		/// if we have 1, we need the default 
 		Pnt3f();			
-		// say where
+		/// say where
 		explicit Pnt3f(const float x,const float y,const float z);	
-		// from an array 
+		/// from an array 
 		Pnt3f(const float*);			
 		// copy constructor created by default
 		// Pnt3f(const Pnt3f&);		
+		///@}
 
 	public:
-		// if you want to treat this thing as a C vector (point to float)
+		/// if you want to treat this thing as a C vector (point to float)
 		float* v();
 
-		// some useful operators - not the complete set, but just some basic ones
+		/// @name some useful operators - not the complete set, but just some basic ones
+		/// @{
+		
+		/// cross product
 		Pnt3f operator * (const Pnt3f&) const;	/* cross product */
+		/// scale by scalar
 		Pnt3f operator * (const float)	const;  /* scale by scalar */
+		/// addition
 		Pnt3f operator + (const Pnt3f&) const;	/* create a temp */
+		/// @}
 
-		// make sure that we're unit length - vertical in the error case (0 length)
+		/// make sure that we're unit length - vertical in the error case (0 length)
 		void normalize();
 
-		// note - the operators above are for Pnt3f*scalar, here we have scalar*Pnt3f
+		/// note - the operators above are for Pnt3f*scalar, here we have scalar*Pnt3f
 		friend Pnt3f operator * (const float s, const Pnt3f& p );
 
 	public:

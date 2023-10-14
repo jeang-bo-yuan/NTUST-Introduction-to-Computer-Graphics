@@ -32,6 +32,9 @@ using std::vector; // avoid having to say std::vector all of the time
 // make use of other data structures from this project
 #include "ControlPoint.H"
 
+/**
+ * @brief 儲存軌道的所有控制點
+ */
 class CTrack {
 	public:		
 		// Constructor
@@ -49,9 +52,11 @@ class CTrack {
 		void writePoints(const char* filename);
 
 	public:
-		// rather than have generic objects, we make a special case for these few
-		// objects that we know that all implementations are going to need and that
-		// we're going to have to handle specially
+		/// @brief 所有控制點
+		/// @details
+		/// rather than have generic objects, we make a special case for these few
+		/// objects that we know that all implementations are going to need and that
+		/// we're going to have to handle specially
 		vector<ControlPoint> points;
 
 		//###################################################################
