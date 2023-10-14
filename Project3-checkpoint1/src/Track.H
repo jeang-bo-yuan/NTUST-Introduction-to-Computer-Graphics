@@ -33,7 +33,7 @@ using std::vector; // avoid having to say std::vector all of the time
 #include "ControlPoint.H"
 
 /**
- * @brief 儲存軌道的所有控制點
+ * @brief 儲存軌道的控制點，以及火車的位置
  */
 class CTrack {
 	public:		
@@ -62,7 +62,12 @@ class CTrack {
 		//###################################################################
 		// TODO: you might want to do this differently
 		//###################################################################
-		// the state of the train - basically, all I need to remember is where
-		// it is in parameter space
+		/// @name the state of the train
+		/// @brief basically, all I need to remember is where it is in parameter space
+		/// @{
+
+		/// @brief 火車位於 第`floor(trainU)` 和其下一個控制點間
 		float trainU;
+
+		/// @}
 };

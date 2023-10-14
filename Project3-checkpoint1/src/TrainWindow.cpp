@@ -214,4 +214,8 @@ advanceTrain(float dir)
 	if (world.trainU > nct) world.trainU -= nct;
 	if (world.trainU < 0) world.trainU += nct;
 #endif
+	this->trainView->m_pTrack->trainU += 0.01f;
+	while (this->trainView->m_pTrack->trainU > this->trainView->m_pTrack->points.size()) {
+		this->trainView->m_pTrack->trainU -= this->trainView->m_pTrack->points.size();
+	}
 }

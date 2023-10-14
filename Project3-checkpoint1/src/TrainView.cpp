@@ -365,10 +365,6 @@ void TrainView::drawStuff(bool doingShadows)
 	// TODO: 
 	// call your own track drawing code
 	//####################################################################
-
-#ifdef EXAMPLE_SOLUTION
-	drawTrack(this, doingShadows);
-#endif
 	Draw::draw_track(*m_pTrack, (SplineType)tw->splineBrowser->value(), doingShadows);
 
 	// draw the train
@@ -376,11 +372,9 @@ void TrainView::drawStuff(bool doingShadows)
 	// TODO: 
 	//	call your own train drawing code
 	//####################################################################
-#ifdef EXAMPLE_SOLUTION
 	// don't draw the train if you're looking out the front window
 	if (!tw->trainCam->value())
-		drawTrain(this, doingShadows);
-#endif
+		Draw::draw_train(*m_pTrack, (SplineType)tw->splineBrowser->value(), doingShadows);
 }
 
 // 

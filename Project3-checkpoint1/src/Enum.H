@@ -20,3 +20,6 @@ constexpr const char* SplineTypeStr[] = { "Linear", "Cardinal Cubic", "Cubic B-S
 
 /// 畫軌道算內插時，t的變化量
 constexpr float Param_Interval = 0.05f;
+
+/// 火車是邊長為2倍train_size的立方體
+constexpr float train_size = 5;
