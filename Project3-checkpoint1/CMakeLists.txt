@@ -53,3 +53,12 @@ target_link_libraries(RollerCoasters
 target_link_libraries(RollerCoasters Utilities)
 
 set_property(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY VS_STARTUP_PROJECT RollerCoasters)
+
+# Git Archive
+add_custom_target(
+    archive
+    COMMAND git archive --format=zip -osrc.zip --prefix=src/ HEAD
+    COMMENT "Archive The HEAD"
+    WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
+    VERBATIM
+)
