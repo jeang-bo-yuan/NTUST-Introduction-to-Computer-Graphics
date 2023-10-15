@@ -9,10 +9,34 @@
 #include <iostream>
 #include <GL/GL.h>
 #include <math.h>
+#include <glm/gtc/type_ptr.hpp>
 
 Draw::Param_Equation Draw::make_line(const Pnt3f p1, const Pnt3f p2) {
 	return [p1, p2](float t) -> Pnt3f {
 		return (1.f - t) * p1 + t * p2;
+	};
+}
+
+Draw::Param_Equation Draw::make_cubic_b_spline(Pnt3f p0, Pnt3f p1, Pnt3f p2, Pnt3f p3) {
+	static const glm::mat4 M (
+		-1 / 6.f,  3 / 6.f, -3 / 6.f, 1 / 6.f, // first column
+		 3 / 6.f, -6 / 6.f,  3 / 6.f,    0,    // second column
+		-3 / 6.f,    0    ,  3 / 6.f,    0,    // third column
+		 1 / 6.f,  4 / 6.f,  1 / 6.f,    0     // forth column
+	);
+
+	// 4 columns and 3 rows
+	glm::mat4x3 G(
+		glm::make_vec3(p0.v()), // first column
+		glm::make_vec3(p1.v()), // second column
+		glm::make_vec3(p2.v()), // third column
+		glm::make_vec3(p3.v())  // forth column
+	);
+
+	return [G](float t) -> Pnt3f {
+		glm::vec4 T(t * t * t, t * t, t, 1);
+		glm::vec3 Q = G * M * T;
+		return Pnt3f(glm::value_ptr(Q));
 	};
 }
 
@@ -22,33 +46,41 @@ namespace {
 	 * @param track - 瓂笵
 	 * @param cp_id - 材control pointindex
 	 * @param type - 把计ΑΑ
-	 * @param[out] point_eq - 纗翴把计Α
-	 * @param[out] orient_eq - 纗orient把计Α
+	 * @param[out] point_eq - 纗翴把计Α
+	 * @param[out] orient_eq - 纗orient把计Α
 	 */
 	void set_equation(const CTrack& track,
 		              const size_t cp_id,
 		              const SplineType type,
 		              Draw::Param_Equation& point_eq,
-		              Draw::Param_Equation& orient_eq) {
+		              Draw::Param_Equation& orient_eq)
+	{
+		// 秨﹍
+		const ControlPoint& P1 = track.points[cp_id];
+
+		// 挡
+		size_t cp2_id = track.next_cp(cp_id);
+		const ControlPoint& P2 = track.points[cp2_id];
+
 		switch (type) {
-		case SplineType::Linear: {
-			const ControlPoint& control1 = track.points[cp_id];
-			const ControlPoint& control2 = track.points[(cp_id + 1) % track.points.size()];
-
-			point_eq = Draw::make_line(control1.pos, control2.pos);
-			orient_eq = Draw::make_line(control1.orient, control2.orient);
-
+		case SplineType::Linear:
+			point_eq = Draw::make_line(P1.pos, P2.pos);
+			orient_eq = Draw::make_line(P1.orient, P2.orient);
 			break;
-		}
 		case SplineType::Cardinal_Cubic:
 			std::cout << "Not Implemented!" << std::endl;
 			return;
 			break;
 		case SplineType::Cubic_B_Spline:
-			std::cout << "Not Implemented!" << std::endl;
-			return;
+			const ControlPoint& P0 = track.points[track.prev_cp(cp_id)];
+			const ControlPoint& P3 = track.points[track.next_cp(cp2_id)];
+
+			point_eq = Draw::make_cubic_b_spline(P0.pos, P1.pos, P2.pos, P3.pos);
+			orient_eq = Draw::make_cubic_b_spline(P0.orient, P1.orient, P2.orient, P3.orient);
 			break;
 		}
+
+		return;
 	}
 
 	/**
@@ -59,7 +91,8 @@ namespace {
 	 */
 	void draw_line_and_sleeper(const Draw::Param_Equation& point_eq,
 		                       const Draw::Param_Equation& orient_eq,
-		                       const bool doingShadow) {
+		                       const bool doingShadow)
+	{
 		// 丁筳Param_Interval
 		for (float t = 0.0f; t < 1.0f; t += Param_Interval) {
 			// points
@@ -87,7 +120,8 @@ namespace {
 			// 礶sleeper
 			horizontal = horizontal * 1.5f; // sleeper糴3 + 3
 			Pnt3f DOWN = u * horizontal;
-			DOWN.normalize(); // sleeper よ 1 虫
+			DOWN.normalize();
+			DOWN = DOWN * 0.3f; // sleeper よ 0.3 虫
 			u = u * 0.2f; // sleeper 瓂笵 0.6
 			p1 = p1 + u + DOWN;
 			p2 = p2 - u + DOWN;
@@ -99,6 +133,8 @@ namespace {
 			glVertex3fv((p1 - horizontal).v());
 			glEnd();
 		}
+
+		return;
 	}
 }
 
@@ -119,7 +155,7 @@ void Draw::draw_train(const CTrack& track, const SplineType type, const bool doi
 	float t = track.trainU - (float)control_id;
 
 	control_id %= track.points.size(); // 磷overflow
-	size_t next_control = (control_id + 1) % track.points.size();
+	size_t next_control = track.next_cp(control_id);
 
 	Param_Equation point_eq, orient_eq;
 

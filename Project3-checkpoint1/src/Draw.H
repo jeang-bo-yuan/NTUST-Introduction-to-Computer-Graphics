@@ -10,6 +10,7 @@
 #include "Enum.H"
 #include "Track.H"
 
+/// @brief 把计Αの酶籹瓂笵ó
 namespace Draw {
 
 	/// @brief Param_Equation 琌function objectノㄓボ絬把计Α
@@ -20,6 +21,13 @@ namespace Draw {
 	/// @param p1 - t=0 翴
 	/// @param p2 - t=1 翴
 	Param_Equation make_line(const Pnt3f p1, const Pnt3f p2);
+
+	/// @brief ミCubic B-spline把计Α
+	/// @param p0 - 北翴
+	/// @param p1 - 秨﹍
+	/// @param p2 - 挡
+	/// @param p3 - 玡北翴
+	Param_Equation make_cubic_b_spline(Pnt3f p0, Pnt3f p1, Pnt3f p2, Pnt3f p3);
 
 	/// @brief 礶瓂笵
 	/// @param track - 瓂笵

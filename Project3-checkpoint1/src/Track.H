@@ -51,6 +51,20 @@ class CTrack {
 		void readPoints(const char* filename);
 		void writePoints(const char* filename);
 
+		/// @brief 眔北翴index
+		/// @param index - ヘ玡北翴index
+		/// @return 璝index琌pointsい程肚`0`玥肚`index + 1`
+		inline size_t next_cp(size_t index) const {
+			return (index >= points.size() - 1 ? 0 : index + 1);
+		}
+
+		/// @brief 眔玡北翴index
+		/// @param index - ヘ玡北翴index
+		/// @return 璝index琌pointsい材肚`points.size() - 1`玥肚`index - 1`
+		inline size_t prev_cp(size_t index) const {
+			return (index == 0 ? points.size() - 1 : index - 1);
+		}
+
 	public:
 		/// @brief ┮Τ北翴
 		/// @details
