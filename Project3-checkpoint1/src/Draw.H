@@ -29,6 +29,13 @@ namespace Draw {
 	/// @param p3 - 玡北翴
 	Param_Equation make_cubic_b_spline(Pnt3f p0, Pnt3f p1, Pnt3f p2, Pnt3f p3);
 
+	/// @brief ミCardinal Spline把计Α
+	/// @param p0 - 北翴
+	/// @param p1 - 秨﹍
+	/// @param p2 - 挡
+	/// @param p3 - 玡北翴
+	Param_Equation make_cardinal(Pnt3f p0, Pnt3f p1, Pnt3f p2, Pnt3f p3);
+
 	/// @brief 礶瓂笵
 	/// @param track - 瓂笵
 	/// @param type - い丁翴璶贺把计Α璸衡

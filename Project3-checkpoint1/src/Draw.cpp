@@ -40,6 +40,29 @@ Draw::Param_Equation Draw::make_cubic_b_spline(Pnt3f p0, Pnt3f p1, Pnt3f p2, Pnt
 	};
 }
 
+Draw::Param_Equation Draw::make_cardinal(Pnt3f p0, Pnt3f p1, Pnt3f p2, Pnt3f p3) {
+	static const glm::mat4 M(
+		-1 / 2.f,  3 / 2.f, -3 / 2.f,  1 / 2.f, // first column
+		 2 / 2.f, -5 / 2.f,  4 / 2.f, -1 / 2.f,    // second column
+		-1 / 2.f,    0,      1 / 2.f,    0,    // third column
+		   0,      2 / 2.f,    0,        0     // forth column
+	);
+
+	// 4 columns and 3 rows
+	glm::mat4x3 G(
+		glm::make_vec3(p0.v()), // first column
+		glm::make_vec3(p1.v()), // second column
+		glm::make_vec3(p2.v()), // third column
+		glm::make_vec3(p3.v())  // forth column
+	);
+
+	return [G](float t) -> Pnt3f {
+		glm::vec4 T(t * t * t, t * t, t, 1);
+		glm::vec3 Q = G * M * T;
+		return Pnt3f(glm::value_ptr(Q));
+	};
+}
+
 namespace {
 	/**
 	 * @brief 設定兩control point間的參數式
@@ -68,15 +91,19 @@ namespace {
 			orient_eq = Draw::make_line(P1.orient, P2.orient);
 			break;
 		case SplineType::Cardinal_Cubic:
-			std::cout << "Not Implemented!" << std::endl;
-			return;
-			break;
 		case SplineType::Cubic_B_Spline:
 			const ControlPoint& P0 = track.points[track.prev_cp(cp_id)];
 			const ControlPoint& P3 = track.points[track.next_cp(cp2_id)];
 
-			point_eq = Draw::make_cubic_b_spline(P0.pos, P1.pos, P2.pos, P3.pos);
-			orient_eq = Draw::make_cubic_b_spline(P0.orient, P1.orient, P2.orient, P3.orient);
+			if (type == SplineType::Cardinal_Cubic) {
+				point_eq = Draw::make_cardinal(P0.pos, P1.pos, P2.pos, P3.pos);
+				orient_eq = Draw::make_cardinal(P0.orient, P1.orient, P2.orient, P3.orient);
+			}
+			else if (type == SplineType::Cubic_B_Spline) {
+				point_eq = Draw::make_cubic_b_spline(P0.pos, P1.pos, P2.pos, P3.pos);
+				orient_eq = Draw::make_cubic_b_spline(P0.orient, P1.orient, P2.orient, P3.orient);
+			}
+
 			break;
 		}
 
@@ -155,7 +182,6 @@ void Draw::draw_train(const CTrack& track, const SplineType type, const bool doi
 	float t = track.trainU - (float)control_id;
 
 	control_id %= track.points.size(); // 避免overflow
-	size_t next_control = track.next_cp(control_id);
 
 	Param_Equation point_eq, orient_eq;
 
@@ -165,7 +191,7 @@ void Draw::draw_train(const CTrack& track, const SplineType type, const bool doi
 	// 火車的位置
 	Pnt3f train_pos = point_eq(t);
 	// 方向向量
-	Pnt3f u = track.points[next_control].pos - track.points[control_id].pos;
+	Pnt3f u = point_eq(t + 0.01f) - point_eq(t);
 	// orient
 	Pnt3f orient = orient_eq(t);
 	// 正上方，垂直軌道
