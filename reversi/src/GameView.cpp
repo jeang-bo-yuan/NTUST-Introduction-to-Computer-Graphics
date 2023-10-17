@@ -3,6 +3,8 @@
 #include <gl/gl.h>
 #include <algorithm>
 #include <cmath>
+#include <QMouseEvent>
+#include <iostream>
 
 #define DISK_RADIUS 0.4f
 
@@ -92,7 +94,7 @@ void GameView::paintGL() {
                 }
 
                 // draw a circle
-                glTranslatef(row + 0.5f, col + 0.5f, 0); // 平移到格子中間
+                glTranslatef(col + 0.5f, row + 0.5f, 0); // 平移到格子中間
                 glScalef(DISK_RADIUS, DISK_RADIUS, 0);  // 設定縮放
                 glDrawArrays(GL_POLYGON, 0, UNIT_CIRCLE_VERTEX_NUM);
                 glLoadIdentity();
@@ -106,8 +108,26 @@ void GameView::paintGL() {
 }
 
 void GameView::resizeGL(int w, int h) {
-    m_board_size = static_cast<int>(std::min(w, h) * 0.8f);
-    m_marginH = (w - m_board_size) / 2;
-    m_marginV = (h - m_board_size) / 2;
+    m_board_size = std::min(w, h) * 0.8f;
+    m_slot_size = m_board_size / 8.f;
+    m_marginH = (w - m_board_size) / 2.f;
+    m_marginV = (h - m_board_size) / 2.f;
+}
+
+void GameView::mousePressEvent(QMouseEvent* event) {
+    if (event->button() == Qt::LeftButton) {
+        float x = event->x() - m_marginH;
+        float y = event->y() - m_marginV;
+
+        if (x < 0.f || x >= m_board_size || y < 0.f || y >= m_board_size) {
+            return;
+        }
+
+        int row = y / m_slot_size;
+        int col = x / m_slot_size;
+        std::cout << "row: " << row << ", col: " << col << std::endl;
+        m_game_ptr->click(row, col);
+        this->update();
+    }
 }
 

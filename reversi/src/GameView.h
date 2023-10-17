@@ -15,11 +15,13 @@ class GameView : public QOpenGLWidget
 {
 private:
     /// Board的邊長
-    int m_board_size;
+    float m_board_size;
+    /// 一個格子的邊長
+    float m_slot_size;
     /// 水平的margin
-    int m_marginH;
+    float m_marginH;
     /// 鉛直的margin
-    int m_marginV;
+    float m_marginV;
     /// points to the Game object
     std::shared_ptr<Game> m_game_ptr;
 
@@ -58,6 +60,8 @@ protected:
     void paintGL() override;
 
     void resizeGL(int w, int h) override;
+
+    void mousePressEvent(QMouseEvent*) override;
 };
 
 #endif // GAMEVIEW_H
