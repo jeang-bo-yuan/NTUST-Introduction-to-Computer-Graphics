@@ -30,11 +30,22 @@ private:
     /// 棋盤
     Disk m_board[8][8];
 
+    /// 記錄可不可以放棋子
+    bool m_can_click[8][8];
+
     /// 是否為黑色的回合
     bool m_is_dark_turn;
 
     /// 遊玩狀態
     State m_state;
+
+private:
+    /**
+     * @brief 計算目前的行動方可以點的位置
+     * @return 有幾個格子可以點，若`m_state != State::Playing`會回傳`0`
+     * @post m_can_click會重置並更新
+     */
+    size_t calc_can_click();
 
 public:
     /**
@@ -47,13 +58,13 @@ public:
     /// @{
 
     /**
-     * @brief 取得盤面上的棋子
+     * @brief 確認能不能點
      * @param row - 列
      * @param col - 欄
-     * @return 棋子的種類 Game::Disk
+     * @return 若可以點，回傳`true`；否則回傳`false`
      */
-    Disk get_disk(size_t row, size_t col) const {
-        return m_board[row][col];
+    bool can_click(size_t row, size_t col) const {
+        return m_can_click[row][col];
     }
 
     /**
@@ -66,6 +77,16 @@ public:
      * 2. 進入下一回合時，要計算能走的棋步
      */
     bool click(size_t row, size_t col);
+
+    /**
+     * @brief 取得盤面上的棋子
+     * @param row - 列
+     * @param col - 欄
+     * @return 棋子的種類 Game::Disk
+     */
+    Disk get_disk(size_t row, size_t col) const {
+        return m_board[row][col];
+    }
 
     /// @}
 

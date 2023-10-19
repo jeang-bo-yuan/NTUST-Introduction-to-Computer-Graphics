@@ -82,6 +82,11 @@ void GameView::paintGL() {
         glVertexPointer(2, GL_FLOAT, 0, unit_circle_arr()); // 設置單位圓的vertex array
         for (int row = 0; row < 8; ++row) {
             for (int col = 0; col < 8; ++col) {
+                if (m_game_ptr->can_click(row, col)) {
+                    glColor4ub(232, 229, 132, 10);
+                    glRecti(col, row, col + 1, row + 1);
+                }
+
                 switch(m_game_ptr->get_disk(row, col)) {
                 case Game::Disk::None:
                     continue;
@@ -118,15 +123,34 @@ void GameView::mousePressEvent(QMouseEvent* event) {
     if (event->button() == Qt::LeftButton) {
         float x = event->x() - m_marginH;
         float y = event->y() - m_marginV;
+        int row = y / m_slot_size;
+        int col = x / m_slot_size;
 
-        if (x < 0.f || x >= m_board_size || y < 0.f || y >= m_board_size) {
+        if (row < 0 || row >= 8 || col < 0 || col >= 8) {
             return;
         }
 
-        int row = y / m_slot_size;
-        int col = x / m_slot_size;
-        std::cout << "row: " << row << ", col: " << col << std::endl;
-        m_game_ptr->click(row, col);
+        std::cout << "row: " << row << ", col: " << col;
+
+        if (m_game_ptr->click(row, col) == false)
+            std::cout << " Click Failed!";
+
+        // 檢查state
+        switch (m_game_ptr->get_state()) {
+        case Game::State::Draw:
+            std::cout << "\nDraw";
+            break;
+        case Game::State::Playing:
+            break;
+        case Game::State::Dark_Win:
+            std::cout << "\nDark Win";
+            break;
+        case Game::State::Light_Win:
+            std::cout << "\nLight Win";
+            break;
+        }
+
+        std::cout << std::endl;
         this->update();
     }
 }
