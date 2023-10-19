@@ -65,6 +65,45 @@ size_t Game::calc_can_click()
     return moves;
 }
 
+void Game::reverse_disk(QPoint pos, QPoint dir)
+{
+    int r = pos.y() + dir.y(); // 馬上沿著dir走
+    int c = pos.x() + dir.x();
+
+    // pos住dir方向走，發現的第一個同色棋子
+    QPoint another(-1, -1);
+    while (0 <= r && r < 8 && 0 <= c && c < 8) {
+        // 夾著空格就不轉
+        if (m_board[r][c] == Disk::None)
+            return;
+        // 夾著對方的棋子，繼續找找看
+        else if (m_board[r][c] != m_board[pos.y()][pos.x()]) {
+            r += dir.y();
+            c += dir.x();
+        }
+        // 找到同色
+        else {
+            another.setY(r);
+            another.setX(c);
+            break;
+        }
+    }
+    // not found
+    if (another == QPoint(-1, -1)) return;
+
+    // 翻轉成
+    Disk reverse_to = m_board[pos.y()][pos.x()];
+    r = pos.y() + dir.y();
+    c = pos.x() + dir.x();
+    // 將pos和another間的棋子翻轉
+    while (r != another.y() || c != another.x()) { // while (c, r) != another
+        m_board[r][c] = reverse_to;
+
+        r += dir.y();
+        c += dir.x();
+    }
+}
+
 Game::Game()
 {
     this->reset();
@@ -87,6 +126,14 @@ bool Game::click(size_t row, size_t col)
     }
 
     // TODO: 翻轉棋子
+    QPoint pos(static_cast<int>(col), static_cast<int>(row));
+    for (int dx = -1; dx <= 1; ++dx) {
+        for (int dy = -1; dy <= 1; ++dy) {
+            if (dx == 0 && dy == 0) continue;
+
+            this->reverse_disk(pos, QPoint(dx, dy));
+        }
+    }
 
     // 進入下一回合+計算棋步
     m_is_dark_turn = !m_is_dark_turn;

@@ -152,6 +152,11 @@ void GameView::mousePressEvent(QMouseEvent* event) {
 
         std::cout << std::endl;
         this->update();
+
+        if (m_game_ptr->is_dark_turn())
+            std::cout << "Dark's turn" << std::endl;
+        else
+            std::cout << "Light's turn" << std::endl;
     }
 }
 

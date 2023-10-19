@@ -7,6 +7,8 @@
 
 #include <string>
 
+class QPoint;
+
 /// 代表遊戲的class
 class Game
 {
@@ -47,6 +49,13 @@ private:
      */
     size_t calc_can_click();
 
+    /**
+     * @brief 翻轉棋子，若pos往dir的方向為「pos上的棋子」夾住「對方的棋子」，則將被夾住的翻轉
+     * @param pos - 啟始點 (col, row)
+     * @param dir - 方向 (dx, dy)
+     */
+    void reverse_disk(QPoint pos, QPoint dir);
+
 public:
     /**
      * @brief constructor，建構後立即呼叫Game::reset
@@ -72,9 +81,6 @@ public:
      * @param row - 列
      * @param col - 欄
      * @return 放置成功則回傳`true`，否則回傳`false`
-     * @todo
-     * 1. 確認能不能放
-     * 2. 進入下一回合時，要計算能走的棋步
      */
     bool click(size_t row, size_t col);
 
