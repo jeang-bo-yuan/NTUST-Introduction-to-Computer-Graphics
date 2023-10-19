@@ -109,7 +109,7 @@ Game::Game()
     this->reset();
 }
 
-bool Game::click(size_t row, size_t col)
+bool Game::click(int row, int col)
 {
     // 若遊戲不在進行中
     if (m_state != State::Playing) return false;
@@ -126,7 +126,7 @@ bool Game::click(size_t row, size_t col)
     }
 
     // TODO: 翻轉棋子
-    QPoint pos(static_cast<int>(col), static_cast<int>(row));
+    QPoint pos(col, row);
     for (int dx = -1; dx <= 1; ++dx) {
         for (int dy = -1; dy <= 1; ++dy) {
             if (dx == 0 && dy == 0) continue;
@@ -148,8 +148,8 @@ bool Game::click(size_t row, size_t col)
             size_t dark_num = 0;
             size_t light_num = 0;
 
-            for (size_t r = 0; r < 8; ++r) {
-                for (size_t c = 0; c < 8; ++c) {
+            for (int r = 0; r < 8; ++r) {
+                for (int c = 0; c < 8; ++c) {
                     switch (m_board[r][c]) {
                     case Disk::Dark:
                         ++dark_num;

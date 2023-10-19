@@ -72,7 +72,7 @@ public:
      * @param col - 欄
      * @return 若可以點，回傳`true`；否則回傳`false`
      */
-    bool can_click(size_t row, size_t col) const {
+    bool can_click(int row, int col) const {
         return m_can_click[row][col];
     }
 
@@ -82,7 +82,7 @@ public:
      * @param col - 欄
      * @return 放置成功則回傳`true`，否則回傳`false`
      */
-    bool click(size_t row, size_t col);
+    bool click(int row, int col);
 
     /**
      * @brief 取得盤面上的棋子
@@ -90,7 +90,7 @@ public:
      * @param col - 欄
      * @return 棋子的種類 Game::Disk
      */
-    Disk get_disk(size_t row, size_t col) const {
+    Disk get_disk(int row, int col) const {
         return m_board[row][col];
     }
 
