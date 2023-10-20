@@ -5,6 +5,7 @@
 #include <cmath>
 #include <QMouseEvent>
 #include <QDebug>
+#include <QPainter>
 
 #define DISK_RADIUS 0.4f
 
@@ -58,11 +59,12 @@ GameView::GameView(QWidget* parent)
 
 void GameView::initializeGL() {
     glMatrixMode(GL_PROJECTION);
-    // (0,0) .......
+    // (-1,-1) .....
     //   |         |
     //   ........(8,8)
     // 為了讓四周的線看起來比較粗，所以稍微向外加大了一點
-    glOrtho(-0.02, 8.02, 8.02, -0.02, -1, 1);
+    // -1 ~ 0 間會填上棋盤的座標
+    glOrtho(-1, 8.02, 8.02, -1, -1, 1);
 
     glLineWidth(3);
     glEnableClientState(GL_VERTEX_ARRAY);
@@ -110,21 +112,34 @@ void GameView::paintGL() {
     glColor3ub(0, 0, 0);
     glVertexPointer(2, GL_INT, 0, border_vertex_arr);
     glDrawArrays(GL_LINES, 0, 36);
+
+    // draw coordinate
+    QPainter painter(this);
+    painter.setFont(QFont("Cascadia Code", -1, QFont::Bold));
+    float size = m_slot_size * 0.9;
+    int time = 0;
+    for (float x = m_marginH + m_slot_size, y = m_marginV; time < 8; x += m_slot_size, ++time) {
+        painter.drawText(QRectF(x, y, m_slot_size, size), Qt::AlignBottom | Qt::AlignHCenter, QString('a' + time));
+    }
+    time = 0;
+    for (float x = m_marginH, y = m_marginV + m_slot_size; time < 8; y += m_slot_size, ++time) {
+        painter.drawText(QRectF(x, y, size, m_slot_size), Qt::AlignRight | Qt::AlignVCenter, QString('1' + time));
+    }
 }
 
 void GameView::resizeGL(int w, int h) {
     m_board_size = std::min(w, h) * 0.8f;
-    m_slot_size = m_board_size / 8.f;
+    m_slot_size = m_board_size / 9.f;
     m_marginH = (w - m_board_size) / 2.f;
     m_marginV = (h - m_board_size) / 2.f;
 }
 
 void GameView::mousePressEvent(QMouseEvent* event) {
     if (event->button() == Qt::LeftButton) {
-        float x = event->x() - m_marginH;
-        float y = event->y() - m_marginV;
-        int row = y / m_slot_size;
-        int col = x / m_slot_size;
+        float x = event->x() - m_marginH - m_slot_size;  // Note: Qt的(x,y)是左上為(0,0)
+        float y = event->y() - m_marginV - m_slot_size;
+        int row = floor(y / m_slot_size);
+        int col = floor(x / m_slot_size);
 
         if (row < 0 || row >= 8 || col < 0 || col >= 8) {
             return;

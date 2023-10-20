@@ -20,10 +20,10 @@ MainWindow::~MainWindow()
 void MainWindow::update_info()
 {
     if (m_game_ptr->is_dark_turn()) {
-        ui->labelTurn->setText("Dark's Turn");
+        ui->labelTurn->setText("Dark's\nTurn");
     }
     else {
-        ui->labelTurn->setText("Light's Turn");
+        ui->labelTurn->setText("Light's\nTurn");
     }
 
     ui->lcdDark->display(m_game_ptr->get_dark_num());
