@@ -152,34 +152,8 @@ void GameView::mousePressEvent(QMouseEvent* event) {
             return;
         }
 
-#ifndef NDEBUG
-        // 檢查state
-        switch (m_game_ptr->get_state()) {
-        case Game::State::Draw:
-            qDebug() << "** Draw";
-            break;
-        case Game::State::Playing:
-            break;
-        case Game::State::Dark_Win:
-            qDebug() << "** Dark Win";
-            break;
-        case Game::State::Light_Win:
-            qDebug() << "** Light Win";
-            break;
-        }
-#endif
-
         this->repaint();
         emit clicked_success();
-
-#ifndef NDEBUG
-        if (m_game_ptr->is_dark_turn())
-            qDebug() << "\n- Dark's turn";
-        else
-            qDebug() << "\n- Light's turn";
-
-        qDebug() << "- Dark: " << m_game_ptr->get_dark_num() << ", Light: " << m_game_ptr->get_light_num();
-#endif
     }
 }
 
