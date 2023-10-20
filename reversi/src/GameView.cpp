@@ -159,9 +159,11 @@ void GameView::mousePressEvent(QMouseEvent* event) {
 
 #ifndef NDEBUG
         if (m_game_ptr->is_dark_turn())
-            qDebug() << "- Dark's turn";
+            qDebug() << "\n- Dark's turn";
         else
-            qDebug() << "- Light's turn";
+            qDebug() << "\n- Light's turn";
+
+        qDebug() << "- Dark: " << m_game_ptr->get_dark_num() << ", Light: " << m_game_ptr->get_light_num();
 #endif
     }
 }

@@ -93,14 +93,27 @@ void Game::reverse_disk(QPoint pos, QPoint dir)
 
     // 翻轉成
     Disk reverse_to = m_board[pos.y()][pos.x()];
+    // 記錄翻轉了幾個
+    uint8_t count = 0;
     r = pos.y() + dir.y();
     c = pos.x() + dir.x();
     // 將pos和another間的棋子翻轉
     while (r != another.y() || c != another.x()) { // while (c, r) != another
         m_board[r][c] = reverse_to;
+        ++count;
 
         r += dir.y();
         c += dir.x();
+    }
+
+    // 更新黑、白棋的數量
+    if (reverse_to == Disk::Dark) {
+        m_dark_num += count;
+        m_light_num -= count;
+    }
+    else {
+        m_light_num += count;
+        m_dark_num -= count;
     }
 }
 
@@ -120,9 +133,11 @@ bool Game::click(int row, int col)
     // 放上棋子
     if (m_is_dark_turn) {
         m_board[row][col] = Disk::Dark;
+        ++m_dark_num;
     }
     else {
         m_board[row][col] = Disk::Light;
+        ++m_light_num;
     }
 
     // TODO: 翻轉棋子
@@ -145,26 +160,8 @@ bool Game::click(int row, int col)
 
         // 若還是不能動則結束
         if (num == 0) {
-            size_t dark_num = 0;
-            size_t light_num = 0;
-
-            for (int r = 0; r < 8; ++r) {
-                for (int c = 0; c < 8; ++c) {
-                    switch (m_board[r][c]) {
-                    case Disk::Dark:
-                        ++dark_num;
-                        break;
-                    case Disk::Light:
-                        ++light_num;
-                        break;
-                    case Disk::None:
-                        break;
-                    }
-                }
-            }
-
-            m_state = dark_num > light_num ? State::Dark_Win :
-                      dark_num < light_num ? State::Light_Win :
+            m_state = m_dark_num > m_light_num ? State::Dark_Win :
+                      m_dark_num < m_light_num ? State::Light_Win :
                                              State::Draw;
         }
     }
@@ -179,6 +176,9 @@ void Game::reset()
     m_board[4][4] = Disk::Light;
     m_board[3][4] = Disk::Dark;
     m_board[4][3] = Disk::Dark;
+
+    m_dark_num = 2;
+    m_light_num = 2;
 
     m_is_dark_turn = true;
 

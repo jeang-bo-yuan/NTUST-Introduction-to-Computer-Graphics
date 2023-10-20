@@ -6,6 +6,7 @@
 #define GAME_H
 
 #include <string>
+#include <stdint.h>
 
 class QPoint;
 
@@ -40,6 +41,12 @@ private:
 
     /// 遊玩狀態
     State m_state;
+
+    /// 盤面上的黑棋個數
+    uint8_t m_dark_num;
+
+    /// 盤面上的白棋個數
+    uint8_t m_light_num;
 
 private:
     /**
@@ -98,6 +105,22 @@ public:
 
     /// @name Game State Management
     /// @{
+
+    /**
+     * @brief 取得黑棋數
+     * @return 黑棋數
+     */
+    int get_dark_num() const {
+        return m_dark_num;
+    }
+
+    /**
+     * @brief 取得白棋數
+     * @return 白棋數
+     */
+    int get_light_num() const {
+        return m_light_num;
+    }
 
     /**
      * @brief 取得遊戲的狀態（state）
