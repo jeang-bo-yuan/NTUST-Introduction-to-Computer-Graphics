@@ -49,6 +49,22 @@ public slots:
      * @brief 重新開始
      */
     void restart();
+
+    /**
+     * @brief 切換palette的顯示
+     * @param open - 是否開啟
+     */
+    void toggle_palette(bool open);
+
+    void choose_BG_color();
+
+    void choose_hint_color();
+
+    void choose_dark_color();
+
+    void choose_light_color();
+
+    void choose_border_color();
 };
 
 #endif // MAINWINDOW_H

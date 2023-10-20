@@ -52,7 +52,8 @@ const GLfloat *GameView::unit_circle_arr() {
 }
 
 GameView::GameView(QWidget* parent)
-    : QOpenGLWidget(parent), m_draw_hint(true)
+    : QOpenGLWidget(parent), m_draw_hint(true),
+    m_BG_color{32, 122, 38}, m_hint_color{232, 229, 132}, m_dark_color{0, 0, 0}, m_light_color{255, 255, 255}, m_border_color{0, 0, 0}
 {
     this->setMinimumSize(200, 200);
 }
@@ -67,11 +68,10 @@ void GameView::initializeGL() {
 
     glLineWidth(3);
     glEnableClientState(GL_VERTEX_ARRAY);
-
-    glClearColor(32 / 255.f, 122 / 255.f, 38 / 255.f, 0);
 }
 
 void GameView::paintGL() {
+    glClearColor(m_BG_color[0] / 255.f, m_BG_color[1] / 255.f, m_BG_color[2] / 255.f, 0);
     glClear(GL_COLOR_BUFFER_BIT);
     glViewport(m_marginH, m_marginV, m_board_size, m_board_size);
 
@@ -84,7 +84,7 @@ void GameView::paintGL() {
         for (int row = 0; row < 8; ++row) {
             for (int col = 0; col < 8; ++col) {
                 if (m_draw_hint && m_game_ptr->can_click(row, col)) {
-                    glColor4ub(232, 229, 132, 10);
+                    glColor3ubv(m_hint_color);
                     glRecti(col, row, col + 1, row + 1);
                 }
 
@@ -92,10 +92,10 @@ void GameView::paintGL() {
                 case Game::Disk::None:
                     continue;
                 case Game::Disk::Dark:
-                    glColor3ub(0, 0, 0);
+                    glColor3ubv(m_dark_color);
                     break;
                 case Game::Disk::Light:
-                    glColor3ub(255, 255, 255);
+                    glColor3ubv(m_light_color);
                     break;
                 }
 
@@ -108,7 +108,7 @@ void GameView::paintGL() {
         }
     }
 
-    glColor3ub(0, 0, 0);
+    glColor3ubv(m_border_color);
     glVertexPointer(2, GL_INT, 0, border_vertex_arr);
     glDrawArrays(GL_LINES, 0, 36);
 

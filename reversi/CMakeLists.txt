@@ -20,5 +20,6 @@ add_executable(reversi
   src/Game.h src/Game.cpp
   src/GameView.h src/GameView.cpp
   src/MainWindow.h src/MainWindow.cpp src/MainWindow.ui
+  src/ColorDisplay.h src/ColorDisplay.cpp
 )
 target_link_libraries(reversi Qt${QT_MAJOR_VERSION}::Widgets opengl32)

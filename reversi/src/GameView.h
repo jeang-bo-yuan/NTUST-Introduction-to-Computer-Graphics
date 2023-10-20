@@ -35,6 +35,28 @@ private:
     bool m_draw_hint;
 
 public:
+    /// @name Color
+    /// @brief 改完後要`update()`才會生效
+    /// @{
+
+    /// 背景色
+    uint8_t m_BG_color[3];
+
+    /// 提示的顏色
+    uint8_t m_hint_color[3];
+
+    /// 黑棋的顏色
+    uint8_t m_dark_color[3];
+
+    /// 白棋的顏色
+    uint8_t m_light_color[3];
+
+    /// 邊界的顏色
+    uint8_t m_border_color[3];
+
+    /// @}
+
+public:
     /// @name Vertex Array
     /// @{
 
