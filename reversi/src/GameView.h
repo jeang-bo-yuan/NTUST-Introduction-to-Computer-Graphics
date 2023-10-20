@@ -18,14 +18,21 @@ class GameView : public QOpenGLWidget
 private:
     /// Board的邊長
     float m_board_size;
+
     /// 一個格子的邊長
     float m_slot_size;
+
     /// 水平的margin
     float m_marginH;
+
     /// 鉛直的margin
     float m_marginV;
+
     /// points to the Game object
     std::shared_ptr<Game> m_game_ptr;
+
+    /// 是否要繪製提示
+    bool m_draw_hint;
 
 public:
     /// @name Vertex Array
@@ -74,6 +81,14 @@ signals:
      * @brief 若滑鼠點擊事件成功，則emit
      */
     void clicked_success();
+
+public slots:
+    /**
+     * @brief 切換提示的顯示
+     * @details 剛建構時為開啟
+     * @param on - 是否開啟
+     */
+    void toggle_hint(bool on);
 };
 
 #endif // GAMEVIEW_H

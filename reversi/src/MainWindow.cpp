@@ -9,8 +9,10 @@ MainWindow::MainWindow(QWidget *parent) :
     this->update_info();
 
     connect(ui->view, &GameView::clicked_success, this, &MainWindow::update_info);
+
     ui->menuFrame->layout()->setAlignment(Qt::AlignLeft | Qt::AlignTop);
     connect(ui->buttonRestart, &QPushButton::clicked, this, &MainWindow::restart);
+    connect(ui->buttonToggleHint, &QPushButton::toggled, ui->view, &GameView::toggle_hint);
 }
 
 MainWindow::~MainWindow()

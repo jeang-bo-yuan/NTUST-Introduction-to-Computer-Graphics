@@ -52,7 +52,7 @@ const GLfloat *GameView::unit_circle_arr() {
 }
 
 GameView::GameView(QWidget* parent)
-    : QOpenGLWidget(parent)
+    : QOpenGLWidget(parent), m_draw_hint(true)
 {
     this->setMinimumSize(200, 200);
 }
@@ -83,7 +83,7 @@ void GameView::paintGL() {
         glVertexPointer(2, GL_FLOAT, 0, unit_circle_arr()); // 設置單位圓的vertex array
         for (int row = 0; row < 8; ++row) {
             for (int col = 0; col < 8; ++col) {
-                if (m_game_ptr->can_click(row, col)) {
+                if (m_draw_hint && m_game_ptr->can_click(row, col)) {
                     glColor4ub(232, 229, 132, 10);
                     glRecti(col, row, col + 1, row + 1);
                 }
@@ -135,6 +135,8 @@ void GameView::resizeGL(int w, int h) {
 }
 
 void GameView::mousePressEvent(QMouseEvent* event) {
+    if (m_game_ptr == nullptr) return;
+
     if (event->button() == Qt::LeftButton) {
         float x = event->x() - m_marginH;  // Note: Qt的(x,y)是左上為(0,0)
         float y = event->y() - m_marginV;
@@ -155,5 +157,10 @@ void GameView::mousePressEvent(QMouseEvent* event) {
         this->repaint();
         emit clicked_success();
     }
+}
+
+void GameView::toggle_hint(bool on) {
+    m_draw_hint = on;
+    this->repaint();
 }
 
