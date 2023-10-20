@@ -63,6 +63,10 @@ protected:
 
     void resizeGL(int w, int h) override;
 
+    /**
+     * @brief 處理滑鼠點擊事件
+     * @details 若點在格子上而且放置棋子成功，則`repaint()`並`emit clicked_success()`
+     */
     void mousePressEvent(QMouseEvent*) override;
 
 signals:
