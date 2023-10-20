@@ -46,7 +46,7 @@ public:
      * @brief constructor
      * @param parent - parent widget
      */
-    GameView(QWidget* parent = nullptr);
+    explicit GameView(QWidget* parent = nullptr);
 
     /**
      * @brief 設置Game Object

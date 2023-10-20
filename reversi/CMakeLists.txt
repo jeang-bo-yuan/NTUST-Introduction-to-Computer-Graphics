@@ -17,9 +17,8 @@ endif()
 # executable
 add_executable(reversi
   src/main.cpp
-  src/Game.h
-  src/Game.cpp
-  src/GameView.h
-  src/GameView.cpp
+  src/Game.h src/Game.cpp
+  src/GameView.h src/GameView.cpp
+  src/MainWindow.h src/MainWindow.cpp src/MainWindow.ui
 )
 target_link_libraries(reversi Qt${QT_MAJOR_VERSION}::Widgets opengl32)
