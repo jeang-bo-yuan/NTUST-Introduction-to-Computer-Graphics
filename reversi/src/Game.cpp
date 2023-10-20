@@ -2,6 +2,7 @@
 #include "Game.h"
 #include <string.h>
 #include <QPoint>
+#include <QtGlobal>
 
 size_t Game::calc_can_click()
 {
@@ -67,6 +68,8 @@ size_t Game::calc_can_click()
 
 void Game::reverse_disk(QPoint pos, QPoint dir)
 {
+    Q_ASSERT(m_board[pos.y()][pos.x()] != Disk::None);
+
     int r = pos.y() + dir.y(); // 馬上沿著dir走
     int c = pos.x() + dir.x();
 

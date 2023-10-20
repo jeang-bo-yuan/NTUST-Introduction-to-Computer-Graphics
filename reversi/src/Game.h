@@ -60,6 +60,7 @@ private:
      * @brief 翻轉棋子，若pos往dir的方向為「pos上的棋子」夾住「對方的棋子」，則將被夾住的翻轉
      * @param pos - 啟始點 (col, row)
      * @param dir - 方向 (dx, dy)
+     * @pre pos上不能是Disk::None
      */
     void reverse_disk(QPoint pos, QPoint dir);
 
