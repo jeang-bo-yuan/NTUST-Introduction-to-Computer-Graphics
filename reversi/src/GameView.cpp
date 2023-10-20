@@ -4,7 +4,7 @@
 #include <algorithm>
 #include <cmath>
 #include <QMouseEvent>
-#include <iostream>
+#include <QDebug>
 
 #define DISK_RADIUS 0.4f
 
@@ -130,33 +130,39 @@ void GameView::mousePressEvent(QMouseEvent* event) {
             return;
         }
 
-        std::cout << "row: " << row << ", col: " << col;
+        qDebug() << "row: " << row << ", col: " << col;
 
-        if (m_game_ptr->click(row, col) == false)
-            std::cout << " Click Failed!";
+        if (m_game_ptr->click(row, col) == false) {
+            qDebug() << " Click Failed!";
+            return;
+        }
 
+#ifndef NDEBUG
         // 檢查state
         switch (m_game_ptr->get_state()) {
         case Game::State::Draw:
-            std::cout << "\nDraw";
+            qDebug() << "** Draw";
             break;
         case Game::State::Playing:
             break;
         case Game::State::Dark_Win:
-            std::cout << "\nDark Win";
+            qDebug() << "** Dark Win";
             break;
         case Game::State::Light_Win:
-            std::cout << "\nLight Win";
+            qDebug() << "** Light Win";
             break;
         }
+#endif
 
-        std::cout << std::endl;
-        this->update();
+        this->repaint();
+        emit clicked_success();
 
+#ifndef NDEBUG
         if (m_game_ptr->is_dark_turn())
-            std::cout << "Dark's turn" << std::endl;
+            qDebug() << "- Dark's turn";
         else
-            std::cout << "Light's turn" << std::endl;
+            qDebug() << "- Light's turn";
+#endif
     }
 }
 

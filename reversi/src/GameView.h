@@ -13,6 +13,8 @@
 /// 顯示棋盤的Widget
 class GameView : public QOpenGLWidget
 {
+    Q_OBJECT
+
 private:
     /// Board的邊長
     float m_board_size;
@@ -62,6 +64,12 @@ protected:
     void resizeGL(int w, int h) override;
 
     void mousePressEvent(QMouseEvent*) override;
+
+signals:
+    /**
+     * @brief 若滑鼠點擊事件成功，則emit
+     */
+    void clicked_success();
 };
 
 #endif // GAMEVIEW_H
