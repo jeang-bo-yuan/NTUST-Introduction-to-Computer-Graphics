@@ -59,12 +59,11 @@ GameView::GameView(QWidget* parent)
 
 void GameView::initializeGL() {
     glMatrixMode(GL_PROJECTION);
-    // (-1,-1) .....
-    //   |         |
-    //   ........(8,8)
+    // (0, 0) .....
+    //   |        |
+    //   .......(8,8)
     // 為了讓四周的線看起來比較粗，所以稍微向外加大了一點
-    // -1 ~ 0 間會填上棋盤的座標
-    glOrtho(-1, 8.02, 8.02, -1, -1, 1);
+    glOrtho(-0.02, 8.02, 8.02, -0.02, -1, 1);
 
     glLineWidth(3);
     glEnableClientState(GL_VERTEX_ARRAY);
@@ -115,29 +114,30 @@ void GameView::paintGL() {
 
     // draw coordinate
     QPainter painter(this);
-    painter.setFont(QFont("Cascadia Code", -1, QFont::Bold));
-    float size = m_slot_size * 0.9;
+    painter.setFont(QFont("Cascadia Code", 12, QFont::Bold));
     int time = 0;
-    for (float x = m_marginH + m_slot_size, y = m_marginV; time < 8; x += m_slot_size, ++time) {
-        painter.drawText(QRectF(x, y, m_slot_size, size), Qt::AlignBottom | Qt::AlignHCenter, QString('a' + time));
+    // 水平的畫
+    for (float x = m_marginH, y = m_marginV; time < 8; x += m_slot_size, ++time) {
+        painter.drawText(QRectF(x, y - 20, m_slot_size, 20), Qt::AlignHCenter | Qt::AlignBottom, QString('a' + time));
     }
     time = 0;
-    for (float x = m_marginH, y = m_marginV + m_slot_size; time < 8; y += m_slot_size, ++time) {
-        painter.drawText(QRectF(x, y, size, m_slot_size), Qt::AlignRight | Qt::AlignVCenter, QString('1' + time));
+    // 垂直的畫
+    for (float x = m_marginH, y = m_marginV; time < 8; y += m_slot_size, ++time) {
+        painter.drawText(QRectF(x - 20, y, 20, m_slot_size), Qt::AlignVCenter | Qt::AlignRight, QString('1' + time));
     }
 }
 
 void GameView::resizeGL(int w, int h) {
     m_board_size = std::min(w, h) * 0.8f;
-    m_slot_size = m_board_size / 9.f;
+    m_slot_size = m_board_size / 8.f;
     m_marginH = (w - m_board_size) / 2.f;
     m_marginV = (h - m_board_size) / 2.f;
 }
 
 void GameView::mousePressEvent(QMouseEvent* event) {
     if (event->button() == Qt::LeftButton) {
-        float x = event->x() - m_marginH - m_slot_size;  // Note: Qt的(x,y)是左上為(0,0)
-        float y = event->y() - m_marginV - m_slot_size;
+        float x = event->x() - m_marginH;  // Note: Qt的(x,y)是左上為(0,0)
+        float y = event->y() - m_marginV;
         int row = floor(y / m_slot_size);
         int col = floor(x / m_slot_size);
 
