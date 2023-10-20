@@ -20,12 +20,6 @@ MainWindow::~MainWindow()
 
 void MainWindow::update_info()
 {
-    ui->labelDarkTurn->hide();
-    ui->labelLightTurn->hide();
-    ui->labelDarkWin->hide();
-    ui->labelLightWin->hide();
-    ui->labelDraw->hide();
-
     ui->lcdDark->display(m_game_ptr->get_dark_num());
     ui->lcdLight->display(m_game_ptr->get_light_num());
 
@@ -33,23 +27,23 @@ void MainWindow::update_info()
     case Game::State::Playing:
         ui->statusbar->showMessage("Playing");
         if (m_game_ptr->is_dark_turn()) {
-            ui->labelDarkTurn->show();
+            ui->stackState->setCurrentWidget(ui->pageDarkTurn);
         }
         else {
-            ui->labelLightTurn->show();
+            ui->stackState->setCurrentWidget(ui->pageLightTurn);
         }
         break;
     case Game::State::Dark_Win:
         ui->statusbar->showMessage("Dark Wins");
-        ui->labelDarkWin->show();
+        ui->stackState->setCurrentWidget(ui->pageDarkWin);
         break;
     case Game::State::Light_Win:
         ui->statusbar->showMessage("Light Wins");
-        ui->labelLightWin->show();
+        ui->stackState->setCurrentWidget(ui->pageLightWin);
         break;
     case Game::State::Draw:
         ui->statusbar->showMessage("Draw");
-        ui->labelDraw->show();
+        ui->stackState->setCurrentWidget(ui->pageDraw);
         break;
     }
 }
