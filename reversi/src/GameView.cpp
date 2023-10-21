@@ -53,7 +53,7 @@ const GLfloat *GameView::unit_circle_arr() {
 
 GameView::GameView(QWidget* parent)
     : QOpenGLWidget(parent), m_draw_hint(true),
-    m_BG_color{32, 122, 38}, m_hint_color{232, 229, 132}, m_dark_color{0, 0, 0}, m_light_color{255, 255, 255}, m_border_color{0, 0, 0}
+    m_color { {32, 122, 38}, {232, 229, 132}, {0, 0, 0}, {255, 255, 255}, {0, 0, 0} }
 {
     this->setMinimumSize(200, 200);
 }
@@ -71,7 +71,7 @@ void GameView::initializeGL() {
 }
 
 void GameView::paintGL() {
-    glClearColor(m_BG_color[0] / 255.f, m_BG_color[1] / 255.f, m_BG_color[2] / 255.f, 0);
+    glClearColor(m_color.BG[0] / 255.f, m_color.BG[1] / 255.f, m_color.BG[2] / 255.f, 0);
     glClear(GL_COLOR_BUFFER_BIT);
     glViewport(m_marginH, m_marginV, m_board_size, m_board_size);
 
@@ -84,7 +84,7 @@ void GameView::paintGL() {
         for (int row = 0; row < 8; ++row) {
             for (int col = 0; col < 8; ++col) {
                 if (m_draw_hint && m_game_ptr->can_click(row, col)) {
-                    glColor3ubv(m_hint_color);
+                    glColor3ubv(m_color.hint);
                     glRecti(col, row, col + 1, row + 1);
                 }
 
@@ -92,10 +92,10 @@ void GameView::paintGL() {
                 case Game::Disk::None:
                     continue;
                 case Game::Disk::Dark:
-                    glColor3ubv(m_dark_color);
+                    glColor3ubv(m_color.dark);
                     break;
                 case Game::Disk::Light:
-                    glColor3ubv(m_light_color);
+                    glColor3ubv(m_color.light);
                     break;
                 }
 
@@ -108,13 +108,14 @@ void GameView::paintGL() {
         }
     }
 
-    glColor3ubv(m_border_color);
+    glColor3ubv(m_color.border);
     glVertexPointer(2, GL_INT, 0, border_vertex_arr);
     glDrawArrays(GL_LINES, 0, 36);
 
     // draw coordinate
     QPainter painter(this);
     painter.setFont(QFont("Cascadia Code", 12, QFont::Bold));
+    painter.setPen(QColor(m_color.border[0], m_color.border[1], m_color.border[2]));
     int time = 0;
     // 水平的畫
     for (float x = m_marginH, y = m_marginV; time < 8; x += m_slot_size, ++time) {

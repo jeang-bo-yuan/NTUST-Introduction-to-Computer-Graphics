@@ -56,14 +56,19 @@ public slots:
      */
     void toggle_palette(bool open);
 
+    /// 顯示Color Dialog來選擇顏色
     void choose_BG_color();
 
+    /// 顯示Color Dialog來選擇顏色
     void choose_hint_color();
 
+    /// 顯示Color Dialog來選擇顏色
     void choose_dark_color();
 
+    /// 顯示Color Dialog來選擇顏色
     void choose_light_color();
 
+    /// 顯示Color Dialog來選擇顏色
     void choose_border_color();
 };
 

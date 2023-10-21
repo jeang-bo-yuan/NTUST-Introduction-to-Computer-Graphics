@@ -19,11 +19,11 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(ui->buttonPalette, &QPushButton::toggled, this, &MainWindow::toggle_palette);
 
     // 初始化Palette
-    ui->BG_display->set_color_ub(ui->view->m_BG_color);
-    ui->Hint_display->set_color_ub(ui->view->m_hint_color);
-    ui->Dark_display->set_color_ub(ui->view->m_dark_color);
-    ui->Light_display->set_color_ub(ui->view->m_light_color);
-    ui->Border_display->set_color_ub(ui->view->m_border_color);
+    ui->BG_display->set_color_ub(ui->view->m_color.BG);
+    ui->Hint_display->set_color_ub(ui->view->m_color.hint);
+    ui->Dark_display->set_color_ub(ui->view->m_color.dark);
+    ui->Light_display->set_color_ub(ui->view->m_color.light);
+    ui->Border_display->set_color_ub(ui->view->m_color.border);
 
     // 連接Palette的按鈕
     connect(ui->buttonSelectBGColor, &QPushButton::clicked, this, &MainWindow::choose_BG_color);
@@ -88,9 +88,9 @@ void MainWindow::choose_BG_color()
     QColor choose = QColorDialog::getColor(ui->BG_display->get_color(), nullptr, "Background");
     if (choose.isValid()) {
         ui->BG_display->set_color(choose);
-        ui->view->m_BG_color[0] = choose.red();
-        ui->view->m_BG_color[1] = choose.green();
-        ui->view->m_BG_color[2] = choose.blue();
+        ui->view->m_color.BG[0] = choose.red();
+        ui->view->m_color.BG[1] = choose.green();
+        ui->view->m_color.BG[2] = choose.blue();
         ui->view->update();
     }
 }
@@ -100,9 +100,9 @@ void MainWindow::choose_hint_color()
     QColor choose = QColorDialog::getColor(ui->Hint_display->get_color(), nullptr, "Hint");
     if (choose.isValid()) {
         ui->Hint_display->set_color(choose);
-        ui->view->m_hint_color[0] = choose.red();
-        ui->view->m_hint_color[1] = choose.green();
-        ui->view->m_hint_color[2] = choose.blue();
+        ui->view->m_color.hint[0] = choose.red();
+        ui->view->m_color.hint[1] = choose.green();
+        ui->view->m_color.hint[2] = choose.blue();
         ui->view->update();
     }
 }
@@ -112,9 +112,9 @@ void MainWindow::choose_dark_color()
     QColor choose = QColorDialog::getColor(ui->Dark_display->get_color(), nullptr, "Dark Disk");
     if (choose.isValid()) {
         ui->Dark_display->set_color(choose);
-        ui->view->m_dark_color[0] = choose.red();
-        ui->view->m_dark_color[1] = choose.green();
-        ui->view->m_dark_color[2] = choose.blue();
+        ui->view->m_color.dark[0] = choose.red();
+        ui->view->m_color.dark[1] = choose.green();
+        ui->view->m_color.dark[2] = choose.blue();
         ui->view->update();
     }
 }
@@ -124,9 +124,9 @@ void MainWindow::choose_light_color()
     QColor choose = QColorDialog::getColor(ui->Light_display->get_color(), nullptr, "Light Disk");
     if (choose.isValid()) {
         ui->Light_display->set_color(choose);
-        ui->view->m_light_color[0] = choose.red();
-        ui->view->m_light_color[1] = choose.green();
-        ui->view->m_light_color[2] = choose.blue();
+        ui->view->m_color.light[0] = choose.red();
+        ui->view->m_color.light[1] = choose.green();
+        ui->view->m_color.light[2] = choose.blue();
         ui->view->update();
     }
 }
@@ -136,9 +136,9 @@ void MainWindow::choose_border_color()
     QColor choose = QColorDialog::getColor(ui->Border_display->get_color(), nullptr, "Border");
     if (choose.isValid()) {
         ui->Border_display->set_color(choose);
-        ui->view->m_border_color[0] = choose.red();
-        ui->view->m_border_color[1] = choose.green();
-        ui->view->m_border_color[2] = choose.blue();
+        ui->view->m_color.border[0] = choose.red();
+        ui->view->m_color.border[1] = choose.green();
+        ui->view->m_color.border[2] = choose.blue();
         ui->view->update();
     }
 }
