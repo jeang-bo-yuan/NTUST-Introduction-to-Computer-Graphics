@@ -70,6 +70,16 @@ public slots:
 
     /// 顯示Color Dialog來選擇顏色
     void choose_border_color();
+
+    /// 將棋盤切換成經典樣式
+    void classic_theme();
+
+    /// theme2
+    void theme2();
+
+private:
+    /// 將color display顯示的顏色和ui->view實際的顏色同步
+    void sync_color_display();
 };
 
 #endif // MAINWINDOW_H

@@ -165,3 +165,27 @@ void GameView::toggle_hint(bool on) {
     this->repaint();
 }
 
+void GameView::use_classic_theme()
+{
+    m_color = decltype(m_color) {
+        {32, 122, 38},      // BG
+        {232, 229, 132},    // hint
+        {0, 0, 0},          // dark
+        {255, 255, 255},    // light
+        {0, 0, 0}           // border
+    };
+    this->update();
+}
+
+void GameView::use_theme2()
+{
+    m_color = decltype(m_color) {
+        {14, 54, 17},       // BG
+        {170, 0, 0},        // hint
+        {0, 0, 0},          // dark
+        {227, 227, 227},    // light
+        {189, 167, 54}      // border
+    };
+    this->update();
+}
+

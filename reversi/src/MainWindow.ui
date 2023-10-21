@@ -10,6 +10,11 @@
     <height>600</height>
    </rect>
   </property>
+  <property name="font">
+   <font>
+    <family>微軟正黑體</family>
+   </font>
+  </property>
   <property name="windowTitle">
    <string>MainWindow</string>
   </property>
@@ -29,6 +34,11 @@
     </property>
     <item>
      <widget class="QFrame" name="menuFrame">
+      <property name="font">
+       <font>
+        <family>微軟正黑體</family>
+       </font>
+      </property>
       <property name="styleSheet">
        <string notr="true">QFrame{
 background-color: rgb(255, 255, 255);
@@ -103,6 +113,11 @@ QPushButton{
            <verstretch>0</verstretch>
           </sizepolicy>
          </property>
+         <property name="font">
+          <font>
+           <family>微軟正黑體</family>
+          </font>
+         </property>
          <property name="text">
           <string>提示</string>
          </property>
@@ -121,6 +136,11 @@ QPushButton{
            <horstretch>0</horstretch>
            <verstretch>0</verstretch>
           </sizepolicy>
+         </property>
+         <property name="font">
+          <font>
+           <family>微軟正黑體</family>
+          </font>
          </property>
          <property name="text">
           <string>調色盤</string>
@@ -442,6 +462,7 @@ Win</string>
              <widget class="QGroupBox" name="groupBoxPalette">
               <property name="font">
                <font>
+                <family>微軟正黑體</family>
                 <kerning>true</kerning>
                </font>
               </property>
@@ -464,6 +485,52 @@ Win</string>
                <property name="horizontalSpacing">
                 <number>5</number>
                </property>
+               <item row="4" column="1">
+                <widget class="QPushButton" name="buttonSelectBorderColor">
+                 <property name="sizePolicy">
+                  <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+                   <horstretch>0</horstretch>
+                   <verstretch>0</verstretch>
+                  </sizepolicy>
+                 </property>
+                 <property name="text">
+                  <string>邊界</string>
+                 </property>
+                </widget>
+               </item>
+               <item row="2" column="1">
+                <widget class="QPushButton" name="buttonSelectDarkColor">
+                 <property name="sizePolicy">
+                  <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+                   <horstretch>0</horstretch>
+                   <verstretch>0</verstretch>
+                  </sizepolicy>
+                 </property>
+                 <property name="text">
+                  <string>Dark</string>
+                 </property>
+                </widget>
+               </item>
+               <item row="7" column="1">
+                <widget class="QPushButton" name="buttonTheme2">
+                 <property name="text">
+                  <string>主題2</string>
+                 </property>
+                </widget>
+               </item>
+               <item row="3" column="1">
+                <widget class="QPushButton" name="buttonSelectLightColor">
+                 <property name="sizePolicy">
+                  <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+                   <horstretch>0</horstretch>
+                   <verstretch>0</verstretch>
+                  </sizepolicy>
+                 </property>
+                 <property name="text">
+                  <string>Light</string>
+                 </property>
+                </widget>
+               </item>
                <item row="0" column="1">
                 <widget class="QPushButton" name="buttonSelectBGColor">
                  <property name="sizePolicy">
@@ -474,6 +541,16 @@ Win</string>
                  </property>
                  <property name="text">
                   <string>背景</string>
+                 </property>
+                </widget>
+               </item>
+               <item row="4" column="0">
+                <widget class="ColorDisplay" name="Border_display" native="true">
+                 <property name="minimumSize">
+                  <size>
+                   <width>40</width>
+                   <height>0</height>
+                  </size>
                  </property>
                 </widget>
                </item>
@@ -493,29 +570,56 @@ Win</string>
                  </property>
                 </widget>
                </item>
-               <item row="2" column="1">
-                <widget class="QPushButton" name="buttonSelectDarkColor">
-                 <property name="sizePolicy">
-                  <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
-                   <horstretch>0</horstretch>
-                   <verstretch>0</verstretch>
-                  </sizepolicy>
-                 </property>
-                 <property name="text">
-                  <string>Dark</string>
+               <item row="3" column="0">
+                <widget class="ColorDisplay" name="Light_display" native="true">
+                 <property name="minimumSize">
+                  <size>
+                   <width>40</width>
+                   <height>0</height>
+                  </size>
                  </property>
                 </widget>
                </item>
-               <item row="3" column="1">
-                <widget class="QPushButton" name="buttonSelectLightColor">
-                 <property name="sizePolicy">
-                  <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
-                   <horstretch>0</horstretch>
-                   <verstretch>0</verstretch>
-                  </sizepolicy>
+               <item row="2" column="0">
+                <widget class="ColorDisplay" name="Dark_display" native="true">
+                 <property name="minimumSize">
+                  <size>
+                   <width>40</width>
+                   <height>0</height>
+                  </size>
                  </property>
+                </widget>
+               </item>
+               <item row="1" column="0">
+                <widget class="ColorDisplay" name="Hint_display" native="true">
+                 <property name="minimumSize">
+                  <size>
+                   <width>40</width>
+                   <height>0</height>
+                  </size>
+                 </property>
+                </widget>
+               </item>
+               <item row="5" column="0" colspan="2">
+                <widget class="Line" name="line">
+                 <property name="frameShadow">
+                  <enum>QFrame::Plain</enum>
+                 </property>
+                 <property name="lineWidth">
+                  <number>1</number>
+                 </property>
+                 <property name="midLineWidth">
+                  <number>0</number>
+                 </property>
+                 <property name="orientation">
+                  <enum>Qt::Horizontal</enum>
+                 </property>
+                </widget>
+               </item>
+               <item row="7" column="0">
+                <widget class="QPushButton" name="buttonClassicTheme">
                  <property name="text">
-                  <string>Light</string>
+                  <string>經典</string>
                  </property>
                 </widget>
                </item>
@@ -532,56 +636,16 @@ Win</string>
                  </property>
                 </widget>
                </item>
-               <item row="1" column="0">
-                <widget class="ColorDisplay" name="Hint_display" native="true">
-                 <property name="minimumSize">
-                  <size>
-                   <width>40</width>
-                   <height>0</height>
-                  </size>
-                 </property>
-                </widget>
-               </item>
-               <item row="4" column="1">
-                <widget class="QPushButton" name="buttonSelectBorderColor">
+               <item row="6" column="0">
+                <widget class="QLabel" name="label">
                  <property name="sizePolicy">
-                  <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+                  <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
                    <horstretch>0</horstretch>
                    <verstretch>0</verstretch>
                   </sizepolicy>
                  </property>
                  <property name="text">
-                  <string>邊界</string>
-                 </property>
-                </widget>
-               </item>
-               <item row="2" column="0">
-                <widget class="ColorDisplay" name="Dark_display" native="true">
-                 <property name="minimumSize">
-                  <size>
-                   <width>40</width>
-                   <height>0</height>
-                  </size>
-                 </property>
-                </widget>
-               </item>
-               <item row="3" column="0">
-                <widget class="ColorDisplay" name="Light_display" native="true">
-                 <property name="minimumSize">
-                  <size>
-                   <width>40</width>
-                   <height>0</height>
-                  </size>
-                 </property>
-                </widget>
-               </item>
-               <item row="4" column="0">
-                <widget class="ColorDisplay" name="Border_display" native="true">
-                 <property name="minimumSize">
-                  <size>
-                   <width>40</width>
-                   <height>0</height>
-                  </size>
+                  <string>主題</string>
                  </property>
                 </widget>
                </item>

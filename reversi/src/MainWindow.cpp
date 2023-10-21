@@ -19,11 +19,7 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(ui->buttonPalette, &QPushButton::toggled, this, &MainWindow::toggle_palette);
 
     // 初始化Palette
-    ui->BG_display->set_color_ub(ui->view->m_color.BG);
-    ui->Hint_display->set_color_ub(ui->view->m_color.hint);
-    ui->Dark_display->set_color_ub(ui->view->m_color.dark);
-    ui->Light_display->set_color_ub(ui->view->m_color.light);
-    ui->Border_display->set_color_ub(ui->view->m_color.border);
+    sync_color_display();
 
     // 連接Palette的按鈕
     connect(ui->buttonSelectBGColor, &QPushButton::clicked, this, &MainWindow::choose_BG_color);
@@ -31,6 +27,8 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(ui->buttonSelectDarkColor, &QPushButton::clicked, this, &MainWindow::choose_dark_color);
     connect(ui->buttonSelectLightColor, &QPushButton::clicked, this, &MainWindow::choose_light_color);
     connect(ui->buttonSelectBorderColor, &QPushButton::clicked, this, &MainWindow::choose_border_color);
+    connect(ui->buttonClassicTheme, &QPushButton::clicked, this, &MainWindow::classic_theme);
+    connect(ui->buttonTheme2, &QPushButton::clicked, this, &MainWindow::theme2);
 }
 
 MainWindow::~MainWindow()
@@ -141,4 +139,25 @@ void MainWindow::choose_border_color()
         ui->view->m_color.border[2] = choose.blue();
         ui->view->update();
     }
+}
+
+void MainWindow::classic_theme()
+{
+    ui->view->use_classic_theme();
+    sync_color_display();
+}
+
+void MainWindow::theme2()
+{
+    ui->view->use_theme2();
+    sync_color_display();
+}
+
+void MainWindow::sync_color_display()
+{
+    ui->BG_display->set_color_ub(ui->view->m_color.BG);
+    ui->Hint_display->set_color_ub(ui->view->m_color.hint);
+    ui->Dark_display->set_color_ub(ui->view->m_color.dark);
+    ui->Light_display->set_color_ub(ui->view->m_color.light);
+    ui->Border_display->set_color_ub(ui->view->m_color.border);
 }

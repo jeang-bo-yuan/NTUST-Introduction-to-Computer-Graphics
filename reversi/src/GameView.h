@@ -62,7 +62,7 @@ public:
     static const GLint border_vertex_arr[72];
 
     /// unit_circle_arr 回傳的陣列有幾組vertex
-    static constexpr GLsizei UNIT_CIRCLE_VERTEX_NUM = 40;
+    static constexpr GLsizei UNIT_CIRCLE_VERTEX_NUM = 90;
     /// @brief 取得單位圓的Vertex Array（半徑=1，以原點為圓心）
     /// @return 共 \ref UNIT_CIRCLE_VERTEX_NUM 組vertex，每組含(x, y)
     static const GLfloat* unit_circle_arr(void);
@@ -109,6 +109,16 @@ public slots:
      * @param on - 是否開啟
      */
     void toggle_hint(bool on);
+
+    /**
+     * @brief 將m_color設成經典樣式，並立即update
+     */
+    void use_classic_theme();
+
+    /**
+     * @brief 使用主題2，並立即update
+     */
+    void use_theme2();
 };
 
 #endif // GAMEVIEW_H
