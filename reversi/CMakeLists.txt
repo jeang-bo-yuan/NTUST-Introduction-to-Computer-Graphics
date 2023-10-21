@@ -22,4 +22,5 @@ add_executable(reversi
   src/MainWindow.h src/MainWindow.cpp src/MainWindow.ui
   src/ColorDisplay.h src/ColorDisplay.cpp
 )
+set_target_properties(reversi PROPERTIES WIN32_EXECUTABLE TRUE) # Make it a GUI application
 target_link_libraries(reversi Qt${QT_MAJOR_VERSION}::Widgets opengl32)
