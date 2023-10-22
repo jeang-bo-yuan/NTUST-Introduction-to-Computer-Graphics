@@ -137,11 +137,11 @@ namespace {
 			if (!doingShadow) glColor3ub(0, 0, 0);
 			// 畫軌道
 			glBegin(GL_LINES);
-			glVertex3fv((p1 + horizontal).v());
-			glVertex3fv((p2 + horizontal).v());
+				glVertex3fv((p1 + horizontal).v());
+				glVertex3fv((p2 + horizontal).v());
 
-			glVertex3fv((p1 - horizontal).v());
-			glVertex3fv((p2 - horizontal).v());
+				glVertex3fv((p1 - horizontal).v());
+				glVertex3fv((p2 - horizontal).v());
 			glEnd();
 
 			// 畫sleeper
@@ -150,19 +150,67 @@ namespace {
 			DOWN.normalize();
 			DOWN = DOWN * 0.3f; // sleeper 在下方 0.3 單位
 			u = u * 0.2f; // sleeper 占軌道長的 0.6
+
 			p1 = p1 + u + DOWN;
 			p2 = p2 - u + DOWN;
-			if (!doingShadow) glColor3ub(255, 255, 255);
+
+			if (!doingShadow) glColor3ub(173, 169, 132);
+
 			glBegin(GL_QUADS);
-			glVertex3fv((p1 + horizontal).v());
-			glVertex3fv((p2 + horizontal).v());
-			glVertex3fv((p2 - horizontal).v());
-			glVertex3fv((p1 - horizontal).v());
+				glNormal3f(-DOWN.x, -DOWN.y, -DOWN.z);
+				glVertex3fv((p1 + horizontal).v());
+				glVertex3fv((p2 + horizontal).v());
+				glVertex3fv((p2 - horizontal).v());
+				glVertex3fv((p1 - horizontal).v());
 			glEnd();
 		}
 
 		return;
 	}
+
+	/// 畫一個2*2*2的正方體，(-1,0,-1) ~ (1, 2, 1)
+	void draw_block() {
+		constexpr GLfloat vertex_arr[] = {
+			1, 0, 1,
+			1, 0, -1,
+			-1, 0, -1,
+			-1, 0, 1,
+			1, 1 * 2, 1,
+			1, 1 * 2, -1,
+			-1, 1 * 2, -1,
+			-1, 1 * 2, 1,
+		};
+		constexpr GLuint indices[] = {
+			0, 1, 2, 3, // normal = (0, -1, 0)
+			0, 1, 5, 4, // normal = (1, 0, 0)
+			0, 3, 7, 4, // normal = (0, 0, 1)
+			4, 5, 6, 7, // normal = (0, 1, 0)
+			1, 5, 6, 2, // normal = (0, 0, -1)
+			3, 2, 6, 7  // normal = (-1, 0, 0)
+		};
+
+		glEnableClientState(GL_VERTEX_ARRAY);
+			glVertexPointer(3, GL_FLOAT, 0, vertex_arr);
+
+			glNormal3f(0, -1, 0);
+			glDrawElements(GL_QUADS, 4, GL_UNSIGNED_INT, indices);
+
+			glNormal3f(1, 0, 0);
+			glDrawElements(GL_QUADS, 4, GL_UNSIGNED_INT, indices + 4);
+
+			glNormal3f(0, 0, 1);
+			glDrawElements(GL_QUADS, 4, GL_UNSIGNED_INT, indices + 8);
+
+			glNormal3f(0, 1, 0);
+			glDrawElements(GL_QUADS, 4, GL_UNSIGNED_INT, indices + 12);
+
+			glNormal3f(0, 0, -1);
+			glDrawElements(GL_QUADS, 4, GL_UNSIGNED_INT, indices + 16);
+
+			glNormal3f(-1, 0, 0);
+			glDrawElements(GL_QUADS, 4, GL_UNSIGNED_INT, indices + 20);
+		glDisableClientState(GL_VERTEX_ARRAY);
+	} // draw_block
 }
 
 void Draw::draw_track(const CTrack& track, const SplineType type, const bool doingShadow) {
@@ -175,7 +223,7 @@ void Draw::draw_track(const CTrack& track, const SplineType type, const bool doi
 
 		draw_line_and_sleeper(point_eq, orient_eq, doingShadow);
 	}
-}
+} // draw_track
 
 void Draw::draw_train(const CTrack& track, const SplineType type, const bool doingShadow) {
 	size_t control_id = floorf(track.trainU);
@@ -191,46 +239,43 @@ void Draw::draw_train(const CTrack& track, const SplineType type, const bool doi
 	// 火車的位置
 	Pnt3f train_pos = point_eq(t);
 	// 方向向量
-	Pnt3f u = point_eq(t + 0.01f) - point_eq(t);
+	Pnt3f u = point_eq(t + 0.01f) - point_eq(t); u.normalize();
 	// orient
 	Pnt3f orient = orient_eq(t);
+	// 水平方向
+	Pnt3f horizontal = orient * u; horizontal.normalize();
 	// 正上方，垂直軌道
-	Pnt3f UP = (u * orient) * u;
-	UP.normalize();
+	Pnt3f UP = u * horizontal; UP.normalize();
 
-	constexpr GLfloat vertex_arr[] = {
-		train_size, 0, train_size,
-		train_size, 0, -train_size,
-		-train_size, 0, -train_size,
-		-train_size, 0, train_size,
-		train_size, train_size * 2, train_size,
-		train_size, train_size * 2, -train_size,
-		-train_size, train_size * 2, -train_size,
-		-train_size, train_size * 2, train_size,
-	};
-	constexpr GLuint indices[] = {
-		0, 1, 2, 3,
-		0, 1, 5, 4,
-		0, 3, 7, 4,
-		4, 5, 6, 7,
-		1, 5, 6, 2,
-		3, 2, 6, 7
-	};
+	glEnable(GL_NORMALIZE); // 因為用了scale，所以開啟GL_NORMALIZE來強迫normal vector變單位向量
 
-	if (!doingShadow) glColor3ub(0, 255, 255);
-
-	// 從ControlPoint::draw抄來的
-	// 先做旋轉使正上方朝向UP，再平移到train_pos
 	glPushMatrix();
-	glTranslatef(train_pos.x, train_pos.y, train_pos.z);
-	float theta1 = -radiansToDegrees(atan2(UP.z, UP.x));
-	glRotatef(theta1, 0, 1, 0);
-	float theta2 = -radiansToDegrees(acos(UP.y));
-	glRotatef(theta2, 0, 0, 1);
+		// 先做旋轉，再平移到train_pos
+		glTranslatef(train_pos.x, train_pos.y, train_pos.z);
 
-		glEnableClientState(GL_VERTEX_ARRAY);
-		glVertexPointer(3, GL_FLOAT, 0, vertex_arr);
-		glDrawElements(GL_QUADS, sizeof(indices) / sizeof(GLuint), GL_UNSIGNED_INT, indices);
-		glDisableClientState(GL_VERTEX_ARRAY);
+		GLfloat rotate_mat[16] = { // 其實是coordinate轉換
+			horizontal.x, horizontal.y, horizontal.z, 0, // 對應x軸
+			UP.x, UP.y, UP.z, 0, // 對應y軸
+			u.x, u.y, u.z, 0, // 對應z軸
+			0, 0, 0, 1
+		};
+		glMultMatrixf(rotate_mat);
+
+		glScalef(train_size, train_size, train_size);
+
+		if (!doingShadow) glColor3ub(0, 0, 255);
+		draw_block();
 	glPopMatrix();
-}
+
+	glPushMatrix(); // 畫車頭
+		Pnt3f pos2 = train_pos + u * train_size * 1.3f;
+		glTranslatef(pos2.x, pos2.y, pos2.z);
+		glMultMatrixf(rotate_mat);
+		glScalef(train_size, train_size / 2.f, train_size * 0.3f);
+
+		if (!doingShadow) glColor3ub(58, 164, 186);
+		draw_block();
+	glPopMatrix();
+
+	glDisable(GL_NORMALIZE);
+} // draw_train
