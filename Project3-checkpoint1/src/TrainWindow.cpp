@@ -143,10 +143,14 @@ TrainWindow(const int x, const int y)
 
 		pty+=30;
 
-		// TODO: add widgets for all of your fancier features here
-#ifdef EXAMPLE_SOLUTION
-		makeExampleWidgets(this,pty);
-#endif
+		/// @todo add widgets for all of your fancier features here
+		lightBrowser = new Fl_Browser(605, pty, 120, 75, "Light");
+		lightBrowser->type(2);
+		lightBrowser->callback((Fl_Callback*)damageCB, this);
+		lightBrowser->add(LightTypeStr[0]);
+		lightBrowser->add(LightTypeStr[1]);
+		lightBrowser->select(1);
+		pty += 110;
 
 		// we need to make a little phantom widget to have things resize correctly
 		Fl_Box* resizebox = new Fl_Box(600,595,200,5);
@@ -197,7 +201,7 @@ advanceTrain(float dir)
 //========================================================================
 {
 	//#####################################################################
-	// TODO: make this work for your train
+	/// @todo make this work for your train
 	//#####################################################################
 #ifdef EXAMPLE_SOLUTION
 	// note - we give a little bit more example code here than normal,
@@ -214,7 +218,7 @@ advanceTrain(float dir)
 	if (world.trainU > nct) world.trainU -= nct;
 	if (world.trainU < 0) world.trainU += nct;
 #endif
-	this->trainView->m_pTrack->trainU += 0.01f;
+	this->trainView->m_pTrack->trainU += 0.01f * speed->value();
 	while (this->trainView->m_pTrack->trainU > this->trainView->m_pTrack->points.size()) {
 		this->trainView->m_pTrack->trainU -= this->trainView->m_pTrack->points.size();
 	}

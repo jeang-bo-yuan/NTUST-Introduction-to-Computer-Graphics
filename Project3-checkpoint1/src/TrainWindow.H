@@ -86,6 +86,8 @@ class TrainWindow : public Fl_Double_Window {
 
 		// the type of the spline (use its value to determine)
 		Fl_Browser*			splineBrowser;
+		/// 選擇光源的種類
+		Fl_Browser* lightBrowser;
 
 		// are we animating the train?
 		Fl_Button*			runButton;

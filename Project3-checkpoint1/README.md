@@ -1,12 +1,18 @@
-# TODO
+# Roller Coaster
+
+## TODO
 
 見`doc/TODO.xlsx`
 
-# 流程
+## 流程
 
-- `TrainView::drawStuff`
+1. `TrainView::draw`:
 
-畫control point -> 畫軌道(`Draw::draw_track`) -> 畫火車
+設定Projection Matrix -> 設定Light -> call `TrainView::drawStuff`
+
+2. `TrainView::drawStuff`:
+
+畫control point -> 畫軌道(`Draw::draw_track`) -> 畫火車(`Draw::draw_train`)
 
 - `Draw::draw_track`
 
