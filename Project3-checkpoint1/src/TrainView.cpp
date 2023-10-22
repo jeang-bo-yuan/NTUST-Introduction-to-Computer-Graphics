@@ -252,8 +252,6 @@ void TrainView::draw()
 		break;
 	case (int)LightType::Point:
 		lightPosition1[3] = 1;
-		lightPosition2[3] = 1;
-		lightPosition3[3] = 1;
 		glLightfv(GL_LIGHT0, GL_DIFFUSE, yellowLight);
 		glLightfv(GL_LIGHT0, GL_SPECULAR, yellowLight);
 		glLightfv(GL_LIGHT0, GL_AMBIENT, grayLight);
