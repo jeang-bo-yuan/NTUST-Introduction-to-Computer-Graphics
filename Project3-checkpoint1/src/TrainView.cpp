@@ -244,9 +244,22 @@ void TrainView::draw()
 	GLfloat blueLight[]			= {.1f,.1f,.3f,1.0};
 	GLfloat grayLight[]			= {.3f, .3f, .3f, 1.0};
 
+	switch (tw->lightBrowser->value()) {
+	case (int)LightType::Directional:
+		glLightfv(GL_LIGHT0, GL_DIFFUSE, whiteLight);
+		glLightfv(GL_LIGHT0, GL_SPECULAR, whiteLight);
+		glLightfv(GL_LIGHT0, GL_AMBIENT, grayLight);
+		break;
+	case (int)LightType::Point:
+		lightPosition1[3] = 1;
+		lightPosition2[3] = 1;
+		lightPosition3[3] = 1;
+		glLightfv(GL_LIGHT0, GL_DIFFUSE, yellowLight);
+		glLightfv(GL_LIGHT0, GL_SPECULAR, yellowLight);
+		glLightfv(GL_LIGHT0, GL_AMBIENT, grayLight);
+		break;
+	}
 	glLightfv(GL_LIGHT0, GL_POSITION, lightPosition1);
-	glLightfv(GL_LIGHT0, GL_DIFFUSE, whiteLight);
-	glLightfv(GL_LIGHT0, GL_AMBIENT, grayLight);
 
 	glLightfv(GL_LIGHT1, GL_POSITION, lightPosition2);
 	glLightfv(GL_LIGHT1, GL_DIFFUSE, yellowLight);
@@ -263,7 +276,6 @@ void TrainView::draw()
 	glUseProgram(0);
 
 	setupFloor();
-	glDisable(GL_LIGHTING);
 	drawFloor(200,10);
 
 
@@ -271,7 +283,6 @@ void TrainView::draw()
 	// now draw the object and we need to do it twice
 	// once for real, and then once for shadows
 	//*********************************************************************
-	glEnable(GL_LIGHTING);
 	setupObjects();
 
 	drawStuff();

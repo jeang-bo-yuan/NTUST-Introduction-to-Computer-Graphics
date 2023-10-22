@@ -148,16 +148,16 @@ namespace {
 			horizontal = horizontal * 1.5f; // sleeper的寬為3 + 3
 			Pnt3f DOWN = u * horizontal;
 			DOWN.normalize();
+			glNormal3f(-DOWN.x, -DOWN.y, -DOWN.z);
 			DOWN = DOWN * 0.3f; // sleeper 在下方 0.3 單位
 			u = u * 0.2f; // sleeper 占軌道長的 0.6
 
 			p1 = p1 + u + DOWN;
 			p2 = p2 - u + DOWN;
 
-			if (!doingShadow) glColor3ub(173, 169, 132);
+			if (!doingShadow) glColor3ub(255, 255, 255);
 
 			glBegin(GL_QUADS);
-				glNormal3f(-DOWN.x, -DOWN.y, -DOWN.z);
 				glVertex3fv((p1 + horizontal).v());
 				glVertex3fv((p2 + horizontal).v());
 				glVertex3fv((p2 - horizontal).v());
