@@ -1,11 +1,13 @@
 
+#include <glad/gl.h>
 #include "GameView.h"
-#include <gl/gl.h>
 #include <algorithm>
 #include <cmath>
 #include <QMouseEvent>
 #include <QDebug>
 #include <QPainter>
+#include <QMessageBox>
+#include <QApplication>
 
 #define DISK_RADIUS 0.4f
 
@@ -59,6 +61,13 @@ GameView::GameView(QWidget* parent)
 }
 
 void GameView::initializeGL() {
+    int version = gladLoaderLoadGL();
+    if (version == 0) {
+        QMessageBox::critical(nullptr, "OpenGL load failed", "Unable to load OpenGL.\nMaybe your GPU doesn't support OpenGL.");
+        qApp->exit(1);
+    }
+    qDebug() << "Load OpenGL" << GLAD_VERSION_MAJOR(version) << '.' << GLAD_VERSION_MINOR(version);
+
     glMatrixMode(GL_PROJECTION);
     // (0, 0) .....
     //   |        |
