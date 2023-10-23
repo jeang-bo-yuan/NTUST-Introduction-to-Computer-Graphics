@@ -36,6 +36,17 @@ namespace Draw {
 	/// @param p3 - 玡北翴
 	Param_Equation make_cardinal(Pnt3f p0, Pnt3f p1, Pnt3f p2, Pnt3f p3);
 
+	/**
+	 * @brief 砞﹚ㄢcontrol point丁把计Α
+	 * @param track - 瓂笵
+	 * @param cp_id - 材control pointindex
+	 * @param type - 把计ΑΑ
+	 * @param[out] point_eq - 纗翴把计Α
+	 * @param[out] orient_eq - 纗orient把计Α
+	 */
+	void set_equation(const CTrack& track, const size_t cp_id, const SplineType type,
+		Draw::Param_Equation& point_eq, Draw::Param_Equation& orient_eq);
+
 	/// @brief 礶瓂笵
 	/// @param track - 瓂笵
 	/// @param type - い丁翴璶贺把计Α璸衡

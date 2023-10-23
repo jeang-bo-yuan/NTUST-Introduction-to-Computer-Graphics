@@ -63,53 +63,45 @@ Draw::Param_Equation Draw::make_cardinal(Pnt3f p0, Pnt3f p1, Pnt3f p2, Pnt3f p3)
 	};
 }
 
-namespace {
-	/**
-	 * @brief 砞﹚ㄢcontrol point丁把计Α
-	 * @param track - 瓂笵
-	 * @param cp_id - 材control pointindex
-	 * @param type - 把计ΑΑ
-	 * @param[out] point_eq - 纗翴把计Α
-	 * @param[out] orient_eq - 纗orient把计Α
-	 */
-	void set_equation(const CTrack& track,
-		              const size_t cp_id,
-		              const SplineType type,
-		              Draw::Param_Equation& point_eq,
-		              Draw::Param_Equation& orient_eq)
-	{
-		// 秨﹍
-		const ControlPoint& P1 = track.points[cp_id];
+void Draw::set_equation(const CTrack& track,
+	const size_t cp_id,
+	const SplineType type,
+	Draw::Param_Equation& point_eq,
+	Draw::Param_Equation& orient_eq)
+{
+	// 秨﹍
+	const ControlPoint& P1 = track.points[cp_id];
 
-		// 挡
-		size_t cp2_id = track.next_cp(cp_id);
-		const ControlPoint& P2 = track.points[cp2_id];
+	// 挡
+	size_t cp2_id = track.next_cp(cp_id);
+	const ControlPoint& P2 = track.points[cp2_id];
 
-		switch (type) {
-		case SplineType::Linear:
-			point_eq = Draw::make_line(P1.pos, P2.pos);
-			orient_eq = Draw::make_line(P1.orient, P2.orient);
-			break;
-		case SplineType::Cardinal_Cubic:
-		case SplineType::Cubic_B_Spline:
-			const ControlPoint& P0 = track.points[track.prev_cp(cp_id)];
-			const ControlPoint& P3 = track.points[track.next_cp(cp2_id)];
+	switch (type) {
+	case SplineType::Linear:
+		point_eq = Draw::make_line(P1.pos, P2.pos);
+		orient_eq = Draw::make_line(P1.orient, P2.orient);
+		break;
+	case SplineType::Cardinal_Cubic:
+	case SplineType::Cubic_B_Spline:
+		const ControlPoint& P0 = track.points[track.prev_cp(cp_id)];
+		const ControlPoint& P3 = track.points[track.next_cp(cp2_id)];
 
-			if (type == SplineType::Cardinal_Cubic) {
-				point_eq = Draw::make_cardinal(P0.pos, P1.pos, P2.pos, P3.pos);
-				orient_eq = Draw::make_cardinal(P0.orient, P1.orient, P2.orient, P3.orient);
-			}
-			else if (type == SplineType::Cubic_B_Spline) {
-				point_eq = Draw::make_cubic_b_spline(P0.pos, P1.pos, P2.pos, P3.pos);
-				orient_eq = Draw::make_cubic_b_spline(P0.orient, P1.orient, P2.orient, P3.orient);
-			}
-
-			break;
+		if (type == SplineType::Cardinal_Cubic) {
+			point_eq = Draw::make_cardinal(P0.pos, P1.pos, P2.pos, P3.pos);
+			orient_eq = Draw::make_cardinal(P0.orient, P1.orient, P2.orient, P3.orient);
+		}
+		else if (type == SplineType::Cubic_B_Spline) {
+			point_eq = Draw::make_cubic_b_spline(P0.pos, P1.pos, P2.pos, P3.pos);
+			orient_eq = Draw::make_cubic_b_spline(P0.orient, P1.orient, P2.orient, P3.orient);
 		}
 
-		return;
+		break;
 	}
 
+	return;
+}
+
+namespace {
 	/**
 	 * @brief 礶瓂笵㎝狤れsleeper
 	 * @param point_eq - 翴把计Α
@@ -126,7 +118,7 @@ namespace {
 			Pnt3f p1 = point_eq(t);
 			Pnt3f p2 = point_eq(t + Param_Interval);
 			// orient
-			Pnt3f orient = orient_eq(t);
+			Pnt3f orient = orient_eq(t + Param_Interval / 2.f);
 			// よ秖
 			Pnt3f u = p2 - p1;
 			// u ㎝ orient 縩眔瓂笵キキ簿よ
