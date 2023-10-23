@@ -221,7 +221,7 @@ void Draw::draw_train(const CTrack& track, const SplineType type, const bool doi
 	size_t control_id = floorf(track.trainU);
 	float t = track.trainU - (float)control_id;
 
-	control_id %= track.points.size(); // Á×§Koverflow
+	// control_id %= track.points.size(); // Á×§Koverflow
 
 	Param_Equation point_eq, orient_eq;
 

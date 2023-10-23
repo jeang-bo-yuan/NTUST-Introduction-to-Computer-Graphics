@@ -149,6 +149,7 @@ TrainWindow(const int x, const int y)
 		lightBrowser->callback((Fl_Callback*)damageCB, this);
 		lightBrowser->add(LightTypeStr[0]);
 		lightBrowser->add(LightTypeStr[1]);
+		lightBrowser->add(LightTypeStr[2]);
 		lightBrowser->select(1);
 		pty += 110;
 
@@ -219,7 +220,7 @@ advanceTrain(float dir)
 	if (world.trainU < 0) world.trainU += nct;
 #endif
 	this->trainView->m_pTrack->trainU += 0.01f * speed->value();
-	while (this->trainView->m_pTrack->trainU > this->trainView->m_pTrack->points.size()) {
+	while (this->trainView->m_pTrack->trainU >= this->trainView->m_pTrack->points.size()) {
 		this->trainView->m_pTrack->trainU -= this->trainView->m_pTrack->points.size();
 	}
 }

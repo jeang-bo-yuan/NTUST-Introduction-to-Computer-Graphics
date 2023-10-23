@@ -21,11 +21,12 @@ constexpr const char* SplineTypeStr[] = { "Linear", "Cardinal Cubic", "Cubic B-S
 /// Light Type
 enum class LightType {
 	Directional = 1,
-	Point = 2
+	Point = 2,
+	Spotlight = 3
 };
 
 /// 各Light Type顯示的字串
-constexpr const char* LightTypeStr[] = { "Directional Light", "Point Light" };
+constexpr const char* LightTypeStr[] = { "Directional Light", "Point Light", "Spot Light"};
 
 /// 畫軌道算內插時，t的變化量
 constexpr float Param_Interval = 0.05f;
