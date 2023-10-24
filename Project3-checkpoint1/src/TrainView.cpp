@@ -259,8 +259,8 @@ void TrainView::draw()
 		glLightf(GL_LIGHT0, GL_SPOT_CUTOFF, 180.f);
 		break;
 	case (int)LightType::Spotlight:
-		glLightfv(GL_LIGHT0, GL_DIFFUSE, yellowLight);
-		glLightfv(GL_LIGHT0, GL_SPECULAR, yellowLight);
+		glLightfv(GL_LIGHT0, GL_DIFFUSE, whiteLight);
+		glLightfv(GL_LIGHT0, GL_SPECULAR, whiteLight);
 		glLightf(GL_LIGHT0, GL_SPOT_CUTOFF, 45.f);
 
 		// calculate train's pos
@@ -271,15 +271,14 @@ void TrainView::draw()
 		if (point_eq == nullptr || orient_eq == nullptr) break;
 
 		Pnt3f pos = point_eq(t);
-		Pnt3f dir = point_eq(t + 0.01) - pos;
+		Pnt3f dir = point_eq(t + 0.001) - pos;
 
-		lightPosition1[0] = pos.x; lightPosition1[1] = pos.y; lightPosition1[2] = pos.z; lightPosition1[3] = 1;
+		lightPosition1[0] = pos.x; lightPosition1[1] = pos.y + 2 * train_size; lightPosition1[2] = pos.z; lightPosition1[3] = 1;
 		glLightfv(GL_LIGHT0, GL_SPOT_DIRECTION, dir.v());
 		break;
 	}
 	glLightfv(GL_LIGHT0, GL_POSITION, lightPosition1);
 	glLightfv(GL_LIGHT0, GL_AMBIENT, grayLight);
-	glLightf(GL_LIGHT0, GL_SPOT_EXPONENT, 10.f);
 
 	glLightfv(GL_LIGHT1, GL_POSITION, lightPosition2);
 	glLightfv(GL_LIGHT1, GL_DIFFUSE, yellowLight);
