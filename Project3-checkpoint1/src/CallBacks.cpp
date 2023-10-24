@@ -97,6 +97,8 @@ void deletePointCB(Fl_Widget*, TrainWindow* tw)
 			tw->m_Track.points.erase(tw->m_Track.points.begin() + tw->trainView->selectedCube);
 		} else
 			tw->m_Track.points.pop_back();
+		if (tw->trainView->m_pTrack->trainU >= tw->trainView->m_pTrack->points.size())
+			tw->trainView->m_pTrack->trainU -= tw->trainView->m_pTrack->points.size();
 	}
 	tw->damageMe();
 }
