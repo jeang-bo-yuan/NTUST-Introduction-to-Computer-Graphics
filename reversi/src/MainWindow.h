@@ -83,6 +83,12 @@ public slots:
     /// theme2
     void theme2();
 
+    /// 儲存配色
+    void save_palette();
+
+    /// 載入配色
+    void load_palette();
+
 private:
     /// 將color display顯示的顏色和ui->view實際的顏色同步
     void sync_color_display();

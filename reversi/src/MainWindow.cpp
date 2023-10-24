@@ -1,6 +1,9 @@
 #include "MainWindow.h"
 #include "ui_MainWindow.h"
 #include <QColorDialog>
+#include <QFileDialog>
+#include <QMessageBox>
+#include <fstream>
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent), ui(new Ui::MainWindow), m_game_ptr(std::make_shared<Game>())
@@ -29,8 +32,12 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(ui->buttonSelectDarkColor, &QPushButton::clicked, this, &MainWindow::choose_dark_color);
     connect(ui->buttonSelectLightColor, &QPushButton::clicked, this, &MainWindow::choose_light_color);
     connect(ui->buttonSelectBorderColor, &QPushButton::clicked, this, &MainWindow::choose_border_color);
+    // theme
     connect(ui->buttonClassicTheme, &QPushButton::clicked, this, &MainWindow::classic_theme);
     connect(ui->buttonTheme2, &QPushButton::clicked, this, &MainWindow::theme2);
+    // file
+    connect(ui->buttonSavePalette, &QPushButton::clicked, this, &MainWindow::save_palette);
+    connect(ui->buttonLoadPalette, &QPushButton::clicked, this, &MainWindow::load_palette);
 }
 
 MainWindow::~MainWindow()
@@ -164,6 +171,40 @@ void MainWindow::classic_theme()
 void MainWindow::theme2()
 {
     ui->view->use_theme2();
+    sync_color_display();
+}
+
+void MainWindow::save_palette()
+{
+    QString file = QFileDialog::getSaveFileName(this, "儲存配色", qApp->applicationDirPath(), "Binary (*.bin)");
+
+    if (file.isEmpty()) return;
+
+    std::ofstream outF(file.toStdString());
+
+    if (!outF.is_open()) {
+        QMessageBox::warning(this, "Save Failed", QString("無法開啟檔案並儲存：").append(file));
+        return;
+    }
+
+    outF.write((char*)&ui->view->m_color, sizeof(ui->view->m_color));
+}
+
+void MainWindow::load_palette()
+{
+    QString file = QFileDialog::getOpenFileName(this, "載入配色", qApp->applicationDirPath(), "Binary (*.bin)");
+
+    if (file.isEmpty()) return;
+
+    std::ifstream inF(file.toStdString());
+
+    if (!inF.is_open()) {
+        QMessageBox::warning(this, "Load Failed", QString("無法開啟檔案並載入：").append(file));
+        return;
+    }
+
+    inF.read((char*)&ui->view->m_color, sizeof(ui->view->m_color));
+    ui->view->update();
     sync_color_display();
 }
 
