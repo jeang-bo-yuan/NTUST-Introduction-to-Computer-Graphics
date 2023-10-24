@@ -17,6 +17,8 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(ui->buttonRestart, &QPushButton::clicked, this, &MainWindow::restart);
     connect(ui->buttonToggleHint, &QPushButton::toggled, ui->view, &GameView::toggle_hint);
     connect(ui->buttonPalette, &QPushButton::toggled, this, &MainWindow::toggle_palette);
+    connect(ui->buttonTutorial, &QPushButton::clicked, this, [this](){ this->toggle_tutorial(true); });
+    connect(ui->buttonTutorialClose, &QPushButton::clicked, this, [this]{ this->toggle_tutorial(false); });
 
     // 初始化Palette
     sync_color_display();
@@ -79,6 +81,18 @@ void MainWindow::toggle_palette(bool open)
         ui->stackSub->setCurrentWidget(ui->pagePalette);
     else
         ui->stackSub->setCurrentWidget(ui->pageInfo);
+}
+
+void MainWindow::toggle_tutorial(bool open)
+{
+    if (open) {
+        ui->stackMain->setCurrentWidget(ui->pageTutorial);
+        ui->menuFrame->hide();
+    }
+    else {
+        ui->stackMain->setCurrentWidget(ui->pagePlaying);
+        ui->menuFrame->show();
+    }
 }
 
 void MainWindow::choose_BG_color()

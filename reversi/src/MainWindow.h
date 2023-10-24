@@ -56,6 +56,12 @@ public slots:
      */
     void toggle_palette(bool open);
 
+    /**
+     * @brief 切換pageTutorial
+     * @param open - 是否開啟
+     */
+    void toggle_tutorial(bool open);
+
     /// 顯示Color Dialog來選擇顏色
     void choose_BG_color();
 
