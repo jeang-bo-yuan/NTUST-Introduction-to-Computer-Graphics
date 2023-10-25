@@ -102,6 +102,9 @@ void Draw::set_equation(const CTrack& track,
 }
 
 namespace {
+	// forward declaration
+	void draw_block();
+
 	/**
 	 * @brief 畫軌道和枕木（sleeper）
 	 * @param point_eq - 點的參數式
@@ -117,46 +120,47 @@ namespace {
 			// points
 			Pnt3f p1 = point_eq(t);
 			Pnt3f p2 = point_eq(t + Param_Interval);
+			Pnt3f middle = (p1 + p2) * 0.5f;
 			// orient
 			Pnt3f orient = orient_eq(t + Param_Interval / 2.f);
 			// 方向向量
 			Pnt3f u = p2 - p1;
+			float line_len = sqrtf(u.x * u.x + u.y * u.y + u.z * u.z); // 這一段的長度
+			u.normalize();
 			// u 和 orient 外積，得到軌道水平平移的方向
-			Pnt3f horizontal = u * orient;
-			horizontal.normalize();
-			horizontal = horizontal * 2; // 軌道的寬為 2 + 2
+			Pnt3f horizontal = u * orient; horizontal.normalize();
+			// 軌道的寬為 2 + 2
+			Pnt3f line_space = horizontal * 2;
 
 			if (!doingShadow) glColor3ub(0, 0, 0);
 			// 畫軌道
 			glBegin(GL_LINES);
-				glVertex3fv((p1 + horizontal).v());
-				glVertex3fv((p2 + horizontal).v());
+				glVertex3fv((p1 + line_space).v());
+				glVertex3fv((p2 + line_space).v());
 
-				glVertex3fv((p1 - horizontal).v());
-				glVertex3fv((p2 - horizontal).v());
+				glVertex3fv((p1 - line_space).v());
+				glVertex3fv((p2 - line_space).v());
 			glEnd();
 
 			// 畫sleeper
-			horizontal = horizontal * 1.5f; // sleeper的寬為3 + 3
-			Pnt3f DOWN = u * horizontal;
-			DOWN.normalize();
-			glNormal3f(-DOWN.x, -DOWN.y, -DOWN.z);
-			DOWN = DOWN * 0.3f; // sleeper 在下方 0.3 單位
-			u = u * 0.2f; // sleeper 占軌道長的 0.6
-
-			p1 = p1 + u + DOWN;
-			p2 = p2 - u + DOWN;
-
-			if (!doingShadow) glColor3ub(255, 255, 255);
-
-			glBegin(GL_QUADS);
-				glVertex3fv((p1 + horizontal).v());
-				glVertex3fv((p2 + horizontal).v());
-				glVertex3fv((p2 - horizontal).v());
-				glVertex3fv((p1 - horizontal).v());
-			glEnd();
+			Pnt3f DOWN = u * horizontal; DOWN.normalize();
+			GLfloat rotate_mat[16] = {
+				horizontal.x, horizontal.y, horizontal.z, 0,
+				DOWN.x, DOWN.y, DOWN.z, 0,
+				u.x, u.y, u.z, 0,
+				0, 0, 0, 1
+			};
+			middle = middle + DOWN * 0.1f; // 住下一點點
+			glPushMatrix();
+				glTranslatef(middle.x, middle.y, middle.z);
+				glMultMatrixf(rotate_mat);
+				glScalef(3, 0.4, line_len * 0.3f);
+				if (!doingShadow) glColor3ub(255, 255, 255);
+				glEnable(GL_NORMALIZE);
+				draw_block();
+				glDisable(GL_NORMALIZE);
+			glPopMatrix();
 		}
-
 		return;
 	}
 
