@@ -220,12 +220,46 @@ advanceTrain(float dir)
 	if (world.trainU < 0) world.trainU += nct;
 #endif
 
-	this->trainView->m_pTrack->trainU += dir * 0.01f * static_cast<float>(speed->value());
+	CTrack* const track = this->trainView->m_pTrack;
+	const size_t nct = track->points.size();
+	const SplineType type = (SplineType)splineBrowser->value();
+	if (!is_valid_SplineType(type)) return;
 
-	// prevent overflow and underflow
-	float nct = static_cast<float>(this->trainView->m_pTrack->points.size());
-	if (this->trainView->m_pTrack->trainU >= nct)
-		this->trainView->m_pTrack->trainU -= nct;
-	if (this->trainView->m_pTrack->trainU < 0)
-		this->trainView->m_pTrack->trainU += nct;
+	if (arcLength->value()) {
+		std::vector<float> arcLenAccum = { 0.f };
+		// 計算曲線長的累積
+		// arcLenAccum[x]代表 第0個control point 到 第x個control point 間的曲線長
+		// arcLenAccum.back() 為整圈的鐵軌的長度
+		for (size_t i = 0; i < nct; ++i) {
+			arcLenAccum.push_back(track->arc_length(i, type));
+			arcLenAccum[i + 1] += arcLenAccum[i];
+		}
+
+		size_t cp_id = floorf(track->trainU);
+		float t = track->trainU - cp_id;
+		// trainU 轉成實際對應的曲線長
+		float S = arcLenAccum[cp_id] + (arcLenAccum[cp_id + 1] - arcLenAccum[cp_id]) * t;
+		// 前進特定長度
+		S += dir * static_cast<float>(speed->value());
+		// prevent overflow
+		if (S >= arcLenAccum.back()) S -= arcLenAccum.back();
+		// prevent underflow
+		if (S < 0) S += arcLenAccum.back();
+
+		// S（實際空間） 轉回 trainU（參數空間）
+		for (size_t i = 0; i < nct; ++i) {
+			if (arcLenAccum[i] <= S && S < arcLenAccum[i + 1]) {
+				float t = (S - arcLenAccum[i]) / (arcLenAccum[i + 1] - arcLenAccum[i]);
+				track->trainU = i + t;
+				break;
+			}
+		}
+	}
+	else {
+		track->trainU += dir * 0.01f * static_cast<float>(speed->value());
+
+		// prevent overflow and underflow
+		if (track->trainU >= nct) track->trainU -= nct;
+		if (track->trainU < 0) track->trainU += nct;
+	}
 }

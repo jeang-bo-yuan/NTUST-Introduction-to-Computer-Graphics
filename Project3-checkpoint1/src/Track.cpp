@@ -215,3 +215,24 @@ Pnt3f CTrack::calc_pos(float U, SplineType type, Pnt3f* FACE, Pnt3f* LEFT, Pnt3f
 
 	return result;
 }
+
+float CTrack::arc_length(size_t cp_id, SplineType type) const
+{
+	Draw::Param_Equation point_eq, orient_eq;
+	Draw::set_equation(*this, cp_id, type, point_eq, orient_eq);
+	if (point_eq == nullptr) return 0.f;
+
+	float len = 0.f;
+	Pnt3f p1 = point_eq(0.f);
+	for (float t = 0.f; t < 1.f; t += Param_Interval) {
+		Pnt3f p2 = point_eq(t + Param_Interval);
+		Pnt3f delta = p2 - p1;
+
+		len += sqrtf(delta.x * delta.x + delta.y * delta.y + delta.z * delta.z);
+
+		// ¼È¦s°_¨Ó
+		p1 = p2;
+	}
+
+	return len;
+}

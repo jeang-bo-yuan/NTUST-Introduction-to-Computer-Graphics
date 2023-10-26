@@ -80,6 +80,15 @@ class CTrack {
 		  */
 		Pnt3f calc_pos(float U, SplineType type, Pnt3f* FACE = nullptr, Pnt3f* LEFT = nullptr, Pnt3f* UP = nullptr) const;
 
+		/**
+		 * @brief 計算某兩個control point間的曲線長
+		 * @param cp_id - 第一個control point的index
+		 * @param type - 使用的參數曲線
+		 * @return 曲線長
+		 * @post 若type是非法的，回傳0
+		 */
+		float arc_length(size_t cp_id, SplineType type) const;
+
 	public:
 		/// @brief 所有控制點
 		/// @details

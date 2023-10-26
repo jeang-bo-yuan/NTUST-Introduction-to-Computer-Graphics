@@ -15,6 +15,15 @@ enum class SplineType {
 	Cubic_B_Spline = 3
 };
 
+inline constexpr bool is_valid_SplineType(SplineType type) {
+	switch (type) {
+	case SplineType::Linear: case SplineType::Cardinal_Cubic: case SplineType::Cubic_B_Spline:
+		return true;
+	default:
+		return false;
+	}
+}
+
 /// 各Spline Type顯示的字串
 constexpr const char* SplineTypeStr[] = { "Linear", "Cardinal Cubic", "Cubic B-Spline" };
 
