@@ -219,8 +219,13 @@ advanceTrain(float dir)
 	if (world.trainU > nct) world.trainU -= nct;
 	if (world.trainU < 0) world.trainU += nct;
 #endif
-	this->trainView->m_pTrack->trainU += 0.01f * speed->value();
-	if (this->trainView->m_pTrack->trainU >= this->trainView->m_pTrack->points.size()) {
-		this->trainView->m_pTrack->trainU -= this->trainView->m_pTrack->points.size();
-	}
+
+	this->trainView->m_pTrack->trainU += dir * 0.01f * static_cast<float>(speed->value());
+
+	// prevent overflow and underflow
+	float nct = static_cast<float>(this->trainView->m_pTrack->points.size());
+	if (this->trainView->m_pTrack->trainU >= nct)
+		this->trainView->m_pTrack->trainU -= nct;
+	if (this->trainView->m_pTrack->trainU < 0)
+		this->trainView->m_pTrack->trainU += nct;
 }
