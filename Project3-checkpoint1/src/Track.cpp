@@ -25,6 +25,7 @@
 *************************************************************************/
 
 #include "Track.H"
+#include "Draw.H"
 
 #include <FL/fl_ask.h>
 
@@ -175,4 +176,42 @@ writePoints(const char* filename)
 				points[i].orient.x, points[i].orient.y, points[i].orient.z);
 		fclose(fp);
 	}
+}
+
+Pnt3f CTrack::calc_pos(float U, SplineType type, Pnt3f* FACE, Pnt3f* LEFT, Pnt3f* UP) const
+{
+	// check U's value
+	if (U < 0.f && U >= static_cast<float>(this->points.size())) return points[0].pos;
+
+	size_t cp_id = floorf(U);
+	float t = U - static_cast<float>(cp_id);
+
+	Draw::Param_Equation point_eq, orient_eq;
+	Draw::set_equation(*this, cp_id, type, point_eq, orient_eq);
+	// check that type is valid
+	if (point_eq == nullptr || orient_eq == nullptr) return points[0].pos;
+
+	Pnt3f result = point_eq(t);
+
+	if (FACE != nullptr || LEFT != nullptr || UP != nullptr) {
+		// «e
+		Pnt3f _FACE = point_eq(t + 0.01f) - result; _FACE.normalize();
+
+		if (FACE != nullptr) *FACE = _FACE;
+		if (LEFT == nullptr && UP == nullptr) return result;
+
+		Pnt3f orient = orient_eq(t);
+		// ¥ª
+		Pnt3f _LEFT = orient * _FACE; _LEFT.normalize();
+
+		if (LEFT != nullptr) *LEFT = _LEFT;
+
+		if (UP != nullptr) {
+			// ¤W
+			*UP = _FACE * _LEFT;
+			UP->normalize();
+		}
+	}
+
+	return result;
 }

@@ -31,6 +31,7 @@ using std::vector; // avoid having to say std::vector all of the time
 
 // make use of other data structures from this project
 #include "ControlPoint.H"
+#include "Enum.H"
 
 /**
  * @brief 儲存軌道的控制點，以及火車的位置
@@ -64,6 +65,20 @@ class CTrack {
 		inline size_t prev_cp(size_t index) const {
 			return (index == 0 ? points.size() - 1 : index - 1);
 		}
+
+		/** @brief 計算參數值為U時，所對應的點的位置
+		    @param U - 和 trainU 一樣，代表在第`floor(U)`和下一個控制點間的點
+		    @param type - 使用的參數曲線
+		    @param[out] FACE - 若不為`nullptr`，則dereference並設成該點面向的方向
+		    @param[out] LEFT - 若不為`nullptr`，則dereference並設成該點左邊的方向
+		    @param[out] UP - 若不為`nullptr`，則dereference並設成該點向上的方向
+		    @return 點的位置
+		    @pre 0 <= U < `this->points.size()`
+			@post
+			1. 若U或type是非法的，則回傳`this->points[0].pos`
+			2. FACE, RIGHT, UP 都會設成單位向量
+		  */
+		Pnt3f calc_pos(float U, SplineType type, Pnt3f* FACE = nullptr, Pnt3f* LEFT = nullptr, Pnt3f* UP = nullptr) const;
 
 	public:
 		/// @brief 所有控制點

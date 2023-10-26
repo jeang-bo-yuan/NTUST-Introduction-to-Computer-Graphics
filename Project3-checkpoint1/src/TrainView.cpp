@@ -264,14 +264,8 @@ void TrainView::draw()
 		glLightf(GL_LIGHT0, GL_SPOT_CUTOFF, 45.f);
 
 		// calculate train's pos
-		int cp_id = floorf(m_pTrack->trainU);
-		float t = m_pTrack->trainU - cp_id;
-		Draw::Param_Equation point_eq, orient_eq;
-		Draw::set_equation(*m_pTrack, cp_id, (SplineType)tw->splineBrowser->value(), point_eq, orient_eq);
-		if (point_eq == nullptr || orient_eq == nullptr) break;
-
-		Pnt3f pos = point_eq(t);
-		Pnt3f dir = point_eq(t + 0.001) - pos;
+		Pnt3f dir;
+		Pnt3f pos = this->m_pTrack->calc_pos(this->m_pTrack->trainU, (SplineType)tw->splineBrowser->value(), &dir);
 
 		lightPosition1[0] = pos.x; lightPosition1[1] = pos.y + 2 * train_size; lightPosition1[2] = pos.z; lightPosition1[3] = 1;
 		glLightfv(GL_LIGHT0, GL_SPOT_DIRECTION, dir.v());

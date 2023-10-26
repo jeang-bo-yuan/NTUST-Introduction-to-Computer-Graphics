@@ -43,6 +43,7 @@ namespace Draw {
 	 * @param type - 把计ΑΑ
 	 * @param[out] point_eq - 纗翴把计Α
 	 * @param[out] orient_eq - 纗orient把计Α
+	 * @post 璝type琌獶猭玥point_eq㎝orient_eq砞Θ`nullptr`
 	 */
 	void set_equation(const CTrack& track, const size_t cp_id, const SplineType type,
 		Draw::Param_Equation& point_eq, Draw::Param_Equation& orient_eq);

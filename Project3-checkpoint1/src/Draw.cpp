@@ -82,7 +82,7 @@ void Draw::set_equation(const CTrack& track,
 		orient_eq = Draw::make_line(P1.orient, P2.orient);
 		break;
 	case SplineType::Cardinal_Cubic:
-	case SplineType::Cubic_B_Spline:
+	case SplineType::Cubic_B_Spline: {
 		const ControlPoint& P0 = track.points[track.prev_cp(cp_id)];
 		const ControlPoint& P3 = track.points[track.next_cp(cp2_id)];
 
@@ -95,6 +95,10 @@ void Draw::set_equation(const CTrack& track,
 			orient_eq = Draw::make_cubic_b_spline(P0.orient, P1.orient, P2.orient, P3.orient);
 		}
 
+		break;
+	}
+	default:
+		point_eq = orient_eq = nullptr;
 		break;
 	}
 
@@ -222,26 +226,8 @@ void Draw::draw_track(const CTrack& track, const SplineType type, const bool doi
 } // draw_track
 
 void Draw::draw_train(const CTrack& track, const SplineType type, const bool doingShadow) {
-	size_t control_id = floorf(track.trainU);
-	float t = track.trainU - (float)control_id;
-
-	// control_id %= track.points.size(); // 避免overflow
-
-	Param_Equation point_eq, orient_eq;
-
-	set_equation(track, control_id, type, point_eq, orient_eq);
-	if (point_eq == nullptr || orient_eq == nullptr) return;
-
-	// 火車的位置
-	Pnt3f train_pos = point_eq(t);
-	// 方向向量
-	Pnt3f u = point_eq(t + 0.01f) - point_eq(t); u.normalize();
-	// orient
-	Pnt3f orient = orient_eq(t);
-	// 水平方向
-	Pnt3f horizontal = orient * u; horizontal.normalize();
-	// 正上方，垂直軌道
-	Pnt3f UP = u * horizontal; UP.normalize();
+	Pnt3f FACE, LEFT, UP;
+	Pnt3f train_pos = track.calc_pos(track.trainU, type, &FACE, &LEFT, &UP);
 
 	glEnable(GL_NORMALIZE); // 因為用了scale，所以開啟GL_NORMALIZE來強迫normal vector變單位向量
 
@@ -250,9 +236,9 @@ void Draw::draw_train(const CTrack& track, const SplineType type, const bool doi
 		glTranslatef(train_pos.x, train_pos.y, train_pos.z);
 
 		GLfloat rotate_mat[16] = { // 其實是coordinate轉換
-			horizontal.x, horizontal.y, horizontal.z, 0, // 對應x軸
+			LEFT.x, LEFT.y, LEFT.z, 0, // 對應x軸
 			UP.x, UP.y, UP.z, 0, // 對應y軸
-			u.x, u.y, u.z, 0, // 對應z軸
+			FACE.x, FACE.y, FACE.z, 0, // 對應z軸
 			0, 0, 0, 1
 		};
 		glMultMatrixf(rotate_mat);
@@ -264,7 +250,7 @@ void Draw::draw_train(const CTrack& track, const SplineType type, const bool doi
 	glPopMatrix();
 
 	glPushMatrix(); // 畫車頭
-		Pnt3f pos2 = train_pos + u * train_size * 1.3f;
+		Pnt3f pos2 = train_pos + FACE * train_size * 1.3f;
 		glTranslatef(pos2.x, pos2.y, pos2.z);
 		glMultMatrixf(rotate_mat);
 		glScalef(train_size, train_size / 2.f, train_size * 0.3f);
