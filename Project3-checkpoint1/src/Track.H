@@ -75,7 +75,7 @@ class CTrack {
 		    @return 點的位置
 		    @pre 0 <= U < `this->points.size()`
 			@post
-			1. 若U或type是非法的，則回傳`this->points[0].pos`
+			1. 若U是非法的，則回傳`this->points[0].pos`
 			2. FACE, RIGHT, UP 都會設成單位向量
 		  */
 		Pnt3f calc_pos(float U, SplineType type, Pnt3f* FACE = nullptr, Pnt3f* LEFT = nullptr, Pnt3f* UP = nullptr) const;
@@ -85,7 +85,6 @@ class CTrack {
 		 * @param cp_id - 第一個control point的index
 		 * @param type - 使用的參數曲線
 		 * @return 曲線長
-		 * @post 若type是非法的，回傳0
 		 */
 		float arc_length(size_t cp_id, SplineType type) const;
 

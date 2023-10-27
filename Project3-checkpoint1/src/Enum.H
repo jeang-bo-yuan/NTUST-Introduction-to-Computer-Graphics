@@ -9,20 +9,28 @@
 /**
  * @brief 代表選中的Spline Type
  */
-enum class SplineType {
-	Linear = 1,
-	Cardinal_Cubic = 2,
-	Cubic_B_Spline = 3
-};
+class SplineType {
+	int val;
 
-inline constexpr bool is_valid_SplineType(SplineType type) {
-	switch (type) {
-	case SplineType::Linear: case SplineType::Cardinal_Cubic: case SplineType::Cubic_B_Spline:
-		return true;
-	default:
-		return false;
-	}
-}
+public:
+	static const int MIN = 1; //!< Minimum value
+	static const int Linear = 1; //!< set to this, if linear is choosen
+	static const int Cardinal_Cubic = 2; //!< set to this, if cardinal cubic is choosen
+	static const int Cubic_B_Spline = 3; //!< set to this, if cubic b-spline is choosen
+	static const int MAX = 3; //!< Maximum value
+
+	/**
+	 * @brief constructor
+	 * @param v - the value, it will be clamped into [MIN, MAX]
+	 */
+	SplineType(int v) : val(v < MIN ? MIN : v > MAX ? MAX : v) {}
+
+	/**
+	 * @brief get value
+	 * @return the value
+	 */
+	int value() const { return val; }
+};
 
 /// 各Spline Type顯示的字串
 constexpr const char* SplineTypeStr[] = { "Linear", "Cardinal Cubic", "Cubic B-Spline" };

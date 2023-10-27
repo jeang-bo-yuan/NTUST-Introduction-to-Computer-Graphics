@@ -76,7 +76,7 @@ void Draw::set_equation(const CTrack& track,
 	size_t cp2_id = track.next_cp(cp_id);
 	const ControlPoint& P2 = track.points[cp2_id];
 
-	switch (type) {
+	switch (type.value()) {
 	case SplineType::Linear:
 		point_eq = Draw::make_line(P1.pos, P2.pos);
 		orient_eq = Draw::make_line(P1.orient, P2.orient);
@@ -86,20 +86,17 @@ void Draw::set_equation(const CTrack& track,
 		const ControlPoint& P0 = track.points[track.prev_cp(cp_id)];
 		const ControlPoint& P3 = track.points[track.next_cp(cp2_id)];
 
-		if (type == SplineType::Cardinal_Cubic) {
+		if (type.value() == SplineType::Cardinal_Cubic) {
 			point_eq = Draw::make_cardinal(P0.pos, P1.pos, P2.pos, P3.pos);
 			orient_eq = Draw::make_cardinal(P0.orient, P1.orient, P2.orient, P3.orient);
 		}
-		else if (type == SplineType::Cubic_B_Spline) {
+		else if (type.value() == SplineType::Cubic_B_Spline) {
 			point_eq = Draw::make_cubic_b_spline(P0.pos, P1.pos, P2.pos, P3.pos);
 			orient_eq = Draw::make_cubic_b_spline(P0.orient, P1.orient, P2.orient, P3.orient);
 		}
 
 		break;
 	}
-	default:
-		point_eq = orient_eq = nullptr;
-		break;
 	}
 
 	return;
@@ -219,7 +216,6 @@ void Draw::draw_track(const CTrack& track, const SplineType type, const bool doi
 		Param_Equation point_eq, orient_eq;
 		
 		set_equation(track, i, type, point_eq, orient_eq);
-		if (point_eq == nullptr || orient_eq == nullptr) return;
 
 		draw_line_and_sleeper(point_eq, orient_eq, doingShadow);
 	}

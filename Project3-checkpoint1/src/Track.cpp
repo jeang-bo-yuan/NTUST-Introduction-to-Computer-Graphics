@@ -188,8 +188,6 @@ Pnt3f CTrack::calc_pos(float U, SplineType type, Pnt3f* FACE, Pnt3f* LEFT, Pnt3f
 
 	Draw::Param_Equation point_eq, orient_eq;
 	Draw::set_equation(*this, cp_id, type, point_eq, orient_eq);
-	// check that type is valid
-	if (point_eq == nullptr || orient_eq == nullptr) return points[0].pos;
 
 	Pnt3f result = point_eq(t);
 
@@ -220,7 +218,6 @@ float CTrack::arc_length(size_t cp_id, SplineType type) const
 {
 	Draw::Param_Equation point_eq, orient_eq;
 	Draw::set_equation(*this, cp_id, type, point_eq, orient_eq);
-	if (point_eq == nullptr) return 0.f;
 
 	float len = 0.f;
 	Pnt3f p1 = point_eq(0.f);

@@ -223,7 +223,6 @@ advanceTrain(float dir)
 	CTrack* const track = this->trainView->m_pTrack;
 	const size_t nct = track->points.size();
 	const SplineType type = (SplineType)splineBrowser->value();
-	if (!is_valid_SplineType(type)) return;
 
 	if (arcLength->value()) {
 		std::vector<float> arcLenAccum = { 0.f };
