@@ -1,12 +1,12 @@
-/************************************************************************
-     File:        CallBacks.H
+/************************************************************************//**
+     @file CallBacks.H
 
-     Author:     
-                  Michael Gleicher, gleicher@cs.wisc.edu
-     Modifier
-                  Yu-Chi Lai, yu-chi@cs.wisc.edu
+     - Author:
+                  + Michael Gleicher, gleicher@cs.wisc.edu
+     - Modifier
+                  + Yu-Chi Lai, yu-chi@cs.wisc.edu
      
-     Comment:     Header file to define callback functions.
+     - Comment:     Header file to define callback functions.
 						define the callbacks for the TrainWindow
 
 						these are little functions that get called when the 
@@ -15,7 +15,7 @@
 						functions are used 
 						when TrainWindow sets itself up.
 
-     Platform:    Visio Studio.Net 2003/2005
+     - Platform:    Visio Studio.Net 2003/2005
 
 *************************************************************************/
 #pragma once

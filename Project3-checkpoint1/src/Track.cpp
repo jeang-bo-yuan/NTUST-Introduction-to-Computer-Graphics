@@ -233,3 +233,47 @@ float CTrack::arc_length(size_t cp_id, SplineType type) const
 
 	return len;
 }
+
+std::vector<float> CTrack::list_points(float startU, SplineType type, float delta, size_t count) const
+{
+	if (count == 0) return std::vector<float>();
+
+	std::vector<float> arcLenAccum = { 0.f };
+	// 計算曲線長的累積
+	// arcLenAccum[x]代表 第0個control point 到 第x個control point 間的曲線長
+	// arcLenAccum.back() 為整圈的鐵軌的長度
+	for (size_t i = 0; i < points.size(); ++i) {
+		arcLenAccum.push_back(arc_length(i, type));
+		arcLenAccum[i + 1] += arcLenAccum[i];
+	}
+
+	float S = 0.f; {
+		size_t cp_id = floorf(startU);
+		float t = startU - cp_id;
+		// startU 轉成實際對應的曲線長
+		S = arcLenAccum[cp_id] + (arcLenAccum[cp_id + 1] - arcLenAccum[cp_id]) * t;
+	}
+
+	std::vector<float> result(count, 0.f);
+	// repeat for `count` times
+	// 將S加上delta並轉回參數空間的點
+	for (size_t i = 0; i < count; ++i) {
+		// 前進特定長度
+		S += delta;
+		// prevent overflow
+		while (S >= arcLenAccum.back()) S -= arcLenAccum.back();
+		// prevent underflow
+		while (S < 0) S += arcLenAccum.back();
+
+		// （實際空間） 轉回 （參數空間）
+		for (size_t cp_id = 0; cp_id < points.size(); ++cp_id) {
+			if (arcLenAccum[cp_id] <= S && S < arcLenAccum[cp_id + 1]) {
+				float t = (S - arcLenAccum[cp_id]) / (arcLenAccum[cp_id + 1] - arcLenAccum[cp_id]);
+				result[i] = cp_id + t;
+				break;
+			}
+		}
+	}
+
+	return result;
+}

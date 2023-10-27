@@ -88,6 +88,18 @@ class CTrack {
 		 */
 		float arc_length(size_t cp_id, SplineType type) const;
 
+		/**
+		 * @brief 列出一長串的點
+		 * @details 給定一個 參數空間內的起始點（startU） 和 實際空間中的間隔（delta），
+		 *          list_points會從 起始點（startU） 開始重覆的加上 這個間隔（delta） 並放入回傳的vector中
+		 * @param startU - start point in param space
+		 * @param type - the Spline Type
+		 * @param delta - the gap in "real space"
+		 * @param count - how many points will be listed
+		 * @return 一個vector，長度為count。vector中的每個元素都是參數空間內的一個點，但不包含startU。
+		 */
+		std::vector<float> list_points(float startU, SplineType type, float delta, size_t count) const;
+
 	public:
 		/// @brief 所有控制點
 		/// @details
