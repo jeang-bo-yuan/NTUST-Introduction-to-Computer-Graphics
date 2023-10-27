@@ -66,8 +66,8 @@ class CTrack {
 			return (index == 0 ? points.size() - 1 : index - 1);
 		}
 
-		/** @brief 計算參數值為U時，所對應的點的位置
-		    @param U - 和 trainU 一樣，代表在第`floor(U)`和下一個控制點間的點
+		/** @brief 計算參數空間中的U，所對應的點的位置
+		    @param U - 參數空間的位置，和 trainU 一樣，代表在第`floor(U)`和下一個控制點間的點
 		    @param type - 使用的參數曲線
 		    @param[out] FACE - 若不為`nullptr`，則dereference並設成該點面向的方向
 		    @param[out] LEFT - 若不為`nullptr`，則dereference並設成該點左邊的方向
@@ -119,4 +119,8 @@ class CTrack {
 		float trainU;
 
 		/// @}
+
+		/// 車箱的數量
+		size_t num_of_cars;
 };
+

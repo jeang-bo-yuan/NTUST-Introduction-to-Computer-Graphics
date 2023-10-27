@@ -153,6 +153,12 @@ TrainWindow(const int x, const int y)
 		lightBrowser->select(1);
 		pty += 110;
 
+		Fl_Button* add_car_button = new Fl_Button(605, pty, 80, 20, "Add Car");
+		add_car_button->callback((Fl_Callback*)add_car_CB, this);
+		Fl_Button* delete_car_button = new Fl_Button(690, pty, 80, 20, "Delete Car");
+		delete_car_button->callback((Fl_Callback*)delete_car_CB, this);
+		pty += 25;
+
 		// we need to make a little phantom widget to have things resize correctly
 		Fl_Box* resizebox = new Fl_Box(600,595,200,5);
 		widgets->resizable(resizebox);

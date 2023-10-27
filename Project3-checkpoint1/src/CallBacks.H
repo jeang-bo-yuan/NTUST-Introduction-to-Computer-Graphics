@@ -5,6 +5,7 @@
                   + Michael Gleicher, gleicher@cs.wisc.edu
      - Modifier
                   + Yu-Chi Lai, yu-chi@cs.wisc.edu
+                  + Bo-Yuan Jeang, b11132021@mail.ntust.edu.tw
      
      - Comment:     Header file to define callback functions.
 						define the callbacks for the TrainWindow
@@ -58,3 +59,17 @@ void rmxCB(Fl_Widget*, TrainWindow* tw);
 void rpzCB(Fl_Widget*, TrainWindow* tw);
 // Rotate the selected control point  about the z axis one less degree
 void rmzCB(Fl_Widget*, TrainWindow* tw);
+
+/**
+ * @brief Callback function when "add car" is clicked
+ * @param tw - the trainwindow
+ * @author Bo Yuan, Jeang
+ */
+void add_car_CB(Fl_Widget*, TrainWindow* tw);
+
+/**
+ * @brief Callback function when "delete car" is clicked
+ * @param tw - the trainwindow
+ * @author Bo Yuan, Jeang
+ */
+void delete_car_CB(Fl_Widget*, TrainWindow* tw);

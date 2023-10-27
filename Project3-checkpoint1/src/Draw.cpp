@@ -208,7 +208,7 @@ namespace {
 			glDrawElements(GL_QUADS, 4, GL_UNSIGNED_INT, indices + 20);
 		glDisableClientState(GL_VERTEX_ARRAY);
 	} // draw_block
-}
+} // unnamed namespace
 
 void Draw::draw_track(const CTrack& track, const SplineType type, const bool doingShadow) {
 	// for each control point
@@ -222,38 +222,73 @@ void Draw::draw_track(const CTrack& track, const SplineType type, const bool doi
 } // draw_track
 
 void Draw::draw_train(const CTrack& track, const SplineType type, const bool doingShadow) {
-	Pnt3f FACE, LEFT, UP;
-	Pnt3f train_pos = track.calc_pos(track.trainU, type, &FACE, &LEFT, &UP);
-
 	glEnable(GL_NORMALIZE); // 因為用了scale，所以開啟GL_NORMALIZE來強迫normal vector變單位向量
 
-	glPushMatrix();
-		// 先做旋轉，再平移到train_pos
-		glTranslatef(train_pos.x, train_pos.y, train_pos.z);
+	{ // 畫車頭
+		Pnt3f FACE, LEFT, UP;
+		Pnt3f train_pos = track.calc_pos(track.trainU, type, &FACE, &LEFT, &UP);
 
-		GLfloat rotate_mat[16] = { // 其實是coordinate轉換
-			LEFT.x, LEFT.y, LEFT.z, 0, // 對應x軸
-			UP.x, UP.y, UP.z, 0, // 對應y軸
-			FACE.x, FACE.y, FACE.z, 0, // 對應z軸
-			0, 0, 0, 1
+		glPushMatrix();
+			// 先做旋轉，再平移到train_pos
+			glTranslatef(train_pos.x, train_pos.y, train_pos.z);
+
+			GLfloat rotate_mat[16] = { // 其實是coordinate轉換
+				LEFT.x, LEFT.y, LEFT.z, 0, // 對應x軸
+				UP.x, UP.y, UP.z, 0, // 對應y軸
+				FACE.x, FACE.y, FACE.z, 0, // 對應z軸
+				0, 0, 0, 1
+			};
+			glMultMatrixf(rotate_mat);
+
+			glScalef(train_size, train_size, train_size);
+
+			if (!doingShadow) glColor3ub(0, 0, 255);
+			draw_block();
+		glPopMatrix();
+
+		glPushMatrix(); // 車頭前方的凸起
+			Pnt3f pos2 = train_pos + FACE * train_size * 1.3f;
+			glTranslatef(pos2.x, pos2.y, pos2.z);
+			glMultMatrixf(rotate_mat);
+			glScalef(train_size, train_size / 2.f, train_size * 0.3f);
+
+			if (!doingShadow) glColor3ub(58, 164, 186);
+			draw_block();
+		glPopMatrix();
+	}
+
+	// 畫更多的車箱
+	if (track.num_of_cars > 0) {
+		std::vector<float> car_pos_list = track.list_points(track.trainU, type, -2.3f * train_size, track.num_of_cars);
+		constexpr GLubyte color[4][3] = {
+			{ 255, 0, 0 },
+			{ 0, 255, 0 },
+			{ 127, 127, 127 },
+			{ 0, 0, 255 },
 		};
-		glMultMatrixf(rotate_mat);
+		for (size_t i = 0; i < track.num_of_cars; ++i) {
+			Pnt3f FACE, LEFT, UP;
+			Pnt3f car_pos = track.calc_pos(car_pos_list[i], type, &FACE, &LEFT, &UP);
 
-		glScalef(train_size, train_size, train_size);
+			glPushMatrix();
+			glTranslatef(car_pos.x, car_pos.y, car_pos.z);
 
-		if (!doingShadow) glColor3ub(0, 0, 255);
-		draw_block();
-	glPopMatrix();
+			GLfloat rotate_mat[16] = {
+				LEFT.x, LEFT.y, LEFT.z, 0,
+				UP.x, UP.y, UP.z, 0,
+				FACE.x, FACE.y, FACE.z, 0,
+				0, 0, 0, 1
+			};
+			glMultMatrixf(rotate_mat);
 
-	glPushMatrix(); // 畫車頭
-		Pnt3f pos2 = train_pos + FACE * train_size * 1.3f;
-		glTranslatef(pos2.x, pos2.y, pos2.z);
-		glMultMatrixf(rotate_mat);
-		glScalef(train_size, train_size / 2.f, train_size * 0.3f);
+			glScalef(train_size, train_size, train_size);
 
-		if (!doingShadow) glColor3ub(58, 164, 186);
-		draw_block();
-	glPopMatrix();
+			if (!doingShadow) glColor3ubv(color[i % 4]);
+			draw_block();
+
+			glPopMatrix();
+		}
+	}
 
 	glDisable(GL_NORMALIZE);
 } // draw_train

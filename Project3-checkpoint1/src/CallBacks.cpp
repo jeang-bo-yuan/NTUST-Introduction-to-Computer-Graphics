@@ -251,3 +251,16 @@ void rmzCB(Fl_Widget*, TrainWindow* tw)
 	rollz(tw, -1);
 }
 
+void add_car_CB(Fl_Widget*, TrainWindow* tw)
+{
+	++tw->m_Track.num_of_cars;
+	tw->damageMe();
+}
+
+void delete_car_CB(Fl_Widget*, TrainWindow* tw)
+{
+	if (tw->m_Track.num_of_cars > 0)
+		--tw->m_Track.num_of_cars;
+	tw->damageMe();
+}
+
