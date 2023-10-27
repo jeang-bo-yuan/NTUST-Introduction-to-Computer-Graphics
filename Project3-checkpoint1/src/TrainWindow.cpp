@@ -226,7 +226,7 @@ advanceTrain(float dir)
 
 	if (arcLength->value()) {
 		float delta = dir * static_cast<float>(speed->value());
-		track->trainU = track->list_points(track->trainU, type, dir, 1).front();
+		track->trainU = track->list_points(track->trainU, type, delta, 1).front();
 	}
 	else {
 		track->trainU += dir * 0.01f * static_cast<float>(speed->value());
