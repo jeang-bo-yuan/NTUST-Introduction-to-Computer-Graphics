@@ -48,7 +48,7 @@ enum class LightType {
 /// 各Light Type顯示的字串
 constexpr const char* LightTypeStr[] = { "Directional Light", "Point Light", "Spot Light"};
 
-
+/// Contains global variables. They are defined in Enum.cpp
 namespace GLOBAL {
 	/// 畫軌道算內插時，t的變化量，1/16
 	constexpr float Param_Interval = 0.0625f;
@@ -59,6 +59,15 @@ namespace GLOBAL {
 	/// @brief Accumulation of arc length. elem.first = t in "param space", elem.second = s in "real space"
 	/// @note it will be initialized in TrainWindow::update_arc_len_accum
 	extern std::vector<std::pair<float, float>> Arc_Len_Accum;
+
+	/// @brief 將參數空間中的T換成實際距離S
+	/// @details 依據 GLOBAL::Arc_Len_Accum 做轉換
+	float T_to_S(float T);
+
+	/// @brief 將實際距離S換成參數空間中的T
+	/// @details 依據 GLOBAL::Arc_Len_Accum 做轉換
+	float S_to_T(float S);
 }
+
 /// 火車是邊長為2倍train_size的立方體
 constexpr float train_size = 5;

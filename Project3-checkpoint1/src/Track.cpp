@@ -239,24 +239,16 @@ std::vector<float> CTrack::list_points(float startU, SplineType type, float delt
 {
 	if (count == 0) return std::vector<float>();
 
-	float S = 0.f; {
-		for (size_t i = 0; i < GLOBAL::Arc_Len_Accum.size() - 1; ++i) {
-			const float lowU = GLOBAL::Arc_Len_Accum[i].first;
-			const float highU = GLOBAL::Arc_Len_Accum[i + 1].first;
-			if (lowU <= startU && startU < highU) {
-				const float lowS = GLOBAL::Arc_Len_Accum[i].second;
-				const float highS = GLOBAL::Arc_Len_Accum[i + 1].second;
-				S = lowS + (startU - lowU) / GLOBAL::Param_Interval * (highS - lowS);
-				break;
-			}
-		}
-	}
+	float S = GLOBAL::T_to_S(startU);
 
 	std::vector<float> result;
 	result.reserve(count);
 	// repeat for `count` times
 	// 將S加上delta並轉回參數空間的點
 	for (size_t i = 0; i < count; ++i) {
+#ifndef NDEBUG
+		float oldS = S;
+#endif
 		// 前進特定長度
 		S += delta;
 		// prevent overflow
@@ -265,16 +257,7 @@ std::vector<float> CTrack::list_points(float startU, SplineType type, float delt
 		while (S < 0) S += GLOBAL::Arc_Len_Accum.back().second;
 
 		// （實際空間） 轉回 （參數空間）
-		for (size_t i = 0; i < GLOBAL::Arc_Len_Accum.size() - 1; ++i) {
-			const float lowS = GLOBAL::Arc_Len_Accum[i].second;
-			const float highS = GLOBAL::Arc_Len_Accum[i + 1].second;
-			if (lowS <= S  && S < highS) {
-				const float lowU = GLOBAL::Arc_Len_Accum[i].first;
-				const float highU = GLOBAL::Arc_Len_Accum[i + 1].first;
-				result.push_back(lowU + (S - lowS) / (highS - lowS) * GLOBAL::Param_Interval);
-				break;
-			}
-		}
+		result.push_back(GLOBAL::S_to_T(S));
 	}
 
 	assert(result.size() == count);
