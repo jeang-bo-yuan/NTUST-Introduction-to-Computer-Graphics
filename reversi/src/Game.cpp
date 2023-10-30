@@ -3,11 +3,10 @@
 #include <string.h>
 #include <QPoint>
 #include <QtGlobal>
+#include <QDebug>
 
 size_t Game::calc_can_click()
 {
-    if (m_state != State::Playing) return 0;
-
     // 重置
     memset(m_can_click, false, sizeof(m_can_click));
 
@@ -120,6 +119,31 @@ void Game::reverse_disk(QPoint pos, QPoint dir)
     }
 }
 
+void Game::next_round(bool dont_change_side)
+{
+    m_state = State::Playing; // 先假設下個回合仍是Playing
+
+    if (dont_change_side == false)
+        m_is_dark_turn = !m_is_dark_turn; // 換人
+
+    size_t num = calc_can_click();
+    if (num == 0) {
+        // 沒辦法動則直接換對方
+        m_is_dark_turn = !m_is_dark_turn;
+        num = calc_can_click();
+
+        // 若還是不能動則結束
+        if (num == 0) {
+            m_state = m_dark_num > m_light_num ? State::Dark_Win :
+                      m_dark_num < m_light_num ? State::Light_Win :
+                                                 State::Draw;
+        }
+    }
+}
+
+// Game Public Method //////////////////////////////////////////////////////////////////////////
+
+///
 Game::Game()
 {
     this->reset();
@@ -133,6 +157,9 @@ bool Game::click(int row, int col)
     // 若不能點
     if (!m_can_click[row][col]) return false;
 
+    // 將上回合的情形存入stack
+    m_stack.push(m_board, m_is_dark_turn);
+
     // 放上棋子
     if (m_is_dark_turn) {
         m_board[row][col] = Disk::Dark;
@@ -143,7 +170,7 @@ bool Game::click(int row, int col)
         ++m_light_num;
     }
 
-    // TODO: 翻轉棋子
+    // 翻轉棋子
     QPoint pos(col, row);
     for (int dx = -1; dx <= 1; ++dx) {
         for (int dy = -1; dy <= 1; ++dy) {
@@ -154,26 +181,15 @@ bool Game::click(int row, int col)
     }
 
     // 進入下一回合+計算棋步
-    m_is_dark_turn = !m_is_dark_turn;
-    size_t num = calc_can_click();
-    if (num == 0) {
-        // 沒辦法動則直接換對方
-        m_is_dark_turn = !m_is_dark_turn;
-        num = calc_can_click();
-
-        // 若還是不能動則結束
-        if (num == 0) {
-            m_state = m_dark_num > m_light_num ? State::Dark_Win :
-                      m_dark_num < m_light_num ? State::Light_Win :
-                                             State::Draw;
-        }
-    }
+    next_round();
 
     return true;
 }
 
 void Game::reset()
 {
+    m_stack.clear();
+
     memset(m_board, 0, sizeof(m_board));
     m_board[3][3] = Disk::Light;
     m_board[4][4] = Disk::Light;
@@ -186,7 +202,113 @@ void Game::reset()
     m_is_dark_turn = true;
 
     m_state = State::Playing;
-
     calc_can_click();
 }
 
+void Game::undo()
+{
+    qDebug() << "Undo:";
+    if (m_stack.empty()) return;
+
+    if (m_stack.can_restore() == false) {
+        m_stack.push(m_board, m_is_dark_turn);
+        m_stack.pop();
+    }
+
+    m_stack.peek(m_board, m_is_dark_turn);
+    m_stack.pop();
+
+    // 重新計算黑、白的數量
+    m_dark_num = 0;
+    m_light_num = 0;
+    for (int r = 0; r < 8; ++r) {
+        for (int c = 0; c < 8; ++c) {
+            switch (m_board[r][c]) {
+            case Disk::None:
+                break;
+            case Disk::Dark:
+                ++m_dark_num;
+                break;
+            case Disk::Light:
+                ++m_light_num;
+                break;
+            }
+        }
+    }
+
+    next_round(true);
+}
+
+void Game::redo()
+{
+    qDebug() << "Redo:";
+    if (m_stack.can_restore() == false) return;
+
+    m_stack.restore();
+    m_stack.restore();
+    m_stack.peek(m_board, m_is_dark_turn);
+    m_stack.pop();
+
+    // 重新計算黑、白的數量
+    m_dark_num = 0;
+    m_light_num = 0;
+    for (int r = 0; r < 8; ++r) {
+        for (int c = 0; c < 8; ++c) {
+            switch (m_board[r][c]) {
+            case Disk::None:
+                break;
+            case Disk::Dark:
+                ++m_dark_num;
+                break;
+            case Disk::Light:
+                ++m_light_num;
+                break;
+            }
+        }
+    }
+
+    next_round(true);
+}
+
+
+// GamingStack //////////////////////////////////////////////////////////////////////////////////////////////
+
+///
+void Game::GamingStack::push(const Disk board[][8], bool is_dark)
+{
+    Game::GamingStack::Data data;
+    memcpy(&data.m_board, &board[0][0], sizeof(Data::m_board));
+    data.m_is_dark_turn = is_dark;
+    m_stack.resize(m_size);
+    m_stack.emplace_back(data);
+    ++m_size;
+
+    qDebug() << "Push index: " << m_size - 1;
+}
+
+void Game::GamingStack::pop()
+{
+    if(this->empty()) return;
+
+    --m_size;
+
+    qDebug() << "Pop index: " << m_size;
+}
+
+void Game::GamingStack::restore()
+{
+    if (this->can_restore() == false) return;
+
+    ++m_size;
+
+    qDebug() << "Restore index: " << m_size - 1;
+}
+
+void Game::GamingStack::peek(Disk board[][8], bool &is_dark)
+{
+    if (this->empty()) return;
+
+    memcpy(&board[0][0], &m_stack[m_size - 1].m_board, sizeof(Data::m_board));
+    is_dark = m_stack[m_size - 1].m_is_dark_turn;
+    qDebug() << "Peek index: " << m_size - 1;
+}

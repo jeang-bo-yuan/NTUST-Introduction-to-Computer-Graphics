@@ -89,6 +89,12 @@ public slots:
     /// 載入配色
     void load_palette();
 
+    /// 取消上一動
+    void undo();
+
+    /// 取消undo
+    void redo();
+
 private:
     /// 將color display顯示的顏色和ui->view實際的顏色同步
     void sync_color_display();

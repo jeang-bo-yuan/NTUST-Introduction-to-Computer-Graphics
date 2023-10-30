@@ -7,6 +7,7 @@
 
 #include <string>
 #include <stdint.h>
+#include <vector>
 
 class QPoint;
 
@@ -30,6 +31,52 @@ public:
     };
 
 private:
+    /// 存放盤面的堆疊
+    class GamingStack {
+        /// 盤面
+        struct Data {
+            Disk m_board[8][8];
+            bool m_is_dark_turn;
+        };
+        /// 堆疊本身
+        std::vector<Data> m_stack;
+        /// 堆疊的大小
+        size_t m_size;
+
+    public:
+        /// default constructor
+        GamingStack(): m_stack(), m_size(0) {}
+
+        /// push into stack
+        void push(const Disk board[][8], bool is_dark);
+
+        /// Pop out the toppest element.
+        void pop();
+
+        /// Push back the element that is lastly popped out.
+        void restore();
+
+        /// Peek the toppest element. Its value is stored into `board` and `is_dark`
+        /// @post If the stack is empty, it won't do anything.
+        void peek(Disk board[][8], bool& is_dark);
+
+        /// check if the stack is empty
+        bool empty() const { return m_size == 0; }
+
+        /// check if the stack can `restore()`
+        bool can_restore() const { return m_size < m_stack.size(); }
+
+        /// clear the stack
+        void clear() { m_size = 0; m_stack.clear(); }
+
+        /// get size
+        size_t size() const { return m_size; }
+    };
+
+private:
+    /// 棋盤的堆疊。top element為上一步的盤面。若可以restore，則restore後變這次，再restore變下一步。
+    GamingStack m_stack;
+
     /// 棋盤
     Disk m_board[8][8];
 
@@ -51,7 +98,7 @@ private:
 private:
     /**
      * @brief 計算目前的行動方可以點的位置
-     * @return 有幾個格子可以點，若`m_state != State::Playing`會回傳`0`
+     * @return 有幾個格子可以點
      * @post m_can_click會重置並更新
      */
     size_t calc_can_click();
@@ -63,6 +110,13 @@ private:
      * @pre pos上不能是Disk::None
      */
     void reverse_disk(QPoint pos, QPoint dir);
+
+    /**
+     * @brief 進入下一回合
+     * @param dont_change_side - 若設成true，則next_round會假設m_is_dark_turn指示了下一回合的行動方
+     * @post 判斷勝負、下一回合輪誰、計算棋步
+     */
+    void next_round(bool dont_change_side = false);
 
 public:
     /**
@@ -152,6 +206,12 @@ public:
     void reset();
 
     /// @}
+
+    /// 取消上一動
+    void undo();
+
+    /// 取消undo
+    void redo();
 };
 
 #endif // GAME_H

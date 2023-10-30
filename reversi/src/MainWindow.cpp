@@ -14,6 +14,8 @@ MainWindow::MainWindow(QWidget *parent) :
 
     // 遊戲介面
     connect(ui->view, &GameView::clicked_success, this, &MainWindow::update_info);
+    connect(ui->buttonUndo, &QPushButton::clicked, this, &MainWindow::undo);
+    connect(ui->buttonRedo, &QPushButton::clicked, this, &MainWindow::redo);
 
     // 上方的menu
     ui->menuFrame->layout()->setAlignment(Qt::AlignLeft | Qt::AlignTop);
@@ -206,6 +208,20 @@ void MainWindow::load_palette()
     inF.read((char*)&ui->view->m_color, sizeof(ui->view->m_color));
     ui->view->update();
     sync_color_display();
+}
+
+void MainWindow::undo()
+{
+    m_game_ptr->undo();
+    ui->view->update();
+    this->update_info();
+}
+
+void MainWindow::redo()
+{
+    m_game_ptr->redo();
+    ui->view->update();
+    this->update_info();
 }
 
 void MainWindow::sync_color_display()
