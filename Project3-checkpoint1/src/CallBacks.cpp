@@ -81,7 +81,8 @@ void addPointCB(Fl_Widget*, TrainWindow* tw)
 		tw->m_Track.trainU += 1;
 		if (tw->m_Track.trainU >= npts) tw->m_Track.trainU -= npts;
 	}
-
+	/// @note Update GLOBAL::Arc_Len_Accum
+	tw->update_arc_len_accum();
 	tw->damageMe();
 }
 
@@ -101,6 +102,8 @@ void deletePointCB(Fl_Widget*, TrainWindow* tw)
 		if (tw->trainView->m_pTrack->trainU >= tw->trainView->m_pTrack->points.size())
 			tw->trainView->m_pTrack->trainU -= tw->trainView->m_pTrack->points.size();
 	}
+	/// @note Update GLOBAL::Arc_Len_Accum
+	tw->update_arc_len_accum();
 	tw->damageMe();
 }
 //***************************************************************************
@@ -187,6 +190,8 @@ void rollx(TrainWindow* tw, float dir)
 		tw->m_Track.points[s].orient.y = co * old.y - si * old.z;
 		tw->m_Track.points[s].orient.z = si * old.y + co * old.z;
 	}
+	/// @note Update GLOBAL::Arc_Len_Accum
+	tw->update_arc_len_accum();
 	tw->damageMe();
 } 
 
@@ -227,7 +232,8 @@ void rollz(TrainWindow* tw, float dir)
 		tw->m_Track.points[s].orient.y = co * old.y - si * old.x;
 		tw->m_Track.points[s].orient.x = si * old.y + co * old.x;
 	}
-
+	/// @note Update GLOBAL::Arc_Len_Accum
+	tw->update_arc_len_accum();
 	tw->damageMe();
 }
 
@@ -261,6 +267,13 @@ void delete_car_CB(Fl_Widget*, TrainWindow* tw)
 {
 	if (tw->m_Track.num_of_cars > 0)
 		--tw->m_Track.num_of_cars;
+	tw->damageMe();
+}
+
+void spline_change_CB(Fl_Widget*, TrainWindow* tw)
+{
+	/// @note Update GLOBAL::Arc_Len_Accum
+	tw->update_arc_len_accum();
 	tw->damageMe();
 }
 

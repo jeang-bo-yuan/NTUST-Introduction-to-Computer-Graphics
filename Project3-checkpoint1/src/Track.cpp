@@ -28,6 +28,7 @@
 #include "Draw.H"
 
 #include <FL/fl_ask.h>
+#include <assert.h>
 
 //****************************************************************************
 //
@@ -221,8 +222,8 @@ float CTrack::arc_length(size_t cp_id, SplineType type) const
 
 	float len = 0.f;
 	Pnt3f p1 = point_eq(0.f);
-	for (float t = 0.f; t < 1.f; t += Param_Interval) {
-		Pnt3f p2 = point_eq(t + Param_Interval);
+	for (float t = 0.f; t < 1.f; t += GLOBAL::Param_Interval) {
+		Pnt3f p2 = point_eq(t + GLOBAL::Param_Interval);
 		Pnt3f delta = p2 - p1;
 
 		len += sqrtf(delta.x * delta.x + delta.y * delta.y + delta.z * delta.z);
@@ -238,42 +239,44 @@ std::vector<float> CTrack::list_points(float startU, SplineType type, float delt
 {
 	if (count == 0) return std::vector<float>();
 
-	std::vector<float> arcLenAccum = { 0.f };
-	// 計算曲線長的累積
-	// arcLenAccum[x]代表 第0個control point 到 第x個control point 間的曲線長
-	// arcLenAccum.back() 為整圈的鐵軌的長度
-	for (size_t i = 0; i < points.size(); ++i) {
-		arcLenAccum.push_back(arc_length(i, type));
-		arcLenAccum[i + 1] += arcLenAccum[i];
-	}
-
 	float S = 0.f; {
-		size_t cp_id = floorf(startU);
-		float t = startU - cp_id;
-		// startU 轉成實際對應的曲線長
-		S = arcLenAccum[cp_id] + (arcLenAccum[cp_id + 1] - arcLenAccum[cp_id]) * t;
+		for (size_t i = 0; i < GLOBAL::Arc_Len_Accum.size() - 1; ++i) {
+			const float lowU = GLOBAL::Arc_Len_Accum[i].first;
+			const float highU = GLOBAL::Arc_Len_Accum[i + 1].first;
+			if (lowU <= startU && startU < highU) {
+				const float lowS = GLOBAL::Arc_Len_Accum[i].second;
+				const float highS = GLOBAL::Arc_Len_Accum[i + 1].second;
+				S = lowS + (startU - lowU) / GLOBAL::Param_Interval * (highS - lowS);
+				break;
+			}
+		}
 	}
 
-	std::vector<float> result(count, 0.f);
+	std::vector<float> result;
+	result.reserve(count);
 	// repeat for `count` times
 	// 將S加上delta並轉回參數空間的點
 	for (size_t i = 0; i < count; ++i) {
 		// 前進特定長度
 		S += delta;
 		// prevent overflow
-		while (S >= arcLenAccum.back()) S -= arcLenAccum.back();
+		while (S >= GLOBAL::Arc_Len_Accum.back().second) S -= GLOBAL::Arc_Len_Accum.back().second;
 		// prevent underflow
-		while (S < 0) S += arcLenAccum.back();
+		while (S < 0) S += GLOBAL::Arc_Len_Accum.back().second;
 
 		// （實際空間） 轉回 （參數空間）
-		for (size_t cp_id = 0; cp_id < points.size(); ++cp_id) {
-			if (arcLenAccum[cp_id] <= S && S < arcLenAccum[cp_id + 1]) {
-				float t = (S - arcLenAccum[cp_id]) / (arcLenAccum[cp_id + 1] - arcLenAccum[cp_id]);
-				result[i] = cp_id + t;
+		for (size_t i = 0; i < GLOBAL::Arc_Len_Accum.size() - 1; ++i) {
+			const float lowS = GLOBAL::Arc_Len_Accum[i].second;
+			const float highS = GLOBAL::Arc_Len_Accum[i + 1].second;
+			if (lowS <= S  && S < highS) {
+				const float lowU = GLOBAL::Arc_Len_Accum[i].first;
+				const float highU = GLOBAL::Arc_Len_Accum[i + 1].first;
+				result.push_back(lowU + (S - lowS) / (highS - lowS) * GLOBAL::Param_Interval);
 				break;
 			}
 		}
 	}
 
+	assert(result.size() == count);
 	return result;
 }

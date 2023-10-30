@@ -35,6 +35,7 @@
 #include "TrainView.H"
 #include "CallBacks.H"
 #include "Enum.H"
+#include "Draw.H"
 
 
 
@@ -107,7 +108,7 @@ TrainWindow(const int x, const int y)
 		/// @todo make sure these choices (Spline Type) are the same as what the code supports
 		splineBrowser = new Fl_Browser(605,pty,120,75,"Spline Type");
 		splineBrowser->type(2);		// select
-		splineBrowser->callback((Fl_Callback*)damageCB,this);
+		splineBrowser->callback((Fl_Callback*)spline_change_CB,this);
 		splineBrowser->add(SplineTypeStr[0]);
 		splineBrowser->add(SplineTypeStr[1]);
 		splineBrowser->add(SplineTypeStr[2]);
@@ -169,6 +170,9 @@ TrainWindow(const int x, const int y)
 
 	// set up callback on idle
 	Fl::add_idle((void (*)(void*))runButtonCB,this);
+
+	/// @note Update GLOBAL::Arc_Len_Accum
+	this->update_arc_len_accum();
 }
 
 //************************************************************************
@@ -230,15 +234,47 @@ advanceTrain(float dir)
 	const size_t nct = track->points.size();
 	const SplineType type = (SplineType)splineBrowser->value();
 
+	this->update_arc_len_accum();
+
 	if (arcLength->value()) {
+		GLOBAL::Arc_Len_Mode = true;
 		float delta = dir * static_cast<float>(speed->value());
 		track->trainU = track->list_points(track->trainU, type, delta, 1).front();
 	}
 	else {
+		GLOBAL::Arc_Len_Mode = false;
 		track->trainU += dir * 0.01f * static_cast<float>(speed->value());
 
 		// prevent overflow and underflow
 		if (track->trainU >= nct) track->trainU -= nct;
 		if (track->trainU < 0) track->trainU += nct;
+	}
+}
+
+void TrainWindow::update_arc_len_accum()
+{
+	// init GLOBAL::Arc_Len_Accum
+	GLOBAL::Arc_Len_Accum.clear();
+	GLOBAL::Arc_Len_Accum.reserve(m_Track.points.size() * 16 + 1);
+	GLOBAL::Arc_Len_Accum.emplace_back(std::pair<float, float>{ 0, 0 });
+	// for each control point
+	for (size_t cp_id = 0, count = 1; cp_id < m_Track.points.size(); ++cp_id) {
+		Draw::Param_Equation point_eq, unused;
+		Draw::set_equation(m_Track, cp_id, splineBrowser->value(), point_eq, unused);
+
+		Pnt3f p1 = point_eq(0);
+		for (float t = GLOBAL::Param_Interval; t <= 1; t += GLOBAL::Param_Interval) {
+			Pnt3f p2 = point_eq(t);
+			Pnt3f delta = p2 - p1;
+			float len = sqrtf(delta.x * delta.x + delta.y * delta.y + delta.z * delta.z);
+
+			GLOBAL::Arc_Len_Accum.emplace_back(std::pair<float, float>{
+				cp_id + t,
+					len + GLOBAL::Arc_Len_Accum[count - 1].second
+			});
+
+			p1 = p2;
+			++count;
+		}
 	}
 }

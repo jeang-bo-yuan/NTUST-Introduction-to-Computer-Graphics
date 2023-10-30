@@ -73,3 +73,10 @@ void add_car_CB(Fl_Widget*, TrainWindow* tw);
  * @author Bo Yuan, Jeang
  */
 void delete_car_CB(Fl_Widget*, TrainWindow* tw);
+
+/**
+ * @brief Callback function when "spline type" is changed
+ * @param tw - the trainwindow
+ * @author Bo Yuan, Jeang
+ */
+void spline_change_CB(Fl_Widget*, TrainWindow* tw);

@@ -64,6 +64,10 @@ class TrainWindow : public Fl_Double_Window {
 		// it should handle forward and backwards
 		void advanceTrain(float dir = 1);
 
+		/// Update the GLOBAL::Arc_Len_Accum
+		/// @note Call it whenever control point change pos or spline type change
+		void update_arc_len_accum();
+
 		// simple helper function to set up a button
 		void togglify(Fl_Button*, int state=0);
 

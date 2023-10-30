@@ -117,13 +117,13 @@ namespace {
 		                       const bool doingShadow)
 	{
 		// 間隔為Param_Interval
-		for (float t = 0.0f; t < 1.0f; t += Param_Interval) {
+		for (float t = 0.0f; t < 1.0f; t += GLOBAL::Param_Interval) {
 			// points
 			Pnt3f p1 = point_eq(t);
-			Pnt3f p2 = point_eq(t + Param_Interval);
+			Pnt3f p2 = point_eq(t + GLOBAL::Param_Interval);
 			Pnt3f middle = (p1 + p2) * 0.5f;
 			// orient
-			Pnt3f orient = orient_eq(t + Param_Interval / 2.f);
+			Pnt3f orient = orient_eq(t + GLOBAL::Param_Interval / 2.f);
 			// 方向向量
 			Pnt3f u = p2 - p1;
 			float line_len = sqrtf(u.x * u.x + u.y * u.y + u.z * u.z); // 這一段的長度

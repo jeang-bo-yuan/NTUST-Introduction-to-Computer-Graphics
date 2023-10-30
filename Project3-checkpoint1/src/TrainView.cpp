@@ -133,6 +133,8 @@ int TrainView::handle(int event)
 				cp->pos.x = (float) rx;
 				cp->pos.y = (float) ry;
 				cp->pos.z = (float) rz;
+				/// @note Update GLOBAL::Arc_Len_Accum after drag
+				tw->update_arc_len_accum();
 				damage(1);
 			}
 			break;
