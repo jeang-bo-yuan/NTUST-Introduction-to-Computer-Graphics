@@ -108,60 +108,53 @@ namespace {
 
 	/**
 	 * @brief 礶瓂笵㎝狤れsleeper
-	 * @param point_eq - 翴把计Α
-	 * @param orient_eq - orient把计Α
+	 * @param p1 - start point
+	 * @param p2 - end point
+	 * @param orient - the orient of the track
 	 * @param doingShadow - 琌礶潮紇
 	 */
-	void draw_line_and_sleeper(const Draw::Param_Equation& point_eq,
-		                       const Draw::Param_Equation& orient_eq,
-		                       const bool doingShadow)
+	void draw_line_and_sleeper(Pnt3f p1, Pnt3f p2, Pnt3f orient, const bool doingShadow)
 	{
 		// 丁筳Param_Interval
-		for (float t = 0.0f; t < 1.0f; t += GLOBAL::Param_Interval) {
-			// points
-			Pnt3f p1 = point_eq(t);
-			Pnt3f p2 = point_eq(t + GLOBAL::Param_Interval);
-			Pnt3f middle = (p1 + p2) * 0.5f;
-			// orient
-			Pnt3f orient = orient_eq(t + GLOBAL::Param_Interval / 2.f);
-			// よ秖
-			Pnt3f u = p2 - p1;
-			float line_len = sqrtf(u.x * u.x + u.y * u.y + u.z * u.z); // 硂琿
-			u.normalize();
-			// u ㎝ orient 縩眔瓂笵キキ簿よ
-			Pnt3f horizontal = u * orient; horizontal.normalize();
-			// 瓂笵糴 2 + 2
-			Pnt3f line_space = horizontal * 2;
+		// points
+		Pnt3f middle = (p1 + p2) * 0.5f;
+		// よ秖
+		Pnt3f u = p2 - p1;
+		float line_len = sqrtf(u.x * u.x + u.y * u.y + u.z * u.z); // 硂琿
+		u.normalize();
+		// u ㎝ orient 縩眔瓂笵キキ簿よ
+		Pnt3f horizontal = u * orient; horizontal.normalize();
+		// 瓂笵糴 2 + 2
+		Pnt3f line_space = horizontal * 2;
 
-			if (!doingShadow) glColor3ub(0, 0, 0);
-			// 礶瓂笵
-			glBegin(GL_LINES);
-				glVertex3fv((p1 + line_space).v());
-				glVertex3fv((p2 + line_space).v());
+		if (!doingShadow) glColor3ub(0, 0, 0);
+		// 礶瓂笵
+		glBegin(GL_LINES);
+			glVertex3fv((p1 + line_space).v());
+			glVertex3fv((p2 + line_space).v());
 
-				glVertex3fv((p1 - line_space).v());
-				glVertex3fv((p2 - line_space).v());
-			glEnd();
+			glVertex3fv((p1 - line_space).v());
+			glVertex3fv((p2 - line_space).v());
+		glEnd();
 
-			// 礶sleeper
-			Pnt3f DOWN = u * horizontal; DOWN.normalize();
-			GLfloat rotate_mat[16] = {
-				horizontal.x, horizontal.y, horizontal.z, 0,
-				DOWN.x, DOWN.y, DOWN.z, 0,
-				u.x, u.y, u.z, 0,
-				0, 0, 0, 1
-			};
-			middle = middle + DOWN * 0.1f; // 翴翴
-			glPushMatrix();
-				glTranslatef(middle.x, middle.y, middle.z);
-				glMultMatrixf(rotate_mat);
-				glScalef(3, 0.4, line_len * 0.3f);
-				if (!doingShadow) glColor3ub(255, 255, 255);
-				glEnable(GL_NORMALIZE);
-				draw_block();
-				glDisable(GL_NORMALIZE);
-			glPopMatrix();
-		}
+		// 礶sleeper
+		Pnt3f DOWN = u * horizontal; DOWN.normalize();
+		GLfloat rotate_mat[16] = {
+			horizontal.x, horizontal.y, horizontal.z, 0,
+			DOWN.x, DOWN.y, DOWN.z, 0,
+			u.x, u.y, u.z, 0,
+			0, 0, 0, 1
+		};
+		middle = middle + DOWN * 0.1f; // 翴翴
+		glPushMatrix();
+			glTranslatef(middle.x, middle.y, middle.z);
+			glMultMatrixf(rotate_mat);
+			glScalef(3, 0.4, line_len * 0.3f);
+			if (!doingShadow) glColor3ub(255, 255, 255);
+			glEnable(GL_NORMALIZE);
+			draw_block();
+			glDisable(GL_NORMALIZE);
+		glPopMatrix();
 		return;
 	}
 
@@ -211,14 +204,63 @@ namespace {
 } // unnamed namespace
 
 void Draw::draw_track(const CTrack& track, const SplineType type, const bool doingShadow) {
+	std::vector<Draw::Param_Equation> point_eq_vec;
+	std::vector<Draw::Param_Equation> orient_eq_vec;
+	point_eq_vec.reserve(track.points.size());
+	orient_eq_vec.reserve(track.points.size());
+
 	// for each control point
 	for (size_t i = 0; i < track.points.size(); ++i) {
 		Param_Equation point_eq, orient_eq;
-		
 		set_equation(track, i, type, point_eq, orient_eq);
-
-		draw_line_and_sleeper(point_eq, orient_eq, doingShadow);
+		point_eq_vec.push_back(point_eq);
+		orient_eq_vec.push_back(orient_eq);
 	}
+
+	if (GLOBAL::Arc_Len_Mode) {
+		bool wrap_back = false; // 琌露S=0玥琌ノㄓ絋玂瓂笵繷Ю硈
+		Pnt3f p1 = point_eq_vec[0](0);
+		float S1 = 0.f; // real distance of p1
+		for (float S2 = GLOBAL::Track_Interval; !wrap_back; S2 += GLOBAL::Track_Interval) {
+			// 露S=0S单程
+			if (S2 >= GLOBAL::Arc_Len_Accum.back().second) {
+				wrap_back = true;
+				S2 = GLOBAL::Arc_Len_Accum.back().second;
+			}
+
+			float T2 = GLOBAL::S_to_T(S2);
+			Pnt3f p2, orient; {
+				size_t cp_id = floorf(T2);
+				float t = T2 - cp_id;
+				p2 = point_eq_vec[cp_id](t);
+				orient = orient_eq_vec[cp_id](t - GLOBAL::Param_Interval / 2.f);
+			}
+
+			draw_line_and_sleeper(p1, p2, orient, doingShadow);
+
+			// store for next iteration
+			p1 = p2;
+			S1 = S2;
+		}
+	}
+	else {
+		for (size_t cp_id = 0; cp_id < track.points.size(); ++cp_id) {
+			Draw::Param_Equation point_eq = point_eq_vec[cp_id];
+			Draw::Param_Equation orient_eq = orient_eq_vec[cp_id];
+
+			Pnt3f p1 = point_eq(0);
+			for (float t = GLOBAL::Param_Interval; t <= 1; t += GLOBAL::Param_Interval) {
+				Pnt3f p2 = point_eq(t);
+				Pnt3f orient = orient_eq(t - GLOBAL::Param_Interval / 2.f);
+				draw_line_and_sleeper(p1, p2, orient, doingShadow);
+
+				// store for next iteration
+				p1 = p2;
+			}
+		}
+	}
+
+
 } // draw_track
 
 void Draw::draw_train(const CTrack& track, const SplineType type, const bool doingShadow) {

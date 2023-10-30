@@ -53,6 +53,9 @@ namespace GLOBAL {
 	/// 畫軌道算內插時，t的變化量，1/16
 	constexpr float Param_Interval = 0.0625f;
 
+	/// Arc_Len_Mode下，軌道間的距離
+	constexpr float Track_Interval = 4.f;
+
 	/// if arc length mode is enabled
 	extern bool Arc_Len_Mode;
 
