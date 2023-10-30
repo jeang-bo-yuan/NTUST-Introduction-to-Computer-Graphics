@@ -60,6 +60,10 @@ void rpzCB(Fl_Widget*, TrainWindow* tw);
 // Rotate the selected control point  about the z axis one less degree
 void rmzCB(Fl_Widget*, TrainWindow* tw);
 
+/// @name Added by myself
+/// @author Bo Yuan, Jeang
+/// @{
+
 /**
  * @brief Callback function when "add car" is clicked
  * @param tw - the trainwindow
@@ -80,3 +84,5 @@ void delete_car_CB(Fl_Widget*, TrainWindow* tw);
  * @author Bo Yuan, Jeang
  */
 void spline_change_CB(Fl_Widget*, TrainWindow* tw);
+
+/// @}

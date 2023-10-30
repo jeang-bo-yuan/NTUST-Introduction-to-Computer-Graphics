@@ -44,6 +44,8 @@ void resetCB(Fl_Widget*, TrainWindow* tw)
 	tw->m_Track.resetPoints();
 	tw->trainView->selectedCube = -1;
 	tw->m_Track.trainU = 0;
+	/// @note Update GLOBAL::Arc_Len_Accum
+	tw->update_arc_len_accum();
 	tw->damageMe();
 }
 
@@ -160,6 +162,8 @@ void loadCB(Fl_Widget*, TrainWindow* tw)
 		fl_file_chooser("Pick a Track File","*.txt","TrackFiles/track.txt");
 	if (fname) {
 		tw->m_Track.readPoints(fname);
+		/// @note Update GLOBAL::Arc_Len_Accum
+		tw->update_arc_len_accum();
 		tw->damageMe();
 	}
 }
