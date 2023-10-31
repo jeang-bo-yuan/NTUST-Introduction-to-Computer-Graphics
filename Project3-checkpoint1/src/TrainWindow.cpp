@@ -171,7 +171,7 @@ TrainWindow(const int x, const int y)
 	// set up callback on idle
 	Fl::add_idle((void (*)(void*))runButtonCB,this);
 
-	/// @note Update GLOBAL::Arc_Len_Accum
+	/// @note Update track's CTrack::Arc_Len_Accum
 	this->update_arc_len_accum();
 }
 
@@ -230,51 +230,26 @@ advanceTrain(float dir)
 	if (world.trainU < 0) world.trainU += nct;
 #endif
 
-	CTrack* const track = this->trainView->m_pTrack;
-	const size_t nct = track->points.size();
-	const SplineType type = (SplineType)splineBrowser->value();
+	const size_t nct = m_Track.points.size();
 
-	this->update_arc_len_accum();
+	//this->update_arc_len_accum();
 
 	if (arcLength->value()) {
 		GLOBAL::Arc_Len_Mode = true;
 		float delta = dir * static_cast<float>(speed->value());
-		track->trainU = track->list_points(track->trainU, type, delta, 1).front();
+		m_Track.trainU = m_Track.list_points(m_Track.trainU, delta, 1).front();
 	}
 	else {
 		GLOBAL::Arc_Len_Mode = false;
-		track->trainU += dir * 0.01f * static_cast<float>(speed->value());
+		m_Track.trainU += dir * 0.01f * static_cast<float>(speed->value());
 
 		// prevent overflow and underflow
-		if (track->trainU >= nct) track->trainU -= nct;
-		if (track->trainU < 0) track->trainU += nct;
+		if (m_Track.trainU >= nct) m_Track.trainU -= nct;
+		if (m_Track.trainU < 0) m_Track.trainU += nct;
 	}
 }
 
 void TrainWindow::update_arc_len_accum()
 {
-	// init GLOBAL::Arc_Len_Accum
-	GLOBAL::Arc_Len_Accum.clear();
-	GLOBAL::Arc_Len_Accum.reserve(m_Track.points.size() * 16 + 1);
-	GLOBAL::Arc_Len_Accum.emplace_back(std::pair<float, float>{ 0, 0 });
-	// for each control point
-	for (size_t cp_id = 0, count = 1; cp_id < m_Track.points.size(); ++cp_id) {
-		Draw::Param_Equation point_eq, unused;
-		Draw::set_equation(m_Track, cp_id, splineBrowser->value(), point_eq, unused);
-
-		Pnt3f p1 = point_eq(0);
-		for (float t = GLOBAL::Param_Interval; t <= 1; t += GLOBAL::Param_Interval) {
-			Pnt3f p2 = point_eq(t);
-			Pnt3f delta = p2 - p1;
-			float len = sqrtf(delta.x * delta.x + delta.y * delta.y + delta.z * delta.z);
-
-			GLOBAL::Arc_Len_Accum.emplace_back(std::pair<float, float>{
-				cp_id + t,
-					len + GLOBAL::Arc_Len_Accum[count - 1].second
-			});
-
-			p1 = p2;
-			++count;
-		}
-	}
+	m_Track.set_spline(splineBrowser->value());
 }

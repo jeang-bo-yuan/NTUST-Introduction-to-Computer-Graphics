@@ -44,7 +44,7 @@ void resetCB(Fl_Widget*, TrainWindow* tw)
 	tw->m_Track.resetPoints();
 	tw->trainView->selectedCube = -1;
 	tw->m_Track.trainU = 0;
-	/// @note Update GLOBAL::Arc_Len_Accum
+	/// @note Update track's CTrack::Arc_Len_Accum
 	tw->update_arc_len_accum();
 	tw->damageMe();
 }
@@ -83,7 +83,7 @@ void addPointCB(Fl_Widget*, TrainWindow* tw)
 		tw->m_Track.trainU += 1;
 		if (tw->m_Track.trainU >= npts) tw->m_Track.trainU -= npts;
 	}
-	/// @note Update GLOBAL::Arc_Len_Accum
+	/// @note Update track's CTrack::Arc_Len_Accum
 	tw->update_arc_len_accum();
 	tw->damageMe();
 }
@@ -104,7 +104,7 @@ void deletePointCB(Fl_Widget*, TrainWindow* tw)
 		if (tw->trainView->m_pTrack->trainU >= tw->trainView->m_pTrack->points.size())
 			tw->trainView->m_pTrack->trainU -= tw->trainView->m_pTrack->points.size();
 	}
-	/// @note Update GLOBAL::Arc_Len_Accum
+	/// @note Update track's CTrack::Arc_Len_Accum
 	tw->update_arc_len_accum();
 	tw->damageMe();
 }
@@ -162,7 +162,7 @@ void loadCB(Fl_Widget*, TrainWindow* tw)
 		fl_file_chooser("Pick a Track File","*.txt","TrackFiles/track.txt");
 	if (fname) {
 		tw->m_Track.readPoints(fname);
-		/// @note Update GLOBAL::Arc_Len_Accum
+		/// @note Update track's CTrack::Arc_Len_Accum
 		tw->update_arc_len_accum();
 		tw->damageMe();
 	}
@@ -194,7 +194,7 @@ void rollx(TrainWindow* tw, float dir)
 		tw->m_Track.points[s].orient.y = co * old.y - si * old.z;
 		tw->m_Track.points[s].orient.z = si * old.y + co * old.z;
 	}
-	/// @note Update GLOBAL::Arc_Len_Accum
+	/// @note Update track's CTrack::Arc_Len_Accum
 	tw->update_arc_len_accum();
 	tw->damageMe();
 } 
@@ -236,7 +236,7 @@ void rollz(TrainWindow* tw, float dir)
 		tw->m_Track.points[s].orient.y = co * old.y - si * old.x;
 		tw->m_Track.points[s].orient.x = si * old.y + co * old.x;
 	}
-	/// @note Update GLOBAL::Arc_Len_Accum
+	/// @note Update track's CTrack::Arc_Len_Accum
 	tw->update_arc_len_accum();
 	tw->damageMe();
 }
@@ -276,7 +276,7 @@ void delete_car_CB(Fl_Widget*, TrainWindow* tw)
 
 void spline_change_CB(Fl_Widget*, TrainWindow* tw)
 {
-	/// @note Update GLOBAL::Arc_Len_Accum
+	/// @note Update track's CTrack::Arc_Len_Accum
 	tw->update_arc_len_accum();
 	tw->damageMe();
 }

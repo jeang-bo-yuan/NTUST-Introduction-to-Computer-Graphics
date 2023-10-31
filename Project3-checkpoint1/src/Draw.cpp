@@ -203,7 +203,7 @@ namespace {
 	} // draw_block
 } // unnamed namespace
 
-void Draw::draw_track(const CTrack& track, const SplineType type, const bool doingShadow) {
+void Draw::draw_track(const CTrack& track, const bool doingShadow) {
 	std::vector<Draw::Param_Equation> point_eq_vec;
 	std::vector<Draw::Param_Equation> orient_eq_vec;
 	point_eq_vec.reserve(track.points.size());
@@ -212,7 +212,7 @@ void Draw::draw_track(const CTrack& track, const SplineType type, const bool doi
 	// for each control point
 	for (size_t i = 0; i < track.points.size(); ++i) {
 		Param_Equation point_eq, orient_eq;
-		set_equation(track, i, type, point_eq, orient_eq);
+		set_equation(track, i, track.spline_type(), point_eq, orient_eq);
 		point_eq_vec.push_back(point_eq);
 		orient_eq_vec.push_back(orient_eq);
 	}
@@ -223,12 +223,12 @@ void Draw::draw_track(const CTrack& track, const SplineType type, const bool doi
 		float S1 = 0.f; // real distance of p1
 		for (float S2 = GLOBAL::Track_Interval; !wrap_back; S2 += GLOBAL::Track_Interval) {
 			// 繞回S=0（S大於等於最大值）了
-			if (S2 >= GLOBAL::Arc_Len_Accum.back().second) {
+			if (S2 >= track.Arc_Len_Accum().back().second) {
 				wrap_back = true;
-				S2 = GLOBAL::Arc_Len_Accum.back().second;
+				S2 = track.Arc_Len_Accum().back().second;
 			}
 
-			float T2 = GLOBAL::S_to_T(S2);
+			float T2 = track.S_to_T(S2);
 			Pnt3f p2, orient; {
 				size_t cp_id = floorf(T2);
 				float t = T2 - cp_id;
@@ -263,12 +263,12 @@ void Draw::draw_track(const CTrack& track, const SplineType type, const bool doi
 
 } // draw_track
 
-void Draw::draw_train(const CTrack& track, const SplineType type, const bool doingShadow) {
+void Draw::draw_train(const CTrack& track, const bool doingShadow) {
 	glEnable(GL_NORMALIZE); // 因為用了scale，所以開啟GL_NORMALIZE來強迫normal vector變單位向量
 
 	{ // 畫車頭
 		Pnt3f FACE, LEFT, UP;
-		Pnt3f train_pos = track.calc_pos(track.trainU, type, &FACE, &LEFT, &UP);
+		Pnt3f train_pos = track.calc_pos(track.trainU, &FACE, &LEFT, &UP);
 
 		glPushMatrix();
 			// 先做旋轉，再平移到train_pos
@@ -301,7 +301,7 @@ void Draw::draw_train(const CTrack& track, const SplineType type, const bool doi
 
 	// 畫更多的車箱
 	if (track.num_of_cars > 0) {
-		std::vector<float> car_pos_list = track.list_points(track.trainU, type, -2.3f * train_size, track.num_of_cars);
+		std::vector<float> car_pos_list = track.list_points(track.trainU, -2.3f * train_size, track.num_of_cars);
 		constexpr GLubyte color[4][3] = {
 			{ 255, 0, 0 },
 			{ 0, 255, 0 },
@@ -310,7 +310,7 @@ void Draw::draw_train(const CTrack& track, const SplineType type, const bool doi
 		};
 		for (size_t i = 0; i < track.num_of_cars; ++i) {
 			Pnt3f FACE, LEFT, UP;
-			Pnt3f car_pos = track.calc_pos(car_pos_list[i], type, &FACE, &LEFT, &UP);
+			Pnt3f car_pos = track.calc_pos(car_pos_list[i], &FACE, &LEFT, &UP);
 
 			glPushMatrix();
 			glTranslatef(car_pos.x, car_pos.y, car_pos.z);

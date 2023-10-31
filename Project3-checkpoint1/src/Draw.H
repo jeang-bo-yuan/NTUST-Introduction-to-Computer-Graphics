@@ -49,14 +49,12 @@ namespace Draw {
 
 	/// @brief 畫出軌道
 	/// @param track - 軌道
-	/// @param type - 中間的點要以哪種參數式計算
 	/// @param doingShadow - 是否在畫陰影
-	void draw_track(const CTrack& track, const SplineType type, const bool doingShadow);
+	void draw_track(const CTrack& track, const bool doingShadow);
 
 	/// @brief 畫出火車
 	/// @param track - 火車所在的軌道
-	/// @param type - 中間的點要以哪種參數式計算
 	/// @param doingShadow - 是否在畫陰影
-	void draw_train(const CTrack& track, const SplineType type, const bool doingShadow);
+	void draw_train(const CTrack& track, const bool doingShadow);
 
 } // namespace Draw

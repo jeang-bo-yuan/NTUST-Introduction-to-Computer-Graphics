@@ -133,7 +133,7 @@ int TrainView::handle(int event)
 				cp->pos.x = (float) rx;
 				cp->pos.y = (float) ry;
 				cp->pos.z = (float) rz;
-				/// @note Update GLOBAL::Arc_Len_Accum after drag
+				/// @note Update track's CTrack::Arc_Len_Accum after drag
 				tw->update_arc_len_accum();
 				damage(1);
 			}
@@ -267,7 +267,7 @@ void TrainView::draw()
 
 		// calculate train's pos
 		Pnt3f dir;
-		Pnt3f pos = this->m_pTrack->calc_pos(this->m_pTrack->trainU, (SplineType)tw->splineBrowser->value(), &dir);
+		Pnt3f pos = this->m_pTrack->calc_pos(this->m_pTrack->trainU, &dir);
 
 		lightPosition1[0] = pos.x; lightPosition1[1] = pos.y + 2 * train_size; lightPosition1[2] = pos.z; lightPosition1[3] = 1;
 		glLightfv(GL_LIGHT0, GL_SPOT_DIRECTION, dir.v());
@@ -391,7 +391,7 @@ void TrainView::drawStuff(bool doingShadows)
 	// TODO: 
 	// call your own track drawing code
 	//####################################################################
-	Draw::draw_track(*m_pTrack, (SplineType)tw->splineBrowser->value(), doingShadows);
+	Draw::draw_track(*m_pTrack, doingShadows);
 
 	// draw the train
 	//####################################################################
@@ -400,7 +400,7 @@ void TrainView::drawStuff(bool doingShadows)
 	//####################################################################
 	// don't draw the train if you're looking out the front window
 	if (!tw->trainCam->value())
-		Draw::draw_train(*m_pTrack, (SplineType)tw->splineBrowser->value(), doingShadows);
+		Draw::draw_train(*m_pTrack, doingShadows);
 }
 
 // 

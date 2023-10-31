@@ -29,13 +29,14 @@
 
 #include <FL/fl_ask.h>
 #include <assert.h>
+#include <cmath>
 
 //****************************************************************************
 //
 // * Constructor
 //============================================================================
 CTrack::
-CTrack() : trainU(0), num_of_cars(0)
+CTrack() : trainU(0), num_of_cars(0), m_type(SplineType::Cardinal_Cubic)
 //============================================================================
 {
 	resetPoints();
@@ -179,7 +180,7 @@ writePoints(const char* filename)
 	}
 }
 
-Pnt3f CTrack::calc_pos(float U, SplineType type, Pnt3f* FACE, Pnt3f* LEFT, Pnt3f* UP) const
+Pnt3f CTrack::calc_pos(float U, Pnt3f* FACE, Pnt3f* LEFT, Pnt3f* UP) const
 {
 	// check U's value
 	if (U < 0.f && U >= static_cast<float>(this->points.size())) return points[0].pos;
@@ -188,7 +189,7 @@ Pnt3f CTrack::calc_pos(float U, SplineType type, Pnt3f* FACE, Pnt3f* LEFT, Pnt3f
 	float t = U - static_cast<float>(cp_id);
 
 	Draw::Param_Equation point_eq, orient_eq;
-	Draw::set_equation(*this, cp_id, type, point_eq, orient_eq);
+	Draw::set_equation(*this, cp_id, m_type, point_eq, orient_eq);
 
 	Pnt3f result = point_eq(t);
 
@@ -215,10 +216,10 @@ Pnt3f CTrack::calc_pos(float U, SplineType type, Pnt3f* FACE, Pnt3f* LEFT, Pnt3f
 	return result;
 }
 
-float CTrack::arc_length(size_t cp_id, SplineType type) const
+float CTrack::arc_length(size_t cp_id) const
 {
 	Draw::Param_Equation point_eq, orient_eq;
-	Draw::set_equation(*this, cp_id, type, point_eq, orient_eq);
+	Draw::set_equation(*this, cp_id, m_type, point_eq, orient_eq);
 
 	float len = 0.f;
 	Pnt3f p1 = point_eq(0.f);
@@ -235,11 +236,11 @@ float CTrack::arc_length(size_t cp_id, SplineType type) const
 	return len;
 }
 
-std::vector<float> CTrack::list_points(float startU, SplineType type, float delta, size_t count) const
+std::vector<float> CTrack::list_points(float startU, float delta, size_t count) const
 {
 	if (count == 0) return std::vector<float>();
 
-	float S = GLOBAL::T_to_S(startU);
+	float S = this->T_to_S(startU);
 
 	std::vector<float> result;
 	result.reserve(count);
@@ -252,14 +253,81 @@ std::vector<float> CTrack::list_points(float startU, SplineType type, float delt
 		// 前進特定長度
 		S += delta;
 		// prevent overflow
-		while (S >= GLOBAL::Arc_Len_Accum.back().second) S -= GLOBAL::Arc_Len_Accum.back().second;
+		while (S >= m_Arc_Len_Accum.back().second) S -= m_Arc_Len_Accum.back().second;
 		// prevent underflow
-		while (S < 0) S += GLOBAL::Arc_Len_Accum.back().second;
+		while (S < 0) S += m_Arc_Len_Accum.back().second;
 
 		// （實際空間） 轉回 （參數空間）
-		result.push_back(GLOBAL::S_to_T(S));
+		result.push_back(this->S_to_T(S));
 	}
 
 	assert(result.size() == count);
 	return result;
+}
+
+void CTrack::set_spline(SplineType type)
+{
+	m_type = type;
+
+	// reset
+	m_Arc_Len_Accum.clear();
+	m_Arc_Len_Accum.reserve(points.size() * 16 + 1);
+	m_Arc_Len_Accum.emplace_back(std::pair<float, float>{ 0, 0 });
+
+	// for each control point
+	for (size_t cp_id = 0; cp_id < points.size(); ++cp_id) {
+		Draw::Param_Equation point_eq, unused;
+		Draw::set_equation(*this, cp_id, m_type, point_eq, unused);
+
+		Pnt3f p1 = point_eq(0);
+		for (float t = GLOBAL::Param_Interval; t <= 1; t += GLOBAL::Param_Interval) {
+			Pnt3f p2 = point_eq(t);
+			Pnt3f delta = p2 - p1;
+			float len = sqrtf(delta.x * delta.x + delta.y * delta.y + delta.z * delta.z);
+
+			m_Arc_Len_Accum.emplace_back(std::pair<float, float>{
+				cp_id + t,
+				len + m_Arc_Len_Accum.back().second
+			});
+
+			// store it for next iteration
+			p1 = p2;
+		}
+	}
+}
+
+float CTrack::T_to_S(float T) const
+{
+	for (size_t i = 0; i < m_Arc_Len_Accum.size() - 1; ++i) {
+		const float lowU = m_Arc_Len_Accum[i].first;
+		const float highU = m_Arc_Len_Accum[i + 1].first;
+		if (lowU <= T && T < highU) {
+			const float lowS = m_Arc_Len_Accum[i].second;
+			const float highS = m_Arc_Len_Accum[i + 1].second;
+			return lowS + (T - lowU) / GLOBAL::Param_Interval * (highS - lowS);
+		}
+	}
+
+	assert(false); // should not go here
+	return NAN;
+}
+
+float CTrack::S_to_T(float S) const
+{
+	/// @note 處理極端特例，當S很接近0或最大長度時，回傳0
+	if (fabs(S) < 1.e-4 || fabs(S - m_Arc_Len_Accum.back().second) < 1.e-4) return 0;
+
+	// （實際空間） 轉回 （參數空間）
+	for (size_t i = 0; i < m_Arc_Len_Accum.size() - 1; ++i) {
+		const float lowS = m_Arc_Len_Accum[i].second;
+		const float highS = m_Arc_Len_Accum[i + 1].second;
+		if ((lowS <= S && S < highS)) {
+			const float lowU = m_Arc_Len_Accum[i].first;
+			const float highU = m_Arc_Len_Accum[i + 1].first;
+			return lowU + (S - lowS) / (highS - lowS) * GLOBAL::Param_Interval;
+		}
+	}
+
+	assert(false); // should not go here
+	return NAN;
 }
