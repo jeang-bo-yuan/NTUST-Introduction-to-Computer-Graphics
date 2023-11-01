@@ -14,6 +14,8 @@ include_directories(${INCLUDE_DIR}glm-0.9.8.5/glm/)
 add_Definitions("-D_XKEYCHECK_H")
 add_definitions(-DPROJECT_DIR="${PROJECT_SOURCE_DIR}")
 
+# Executable
+
 add_executable(RollerCoasters
     ${SRC_DIR}CallBacks.h
     ${SRC_DIR}CallBacks.cpp
@@ -29,7 +31,10 @@ add_executable(RollerCoasters
     ${SRC_DIR}TrainWindow.cpp
     ${INCLUDE_DIR}glad4.6/src/glad.c "src/Enum.H" "src/Draw.H" "src/Draw.cpp" "src/Enum.cpp")
 
-add_library(Utilities 
+
+# Link Libraries
+
+add_library(Utilities STATIC
     ${SRC_DIR}Utilities/3DUtils.h
     ${SRC_DIR}Utilities/3DUtils.cpp
     ${SRC_DIR}Utilities/ArcBallCam.h
@@ -37,7 +42,9 @@ add_library(Utilities
     ${SRC_DIR}Utilities/Pnt3f.h
     ${SRC_DIR}Utilities/Pnt3f.cpp)
 
-target_link_libraries(RollerCoasters 
+target_link_libraries(RollerCoasters Utilities)
+
+target_link_libraries(RollerCoasters # Link to FLTK
     debug ${LIB_DIR}Debug/fltk_formsd.lib      optimized ${LIB_DIR}Release/fltk_forms.lib
     debug ${LIB_DIR}Debug/fltk_gld.lib         optimized ${LIB_DIR}Release/fltk_gl.lib
     debug ${LIB_DIR}Debug/fltk_imagesd.lib     optimized ${LIB_DIR}Release/fltk_images.lib
@@ -46,11 +53,17 @@ target_link_libraries(RollerCoasters
     debug ${LIB_DIR}Debug/fltk_zd.lib          optimized ${LIB_DIR}Release/fltk_z.lib
     debug ${LIB_DIR}Debug/fltkd.lib            optimized ${LIB_DIR}Release/fltk.lib)
 
-target_link_libraries(RollerCoasters 
+target_link_libraries(RollerCoasters # Link to OpenGL
     ${LIB_DIR}OpenGL32.lib
     ${LIB_DIR}glu32.lib)
 
-target_link_libraries(RollerCoasters Utilities)
+target_link_libraries(RollerCoasters # Link to OpenCV
+    debug ${LIB_DIR}/Debug/opencv_world341d.lib optimized ${LIB_DIR}/Release/opencv_world341.lib
+)
+target_link_libraries(RollerCoasters # I don't know what it is
+    ${LIB_DIR}/common.lib
+    ${LIB_DIR}/ex-common.lib
+)
 
 set_property(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY VS_STARTUP_PROJECT RollerCoasters)
 
