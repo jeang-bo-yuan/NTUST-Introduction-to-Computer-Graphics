@@ -51,6 +51,11 @@ class CTrack;
 // this uses the old ArcBall Code
 #include "Utilities/ArcBallCam.H"
 
+#include "RenderUtilities/BufferObject.h"
+#include "RenderUtilities/Shader.h"
+#include "RenderUtilities/Texture.h"
+#include <memory>
+
 /**
  * @brief 顯示火車的畫面
  */
@@ -89,4 +94,29 @@ class TrainView : public Fl_Gl_Window
 		TrainWindow*	tw;
 		/// The track of the entire scene
 		CTrack*			m_pTrack;
+
+private:
+	std::unique_ptr<Shader> m_shader;
+	std::unique_ptr<Texture2D> m_texture;
+	std::unique_ptr<VAO> m_plane;
+	std::unique_ptr<UBO> m_common_matrices;
+
+private: // private methods that initialize VAO, UBO, shader ...
+	/// load shaders
+	void init_shader();
+
+	/// allocate storage for UBO
+	void init_UBO();
+
+	/// store modelview and projection matrix into UBO
+	void setup_UBO();
+
+	/// allocate VAO's storage and set up values
+	void init_VAO();
+
+	/// load texture
+	void init_texture();
+
+	/// draw m_plane
+	void draw_plane();
 };

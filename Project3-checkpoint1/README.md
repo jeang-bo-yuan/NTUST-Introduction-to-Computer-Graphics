@@ -8,7 +8,7 @@
 
 1. `TrainView::draw`:
 
-    設定Projection Matrix -> 設定Light -> call `TrainView::drawStuff`
+    設定VAO、UBO -> 設定Projection Matrix -> 設定Light -> call `TrainView::draw_plane` -> call `TrainView::drawStuff`
 
 2. `TrainView::drawStuff`:
 

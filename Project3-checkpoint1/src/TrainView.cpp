@@ -32,6 +32,8 @@
 //#include "GL/gl.h"
 #include <glad/glad.h>
 #include <glm/glm.hpp>
+#include <glm/gtc/type_ptr.hpp>
+#include <glm/gtc/matrix_transform.hpp>
 #include "GL/glu.h"
 
 #include "TrainView.H"
@@ -189,6 +191,10 @@ void TrainView::draw()
 	if (gladLoadGL())
 	{
 		//initiailize VAO, VBO, Shader...
+		if (m_shader == nullptr) this->init_shader();
+		if (m_common_matrices == nullptr) this->init_UBO();
+		if (m_plane == nullptr) this->init_VAO();
+		if (m_texture == nullptr) this->init_texture();
 	}
 	else
 		throw std::runtime_error("Could not initialize GLAD!");
@@ -293,6 +299,7 @@ void TrainView::draw()
 	setupFloor();
 	drawFloor(200,10);
 
+	draw_plane();
 
 	//*********************************************************************
 	// now draw the object and we need to do it twice
@@ -466,4 +473,153 @@ doPick()
 		selectedCube = -1;
 
 	printf("Selected Cube %d\n",selectedCube);
+}
+
+void TrainView::init_shader()
+{
+	m_shader = std::make_unique<Shader>(
+		"./shaders/simple.vert",
+		nullptr, nullptr, nullptr,
+		"./shaders/simple.frag");
+}
+
+void TrainView::init_UBO()
+{
+	m_common_matrices = std::make_unique<UBO>();
+	// 存 2 個 4x4 matrix
+	m_common_matrices->size = 2 * sizeof(glm::mat4);
+	// generate a buffer object
+	glGenBuffers(1, &m_common_matrices->ubo);
+
+	glBindBuffer(GL_UNIFORM_BUFFER, m_common_matrices->ubo);
+	// allocate storage
+	glBufferData(GL_UNIFORM_BUFFER, m_common_matrices->size, nullptr, GL_STATIC_DRAW);
+	glBindBuffer(GL_UNIFORM_BUFFER, 0);
+}
+
+void TrainView::setup_UBO()
+{
+	glm::mat4 modelview;
+	glm::mat4 projection;
+
+	glGetFloatv(GL_MODELVIEW_MATRIX, glm::value_ptr(modelview));
+	glGetFloatv(GL_PROJECTION_MATRIX, glm::value_ptr(projection));
+
+	glBindBuffer(GL_UNIFORM_BUFFER, m_common_matrices->ubo);
+	// 將projection和modelview兩矩陣依序存入OpenGL分配的空間中
+	glBufferSubData(GL_UNIFORM_BUFFER, 0, sizeof(glm::mat4), glm::value_ptr(projection));
+	glBufferSubData(GL_UNIFORM_BUFFER, sizeof(glm::mat4), sizeof(glm::mat4), glm::value_ptr(modelview));
+	glBindBuffer(GL_UNIFORM_BUFFER, 0);
+}
+
+void TrainView::init_VAO()
+{
+	constexpr GLfloat w = 0.5f;
+	constexpr GLfloat vertices[] = {
+		// vertex     color
+		0, 0, -w,     0, 1, 0,
+		w, 0, w,      0, 0, 1,
+		-w, 0, w,     1, 0, 0,
+	};
+	constexpr GLfloat normal[] = {
+		0, 1, 0,
+		0, 1, 0,
+		0, 1, 0
+	};
+	constexpr GLfloat texture_coordinate[] = {
+		0.5, 1,
+		0, 0,
+		1, 0
+	};
+	constexpr GLuint element[] = {
+		0, 1, 2
+	};
+
+	m_plane = std::make_unique<VAO>();
+	m_plane->element_amount = sizeof(element) / sizeof(GLuint);
+	glGenVertexArrays(1, &m_plane->vao);
+	glGenBuffers(3, m_plane->vbo);
+	glGenBuffers(1, &m_plane->ebo);
+
+	glBindVertexArray(m_plane->vao);
+
+	glBindBuffer(GL_ARRAY_BUFFER, m_plane->vbo[0]); // bind vbo[0]
+	glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW); // store vertices into it
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(GLfloat), (void*)0); // set 0-th attribute data
+	glVertexAttribPointer(3, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(GLfloat), (void*)(3 * sizeof(GLfloat))); // set 3-rd attribute date
+	glEnableVertexAttribArray(0); // enable 0-th attribute data
+	glEnableVertexAttribArray(3);
+
+	glBindBuffer(GL_ARRAY_BUFFER, m_plane->vbo[1]); // bind vbo[1]
+	glBufferData(GL_ARRAY_BUFFER, sizeof(normal), normal, GL_STATIC_DRAW); // store normal into it
+	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 0, (void*)0); // set vbo[1] as vao's 1-st attribute data
+	glEnableVertexAttribArray(1); // enable 1-st attribute data
+
+	glBindBuffer(GL_ARRAY_BUFFER, m_plane->vbo[2]); // bind vbo[2]
+	glBufferData(GL_ARRAY_BUFFER, sizeof(texture_coordinate), texture_coordinate, GL_STATIC_DRAW); // store texture_coordinate into it
+	glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 0, (void*)0); // set vbo[2] as vao's 2-nd attribute data
+	glEnableVertexAttribArray(2); // enable 2-nd attribute data
+
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_plane->ebo); // bind ebo
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(element), element, GL_STATIC_DRAW); // store element into it
+
+	// Attribut 和 EBO 的綁定會記在VBO內
+	glBindVertexArray(0);
+	glBindBuffer(GL_ARRAY_BUFFER, 0);
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+}
+
+void TrainView::init_texture()
+{
+	m_texture = std::make_unique<Texture2D>("./images/church.png");
+}
+
+void TrainView::draw_plane()
+{
+	this->setup_UBO();
+
+	// 將m_common_matrices->ubo這個buffer object綁定到GL_UNIFORM_BUFFER中的index 0
+	// GL_UNIFORM_BUFFER包含許多的index，要用glBindBufferRange才能綁定到特定index
+	// simple.vert內的layout uniform common_matrices會去使用GL_UNIFORM_BUFFER中的index 0
+	glBindBufferRange(GL_UNIFORM_BUFFER, /* bind to index */ 0, m_common_matrices->ubo, 0, m_common_matrices->size);
+
+	// bind shader
+	m_shader->Use();
+
+	glm::mat4 model_matrix;
+	model_matrix = glm::translate(model_matrix, glm::vec3(0.f, 10.f, 0.f));
+	model_matrix = glm::scale(model_matrix, glm::vec3(10.f, 10.f, 10.f));
+
+	glUniformMatrix4fv( // set uniform data
+		glGetUniformLocation(m_shader->Program, "u_model"),
+		1,
+		GL_FALSE, // don't transpose
+		glm::value_ptr(model_matrix)
+	);
+
+	glUniform3fv( // set uniform data
+		glGetUniformLocation(m_shader->Program, "u_color"),
+		1,
+		glm::value_ptr(glm::vec3(0.f, 1.f, 0.f))
+	);
+
+	m_texture->bind(0);
+	glUniform1i(
+		glGetUniformLocation(m_shader->Program, "u_texture"),
+		0
+	);
+
+	// bind VAO
+	glBindVertexArray(m_plane->vao);
+
+	glDrawElements(GL_TRIANGLES, m_plane->element_amount, GL_UNSIGNED_INT, 0);
+
+	// unbind VAO
+	glBindVertexArray(0);
+
+	// unbind uniform buffer
+	glBindBuffer(GL_UNIFORM_BUFFER, 0);
+
+	// unbind shader
+	glUseProgram(0);
 }

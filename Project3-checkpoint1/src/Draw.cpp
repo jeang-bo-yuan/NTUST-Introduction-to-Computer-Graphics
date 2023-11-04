@@ -149,7 +149,7 @@ namespace {
 		glPushMatrix();
 			glTranslatef(middle.x, middle.y, middle.z);
 			glMultMatrixf(rotate_mat);
-			glScalef(3, 0.4, line_len * 0.3f);
+			glScalef(3.f, 0.4f, line_len * 0.3f);
 			if (!doingShadow) glColor3ub(255, 255, 255);
 			glEnable(GL_NORMALIZE);
 			draw_block();
@@ -199,6 +199,8 @@ namespace {
 
 			glNormal3f(-1, 0, 0);
 			glDrawElements(GL_QUADS, 4, GL_UNSIGNED_INT, indices + 20);
+
+			glVertexPointer(3, GL_FLOAT, 0, nullptr);
 		glDisableClientState(GL_VERTEX_ARRAY);
 	} // draw_block
 } // unnamed namespace
@@ -230,7 +232,7 @@ void Draw::draw_track(const CTrack& track, const bool doingShadow) {
 
 			float T2 = track.S_to_T(S2);
 			Pnt3f p2, orient; {
-				size_t cp_id = floorf(T2);
+				size_t cp_id = static_cast<size_t>(floorf(T2));
 				float t = T2 - cp_id;
 				p2 = point_eq_vec[cp_id](t);
 				orient = orient_eq_vec[cp_id](t - GLOBAL::Param_Interval / 2.f);

@@ -75,3 +75,13 @@ add_custom_target(
     WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
     VERBATIM
 )
+
+# Copy "assets/"
+add_custom_target(CopyAssets
+    COMMAND ${CMAKE_COMMAND} -E copy_directory_if_different assets ${CMAKE_BINARY_DIR}
+    WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
+    COMMENT "Copying contents of assets/ to build directory..."
+    VERBATIM
+)
+# Make CopyAssets run whenever RollerCoaster is built
+add_dependencies(RollerCoasters CopyAssets)
