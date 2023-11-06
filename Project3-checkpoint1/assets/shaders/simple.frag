@@ -9,8 +9,6 @@ in V_OUT
    vec3 color;
 } f_in;
 
-uniform vec3 u_color;
-
 uniform sampler2D u_texture;
 
 void main()
