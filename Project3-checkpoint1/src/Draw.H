@@ -34,7 +34,8 @@ namespace Draw {
 	/// @param p1 - 開始
 	/// @param p2 - 結束
 	/// @param p3 - 更前面的控制點
-	Param_Equation make_cardinal(Pnt3f p0, Pnt3f p1, Pnt3f p2, Pnt3f p3);
+	/// @param tension - 
+	Param_Equation make_cardinal(Pnt3f p0, Pnt3f p1, Pnt3f p2, Pnt3f p3, float tension);
 
 	/**
 	 * @brief 設定兩control point間的參數式

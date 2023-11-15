@@ -105,6 +105,16 @@ public:
 		 */
 	void set_spline(SplineType type);
 
+	/**
+	 * @brief 設定Cardinal Curve的Tension
+	 * @param tension
+	 * @post 若目前的spline type是Cardinal，則更新 Arc_Len_Accum
+	 */
+	void set_tension(float tension);
+
+	/// return tension of cardinal
+	float get_tension() const { return m_tension; }
+
 	/// @brief 取得參數曲線的種類
 	SplineType spline_type() const { return m_type; }
 
@@ -161,5 +171,8 @@ private:
 
 	/// @brief Accumulation of arc length. elem.first = t in "param space", elem.second = s in "real space"
 	Arc_Len_Accum_T m_Arc_Len_Accum;
+
+	/// Tension of Cardinal Curve
+	float m_tension;
 };
 

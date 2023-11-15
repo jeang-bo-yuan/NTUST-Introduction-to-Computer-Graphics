@@ -71,6 +71,7 @@ TrainWindow(const int x, const int y)
 		rb->callback((Fl_Callback*)backCB,this);
 		
 		arcLength = new Fl_Button(730,pty,65,20,"ArcLength");
+		arcLength->callback((Fl_Callback*)damageCB, this);
 		togglify(arcLength,1);
   
 		pty+=25;
@@ -159,6 +160,14 @@ TrainWindow(const int x, const int y)
 		Fl_Button* delete_car_button = new Fl_Button(690, pty, 80, 20, "Delete Car");
 		delete_car_button->callback((Fl_Callback*)delete_car_CB, this);
 		pty += 25;
+
+		pty += 25;
+		tension = new Fl_Value_Slider(655, pty, 140, 20, "Tension");
+		tension->callback((Fl_Callback*)damageCB, this);
+		tension->range(0, 10);
+		tension->value(0.5);
+		tension->align(FL_ALIGN_LEFT);
+		tension->type(FL_HORIZONTAL);
 
 		// we need to make a little phantom widget to have things resize correctly
 		Fl_Box* resizebox = new Fl_Box(600,595,200,5);

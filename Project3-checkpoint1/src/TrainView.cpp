@@ -411,6 +411,7 @@ void TrainView::drawStuff(bool doingShadows)
 	// TODO: 
 	// call your own track drawing code
 	//####################################################################
+	m_pTrack->set_tension(tw->tension->value());
 	Draw::draw_track(*m_pTrack, doingShadows);
 
 	// draw the train

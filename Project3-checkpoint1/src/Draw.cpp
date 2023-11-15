@@ -40,12 +40,12 @@ Draw::Param_Equation Draw::make_cubic_b_spline(Pnt3f p0, Pnt3f p1, Pnt3f p2, Pnt
 	};
 }
 
-Draw::Param_Equation Draw::make_cardinal(Pnt3f p0, Pnt3f p1, Pnt3f p2, Pnt3f p3) {
-	static const glm::mat4 M(
-		-1 / 2.f,  3 / 2.f, -3 / 2.f,  1 / 2.f, // first column
-		 2 / 2.f, -5 / 2.f,  4 / 2.f, -1 / 2.f,    // second column
-		-1 / 2.f,    0,      1 / 2.f,    0,    // third column
-		   0,      2 / 2.f,    0,        0     // forth column
+Draw::Param_Equation Draw::make_cardinal(Pnt3f p0, Pnt3f p1, Pnt3f p2, Pnt3f p3, float tension) {
+	const glm::mat4 M(
+		-tension,     2 - tension,  tension - 2,     tension, // first column
+		 2 * tension, tension - 3,  3 - 2 * tension, -tension,    // second column
+		-tension,     0,            tension,         0,    // third column
+		   0,         1,            0,               0     // forth column
 	);
 
 	// 4 columns and 3 rows
@@ -56,7 +56,7 @@ Draw::Param_Equation Draw::make_cardinal(Pnt3f p0, Pnt3f p1, Pnt3f p2, Pnt3f p3)
 		glm::make_vec3(p3.v())  // forth column
 	);
 
-	return [G](float t) -> Pnt3f {
+	return [G, M](float t) -> Pnt3f {
 		glm::vec4 T(t * t * t, t * t, t, 1);
 		glm::vec3 Q = G * M * T;
 		return Pnt3f(glm::value_ptr(Q));
@@ -87,8 +87,8 @@ void Draw::set_equation(const CTrack& track,
 		const ControlPoint& P3 = track.points[track.next_cp(cp2_id)];
 
 		if (type.value() == SplineType::Cardinal_Cubic) {
-			point_eq = Draw::make_cardinal(P0.pos, P1.pos, P2.pos, P3.pos);
-			orient_eq = Draw::make_cardinal(P0.orient, P1.orient, P2.orient, P3.orient);
+			point_eq = Draw::make_cardinal(P0.pos, P1.pos, P2.pos, P3.pos, track.get_tension());
+			orient_eq = Draw::make_cardinal(P0.orient, P1.orient, P2.orient, P3.orient, track.get_tension());
 		}
 		else if (type.value() == SplineType::Cubic_B_Spline) {
 			point_eq = Draw::make_cubic_b_spline(P0.pos, P1.pos, P2.pos, P3.pos);

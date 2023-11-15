@@ -36,7 +36,7 @@
 // * Constructor
 //============================================================================
 CTrack::
-CTrack() : trainU(0), num_of_cars(0), m_type(SplineType::Cardinal_Cubic)
+CTrack() : trainU(0), num_of_cars(0), m_type(SplineType::Cardinal_Cubic), m_tension(0.5f)
 //============================================================================
 {
 	resetPoints();
@@ -293,6 +293,15 @@ void CTrack::set_spline(SplineType type)
 			// store it for next iteration
 			p1 = p2;
 		}
+	}
+}
+
+void CTrack::set_tension(float tension)
+{
+	m_tension = tension;
+	if (m_type.value() == SplineType::Cardinal_Cubic) {
+		// 使用set_spline的code去更新Arc_Len_Accum
+		this->set_spline(SplineType::Cardinal_Cubic);
 	}
 }
 
