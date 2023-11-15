@@ -363,7 +363,7 @@ setProjection()
 		Pnt3f pos = this->m_pTrack->calc_pos(this->m_pTrack->trainU, &FACE, &LEFT, &UP);
 
 		glMatrixMode(GL_PROJECTION);
-		gluPerspective(50.f, aspect, .1f, 1000.f);
+		gluPerspective(90.f, aspect, .1f, 1000.f);
 		glMatrixMode(GL_MODELVIEW);
 		glLoadIdentity();
 		GLfloat rotate_matrix[16] = {
