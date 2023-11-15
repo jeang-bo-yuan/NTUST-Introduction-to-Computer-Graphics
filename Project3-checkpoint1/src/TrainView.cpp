@@ -359,9 +359,22 @@ setProjection()
 	// put code for train view projection here!	
 	//####################################################################
 	else {
-#ifdef EXAMPLE_SOLUTION
-		trainCamView(this,aspect);
-#endif
+		Pnt3f FACE, UP, LEFT;
+		Pnt3f pos = this->m_pTrack->calc_pos(this->m_pTrack->trainU, &FACE, &LEFT, &UP);
+
+		glMatrixMode(GL_PROJECTION);
+		gluPerspective(50.f, aspect, .1f, 1000.f);
+		glMatrixMode(GL_MODELVIEW);
+		glLoadIdentity();
+		GLfloat rotate_matrix[16] = {
+			-LEFT.x, UP.x, -FACE.x, 0,
+			-LEFT.y, UP.y, -FACE.y, 0,
+			-LEFT.z, UP.z, -FACE.z, 0,
+			0,       0,    0,       1
+		};
+		glMultMatrixf(rotate_matrix);
+		glTranslatef(-train_size * UP.x, -train_size * UP.y, -train_size * UP.z);
+		glTranslatef(-pos.x, -pos.y, -pos.z);
 	}
 }
 
