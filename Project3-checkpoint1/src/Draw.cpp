@@ -284,17 +284,17 @@ void Draw::draw_train(const CTrack& track, const bool doingShadow) {
 			};
 			glMultMatrixf(rotate_mat);
 
-			glScalef(train_size, train_size, train_size);
+			glScalef(GLOBAL::train_size, GLOBAL::train_size, GLOBAL::train_size);
 
 			if (!doingShadow) glColor3ub(0, 0, 255);
 			draw_block();
 		glPopMatrix();
 
 		glPushMatrix(); // 車頭前方的凸起
-			Pnt3f pos2 = train_pos + FACE * train_size * 1.3f;
+			Pnt3f pos2 = train_pos + FACE * GLOBAL::train_size * 1.3f;
 			glTranslatef(pos2.x, pos2.y, pos2.z);
 			glMultMatrixf(rotate_mat);
-			glScalef(train_size, train_size / 2.f, train_size * 0.3f);
+			glScalef(GLOBAL::train_size, GLOBAL::train_size / 2.f, GLOBAL::train_size * 0.3f);
 
 			if (!doingShadow) glColor3ub(58, 164, 186);
 			draw_block();
@@ -303,7 +303,7 @@ void Draw::draw_train(const CTrack& track, const bool doingShadow) {
 
 	// 畫更多的車箱
 	if (track.num_of_cars > 0) {
-		std::vector<float> car_pos_list = track.list_points(track.trainU, -2.3f * train_size, track.num_of_cars);
+		std::vector<float> car_pos_list = track.list_points(track.trainU, -2.3f * GLOBAL::train_size, track.num_of_cars);
 		constexpr GLubyte color[4][3] = {
 			{ 255, 0, 0 },
 			{ 0, 255, 0 },
@@ -325,7 +325,7 @@ void Draw::draw_train(const CTrack& track, const bool doingShadow) {
 			};
 			glMultMatrixf(rotate_mat);
 
-			glScalef(train_size, train_size, train_size);
+			glScalef(GLOBAL::train_size, GLOBAL::train_size, GLOBAL::train_size);
 
 			if (!doingShadow) glColor3ubv(color[i % 4]);
 			draw_block();

@@ -32,9 +32,6 @@ public:
 	int value() const { return val; }
 };
 
-/// 各Spline Type顯示的字串
-constexpr const char* SplineTypeStr[] = { "Linear", "Cardinal Cubic", "Cubic B-Spline" };
-
 /// Light Type
 enum class LightType {
 	Directional = 1,
@@ -42,11 +39,14 @@ enum class LightType {
 	Spotlight = 3
 };
 
-/// 各Light Type顯示的字串
-constexpr const char* LightTypeStr[] = { "Directional Light", "Point Light", "Spot Light"};
-
-/// Contains global variables. They are defined in Enum.cpp
+/// Contains global variables. Non-constant ones are defined in Enum.cpp
 namespace GLOBAL {
+	/// 各Spline Type顯示的字串
+	constexpr const char* SplineTypeStr[] = { "Linear", "Cardinal Cubic", "Cubic B-Spline" };
+
+	/// 各Light Type顯示的字串
+	constexpr const char* LightTypeStr[] = { "Directional Light", "Point Light", "Spot Light" };
+
 	/// 畫軌道算內插時，t的變化量，1/16
 	constexpr float Param_Interval = 0.0625f;
 
@@ -55,7 +55,7 @@ namespace GLOBAL {
 
 	/// if arc length mode is enabled
 	extern bool Arc_Len_Mode;
-}
 
-/// 火車是邊長為2倍train_size的立方體
-constexpr float train_size = 5;
+	/// 火車是邊長為2倍train_size的立方體
+	constexpr float train_size = 5;
+}

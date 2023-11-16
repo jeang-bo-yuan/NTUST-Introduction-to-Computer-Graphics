@@ -275,7 +275,7 @@ void TrainView::draw()
 		Pnt3f dir;
 		Pnt3f pos = this->m_pTrack->calc_pos(this->m_pTrack->trainU, &dir);
 
-		lightPosition1[0] = pos.x; lightPosition1[1] = pos.y + 2 * train_size; lightPosition1[2] = pos.z; lightPosition1[3] = 1;
+		lightPosition1[0] = pos.x; lightPosition1[1] = pos.y + 2 * GLOBAL::train_size; lightPosition1[2] = pos.z; lightPosition1[3] = 1;
 		glLightfv(GL_LIGHT0, GL_SPOT_DIRECTION, dir.v());
 		break;
 	}
@@ -373,7 +373,7 @@ setProjection()
 			0,       0,    0,       1
 		};
 		glMultMatrixf(rotate_matrix);
-		glTranslatef(-train_size * UP.x, -train_size * UP.y, -train_size * UP.z);
+		glTranslatef(-GLOBAL::train_size * UP.x, -GLOBAL::train_size * UP.y, -GLOBAL::train_size * UP.z);
 		glTranslatef(-pos.x, -pos.y, -pos.z);
 	}
 }

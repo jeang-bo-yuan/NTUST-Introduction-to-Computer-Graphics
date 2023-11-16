@@ -110,9 +110,9 @@ TrainWindow(const int x, const int y)
 		splineBrowser = new Fl_Browser(605,pty,120,75,"Spline Type");
 		splineBrowser->type(2);		// select
 		splineBrowser->callback((Fl_Callback*)spline_change_CB,this);
-		splineBrowser->add(SplineTypeStr[0]);
-		splineBrowser->add(SplineTypeStr[1]);
-		splineBrowser->add(SplineTypeStr[2]);
+		splineBrowser->add(GLOBAL::SplineTypeStr[0]);
+		splineBrowser->add(GLOBAL::SplineTypeStr[1]);
+		splineBrowser->add(GLOBAL::SplineTypeStr[2]);
 		splineBrowser->select(2);
 
 		pty += 110;
@@ -149,9 +149,9 @@ TrainWindow(const int x, const int y)
 		lightBrowser = new Fl_Browser(605, pty, 120, 75, "Light");
 		lightBrowser->type(2);
 		lightBrowser->callback((Fl_Callback*)damageCB, this);
-		lightBrowser->add(LightTypeStr[0]);
-		lightBrowser->add(LightTypeStr[1]);
-		lightBrowser->add(LightTypeStr[2]);
+		lightBrowser->add(GLOBAL::LightTypeStr[0]);
+		lightBrowser->add(GLOBAL::LightTypeStr[1]);
+		lightBrowser->add(GLOBAL::LightTypeStr[2]);
 		lightBrowser->select(1);
 		pty += 110;
 
