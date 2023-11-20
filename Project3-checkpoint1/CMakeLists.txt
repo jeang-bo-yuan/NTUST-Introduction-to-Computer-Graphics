@@ -29,7 +29,7 @@ add_executable(RollerCoasters
     ${SRC_DIR}TrainView.cpp
     ${SRC_DIR}TrainWindow.h
     ${SRC_DIR}TrainWindow.cpp
-    ${INCLUDE_DIR}glad4.6/src/glad.c "src/Enum.H" "src/Draw.H" "src/Draw.cpp" "src/Enum.cpp")
+    ${INCLUDE_DIR}glad4.6/src/glad.c "src/Enum.H" "src/Draw.H" "src/Draw.cpp" "src/Enum.cpp" "src/Wave_VAO.h" "src/Wave_VAO.cpp" "src/VAO_Interface.h" "src/TextureCubeMap.h" "src/TextureCubeMap.cpp" "src/Box_VAO.h" "src/Box_VAO.cpp")
 
 
 # Link Libraries

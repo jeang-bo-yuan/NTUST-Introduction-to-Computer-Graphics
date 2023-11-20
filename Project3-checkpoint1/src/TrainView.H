@@ -54,6 +54,9 @@ class CTrack;
 #include "RenderUtilities/BufferObject.h"
 #include "RenderUtilities/Shader.h"
 #include "RenderUtilities/Texture.h"
+#include "Wave_VAO.h"
+#include "Box_VAO.h"
+#include "TextureCubeMap.h"
 #include <memory>
 
 /**
@@ -100,6 +103,13 @@ private:
 	std::unique_ptr<Texture2D> m_texture;
 	std::unique_ptr<VAO> m_plane;
 	std::unique_ptr<UBO> m_common_matrices;
+
+	std::unique_ptr<Wave_VAO> m_wave_VAO_p; // wave
+	std::unique_ptr<Shader> m_wave_shader_p; // shader for wave
+
+	std::unique_ptr<Box_VAO> m_skybox_VAO_p;
+	std::unique_ptr<Shader> m_skybox_shader_p;
+	std::unique_ptr<qtTextureCubeMap> m_texture_skybox;
 
 private: // private methods that initialize VAO, UBO, shader ...
 	/// load shaders

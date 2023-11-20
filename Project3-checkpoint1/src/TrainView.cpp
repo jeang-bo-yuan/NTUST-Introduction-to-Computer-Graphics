@@ -34,6 +34,7 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/type_ptr.hpp>
 #include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtc/matrix_inverse.hpp>
 #include "GL/glu.h"
 
 #include "TrainView.H"
@@ -195,6 +196,11 @@ void TrainView::draw()
 		if (m_common_matrices == nullptr) this->init_UBO();
 		if (m_plane == nullptr) this->init_VAO();
 		if (m_texture == nullptr) this->init_texture();
+		if (m_wave_VAO_p == nullptr) m_wave_VAO_p = std::make_unique<Wave_VAO>(100);
+		if (m_skybox_VAO_p == nullptr) m_skybox_VAO_p = std::make_unique<Box_VAO>(1000);
+		if (m_texture_skybox == nullptr) m_texture_skybox = std::make_unique<qtTextureCubeMap>(
+			"./images/right.jpg", "./images/left.jpg", "./images/top.jpg", "./images/bottom.jpg", "./images/front.jpg", "./images/back.jpg"
+		);
 	}
 	else
 		throw std::runtime_error("Could not initialize GLAD!");
@@ -244,7 +250,7 @@ void TrainView::draw()
 	// * set the light parameters
 	//
 	//**********************************************************************
-	GLfloat lightPosition1[]	= {0,1,1,0}; // {50, 200.0, 50, 1.0};
+	GLfloat lightPosition1[]	= {0,5,1,0}; // {50, 200.0, 50, 1.0};
 	GLfloat lightPosition2[]	= {1, 0, 0, 0};
 	GLfloat lightPosition3[]	= {0, -1, 0, 0};
 	GLfloat yellowLight[]		= {0.5f, 0.5f, .1f, 1.0};
@@ -288,7 +294,37 @@ void TrainView::draw()
 	glLightfv(GL_LIGHT2, GL_POSITION, lightPosition3);
 	glLightfv(GL_LIGHT2, GL_DIFFUSE, blueLight);
 
+	m_wave_shader_p->Use();
+	m_texture_skybox->bind_to(0);
+	GLfloat view_matrix[16];
+	GLfloat proj_matrix[16];
+	glGetFloatv(GL_MODELVIEW_MATRIX, view_matrix);
+	glGetFloatv(GL_PROJECTION_MATRIX, proj_matrix);
+	glUniformMatrix4fv(glGetUniformLocation(m_wave_shader_p->Program, "view_matrix"), 1, GL_FALSE, view_matrix);
+	glUniformMatrix4fv(glGetUniformLocation(m_wave_shader_p->Program, "proj_matrix"), 1, GL_FALSE, proj_matrix);
+	glUniform1ui(glGetUniformLocation(m_wave_shader_p->Program, "frame"), clock());
+	glUniform1ui(glGetUniformLocation(m_wave_shader_p->Program, "skybox"), 0);
+	glm::vec3 eye = glm::affineInverse(glm::make_mat4(view_matrix))[3];
+	glUniform3fv(glGetUniformLocation(m_wave_shader_p->Program, "eye_position"), 1, glm::value_ptr(eye));
+	glUniform4fv(glGetUniformLocation(m_wave_shader_p->Program, "color_ambient"), 1, blueLight);
+	if (tw->lightBrowser->value() == (int)LightType::Point) {
+		glUniform4fv(glGetUniformLocation(m_wave_shader_p->Program, "color_diffuse"), 1, yellowLight);
+		glUniform4fv(glGetUniformLocation(m_wave_shader_p->Program, "color_specular"), 1, yellowLight);
+	}
+	else {
+		glUniform4fv(glGetUniformLocation(m_wave_shader_p->Program, "color_diffuse"), 1, whiteLight);
+		glUniform4fv(glGetUniformLocation(m_wave_shader_p->Program, "color_specular"), 1, whiteLight);
+	}
+	glUniform3fv(glGetUniformLocation(m_wave_shader_p->Program, "light_position"), 1, lightPosition1);
+	m_wave_VAO_p->draw();
 
+	m_skybox_shader_p->Use();
+	glUniformMatrix4fv(glGetUniformLocation(m_skybox_shader_p->Program, "view_matrix"), 1, GL_FALSE, view_matrix);
+	glUniformMatrix4fv(glGetUniformLocation(m_skybox_shader_p->Program, "proj_matrix"), 1, GL_FALSE, proj_matrix);
+	glUniform1ui(glGetUniformLocation(m_skybox_shader_p->Program, "skybox"), 0);
+	m_skybox_VAO_p->draw();
+
+	
 
 	//*********************************************************************
 	// now draw the ground plane
@@ -297,7 +333,7 @@ void TrainView::draw()
 	glUseProgram(0);
 
 	setupFloor();
-	drawFloor(200,10);
+	//drawFloor(200,10);
 
 	draw_plane();
 
@@ -363,7 +399,7 @@ setProjection()
 		Pnt3f pos = this->m_pTrack->calc_pos(this->m_pTrack->trainU, &FACE, &LEFT, &UP);
 
 		glMatrixMode(GL_PROJECTION);
-		gluPerspective(90.f, aspect, .1f, 1000.f);
+		gluPerspective(90.f, aspect, .1f, 3000.f);
 		glMatrixMode(GL_MODELVIEW);
 		glLoadIdentity();
 		GLfloat rotate_matrix[16] = {
@@ -495,6 +531,18 @@ void TrainView::init_shader()
 		"./shaders/simple.vert",
 		nullptr, nullptr, nullptr,
 		"./shaders/simple.frag");
+
+	m_wave_shader_p = std::make_unique<Shader>(
+		"./shaders/wave.vert",
+		nullptr, nullptr, nullptr,
+		"./shaders/wave.frag"
+	);
+
+	m_skybox_shader_p = std::make_unique<Shader>(
+		"./shaders/skybox.vert",
+		nullptr, nullptr, nullptr,
+		"./shaders/skybox.frag"
+	);
 }
 
 void TrainView::init_UBO()
