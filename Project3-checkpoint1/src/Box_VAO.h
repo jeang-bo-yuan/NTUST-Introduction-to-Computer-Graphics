@@ -1,6 +1,6 @@
 /**
  * @file Box_VAO.h
- * @brief ç¹ªåˆ¶æ–¹å¡Šæ™‚ç”¨çš„VAO
+ * @brief Ã¸¨î¤è¶ô®É¥ÎªºVAO
  */
 #ifndef BOX_VAO_H
 #define BOX_VAO_H
@@ -8,7 +8,7 @@
 #include "VAO_Interface.h"
 
 
-/// ç¹ªåˆ¶æ–¹å¡Šæ™‚ç”¨çš„VAO
+/// Ã¸¨î¤è¶ô®É¥ÎªºVAO
 class Box_VAO : public VAO_Interface
 {
 private:
@@ -17,14 +17,14 @@ private:
     GLsizei m_ebo_len;
 
 public:
-    /// @brief constructorï¼Œç”ŸæˆVBOã€EBO
-    /// @param size - æ–¹å¡Šçš„å¤§å°
+    /// @brief constructor¡A¥Í¦¨VBO¡BEBO
+    /// @param size - ¤è¶ôªº¤j¤p
     Box_VAO(GLfloat size);
 
-    /// å‘¼å« glDeleteBuffers
+    /// ©I¥s glDeleteBuffers
     virtual ~Box_VAO();
 
-    /// ç•«å‡ºä¾†ï¼Œæ–¹å¡Šçš„ç¯„åœï¼š(-size, -size, -size) ~ (size, size, size)
+    /// µe¥X¨Ó¡A¤è¶ôªº½d³ò¡G(-size, -size, -size) ~ (size, size, size)
     void draw() override;
 };
 

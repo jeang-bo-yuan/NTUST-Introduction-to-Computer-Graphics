@@ -18,28 +18,28 @@ private:
 
 public:
     /**
-     * @brief å»ºæ§‹å­ï¼Œåƒæ•¸ç‚ºåœ–ç‰‡æª”çš„è·¯å¾‘
+     * @brief «Øºc¤l¡A°Ñ¼Æ¬°¹Ï¤ùÀÉªº¸ô®|
      * @param pX - positive X
      * @param nX - negative X
      * @param pY - positive Y
      * @param nY - negative Y
      * @param pZ - positive Z
      * @param nZ - negative Z
-     * @throw std::invalid_argument - è‹¥ç„¡æ³•é–‹å•Ÿåœ–ç‰‡
+     * @throw std::invalid_argument - ­YµLªk¶}±Ò¹Ï¤ù
      */
     qtTextureCubeMap(const std::string& pX, const std::string& nX, const std::string& pY, const std::string& nY, const std::string& pZ, const std::string& nZ);
 
-    /// è§£æ§‹å­ï¼Œå‘¼å« glDeleteTextures
+    /// ¸Ñºc¤l¡A©I¥s glDeleteTextures
     ~qtTextureCubeMap();
 
     /**
-     * @brief ç¶å®šåˆ°ç‰¹å®šçš„ samplerCube
+     * @brief ¸j©w¨ì¯S©wªº samplerCube
      * @param sampler
      */
     void bind_to(GLuint sampler);
 
     /**
-     * @brief å¾ç‰¹å®šçš„ sampler è§£é™¤ç¶å®š
+     * @brief ±q¯S©wªº sampler ¸Ñ°£¸j©w
      * @param sampler
      */
     void unbind_from(GLuint sampler);

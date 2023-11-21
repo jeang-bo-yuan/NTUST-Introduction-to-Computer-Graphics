@@ -8,7 +8,7 @@ qtTextureCubeMap::qtTextureCubeMap(const std::string &pX, const std::string &nX,
     GLint old_cube_map;
     glGetIntegerv(GL_TEXTURE_BINDING_CUBE_MAP, &old_cube_map);
 
-    // ç”¢ç”Ÿtextureï¼Œä¸¦ç¶å®š
+    // ²£¥Ítexture¡A¨Ã¸j©w
     glGenTextures(1, &m_texture_id);
     glBindTexture(GL_TEXTURE_CUBE_MAP, m_texture_id);
 
@@ -39,7 +39,7 @@ qtTextureCubeMap::qtTextureCubeMap(const std::string &pX, const std::string &nX,
     glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
     glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
 
-    // æ¢å¾©åŸç‹€
+    // «ì´_­ìª¬
     glBindTexture(GL_TEXTURE_CUBE_MAP, old_cube_map);
 }
 
