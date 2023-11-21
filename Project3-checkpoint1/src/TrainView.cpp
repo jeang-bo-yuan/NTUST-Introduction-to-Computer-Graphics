@@ -662,12 +662,6 @@ void TrainView::draw_plane()
 		glm::value_ptr(model_matrix)
 	);
 
-	glUniform3fv( // set uniform data
-		glGetUniformLocation(m_shader->Program, "u_color"),
-		1,
-		glm::value_ptr(glm::vec3(0.f, 1.f, 0.f))
-	);
-
 	m_texture->bind(0);
 	glUniform1i(
 		glGetUniformLocation(m_shader->Program, "u_texture"),

@@ -78,7 +78,7 @@ add_custom_target(
 
 # Copy "assets/"
 add_custom_target(CopyAssets
-    COMMAND ${CMAKE_COMMAND} -E copy_directory_if_different assets ${CMAKE_BINARY_DIR}
+    COMMAND ${CMAKE_COMMAND} -E copy_directory assets ${CMAKE_BINARY_DIR}
     WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
     COMMENT "Copying contents of assets/ to build directory..."
     VERBATIM
