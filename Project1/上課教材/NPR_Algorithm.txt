@@ -1,0 +1,1 @@
+[Painterly rendering with curved brush strokes of multiple sizes](https://dl.acm.org/doi/10.1145/280814.280951)
