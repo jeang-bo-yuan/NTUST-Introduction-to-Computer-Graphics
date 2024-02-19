@@ -1,18 +1,9 @@
-# What to Edit?
-- `MazeWindow::draw`
-- `Maze::Draw_View`
+# 迷宮
 
-# Progress
+# How to Build
 
-|項目|狀態|附註|
-|---|---|---|
-|自己寫gluPerspective和gluLookAt | ***完成*** |寫在My_GLU.h|
-|Clipping for one cell| ***完成*** |Frustum.h </br> `Maze::Draw_Cell` </br> `Maze::Draw_Wall_With_Clipping`|
-|Clipping Recursively| ***完成***| `Frustum_2D::restrict`可用來限制視錐的範圍 |
-|手動轉NDC座標並繪製| ***完成*** ||
+> 該程式只能在x64 Windows + MSVC環境編譯
 
-# Note
-
-glm的mat是column-major，初始化時先指定第一欄、再指定第二欄...。
-
-glm::make_mat*可將一維陣列轉成mat，該陣列要是column-major。
+1. 以Visual Studio開啟CMakeLists.txt
+2. 設定組態（建議x64-Release）
+3. 選擇MazeVisibility.exe作為啟動項目
