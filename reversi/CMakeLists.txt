@@ -24,5 +24,5 @@ add_executable(reversi
   src/gl.cpp
 )
 set_target_properties(reversi PROPERTIES WIN32_EXECUTABLE TRUE) # Make it a GUI application
-target_include_directories(reversi PRIVATE include)
+target_include_directories(reversi PRIVATE include src)
 target_link_libraries(reversi PRIVATE Qt${QT_MAJOR_VERSION}::Widgets)
