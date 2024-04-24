@@ -1,5 +1,7 @@
 # Reversi
 
+![](./game_window.png)
+
 ## 使用的Library
 
 |Name|Note|
